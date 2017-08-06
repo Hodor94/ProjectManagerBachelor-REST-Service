@@ -18,7 +18,7 @@ import cz.msebera.android.httpclient.impl.client.HttpClientBuilder;
 public class Main {
 
 	public static void main(String[] args) {
-		String url ="http://localhost:8080/ProjectManager-0.0.1-SNAPSHOT/pmservice/login";
+		String url ="http://localhost:8080/pmservice/login";
 		String username = "yolo";
 		String password = "swag";
 		String[] params = {url, username, password};

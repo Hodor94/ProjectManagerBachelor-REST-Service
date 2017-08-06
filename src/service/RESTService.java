@@ -920,16 +920,14 @@ public class RESTService {
 	@Path("/login/{username}/{password}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject loginUser(JSONObject userInformation,
-								@PathParam("username") String username,
-								@PathParam("password") String password) {
-		//String username;
-		//String password;
+	public JSONObject loginUser(JSONObject userInformation) {
+		String username;
+		String password;
 		JSONObject result;
 		String jsonInfo;
 		try {
-			//username = userInformation.getString("username");
-			//password = userInformation.getString("password");
+			username = userInformation.getString("username");
+			password = userInformation.getString("password");
 			if (dataService.login(username, password)) {
 				// TODO usertoken & session token & user data
 				UserEntity user = dataService.getUser(username);
