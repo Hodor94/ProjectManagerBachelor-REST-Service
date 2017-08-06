@@ -917,7 +917,7 @@ public class RESTService {
 	}
 
 	@POST
-	@Path("/login/{username}/{password}")
+	@Path("/login")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject loginUser(JSONObject userInformation) {
