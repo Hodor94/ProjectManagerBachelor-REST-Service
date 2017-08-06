@@ -4,11 +4,10 @@ package service;
  * Created by Raphael on 15.06.2017.
  */
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBElement;
-import javax.xml.crypto.Data;
 
 import entity.*;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -18,13 +17,17 @@ import org.codehaus.jettison.json.JSONException;
 import org.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.text.ParseException;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Calendar;
+
+import javax.crypto.spec.SecretKeySpec;
+import javax.xml.bind.DatatypeConverter;
+import java.security.Key;
+import io.jsonwebtoken.*;
+import java.util.Date;
 
 // TODO watch UserEntity and make with:
 // TODO: MessageEntity - alles - Überlegung: Wie identifizieren
@@ -36,6 +39,7 @@ import java.util.Calendar;
 public class RESTService {
 
 	private DataService dataService = new DataService();
+
 	// TEST
 	private Calendar testDate = Calendar.getInstance();
 	private SimpleDateFormat formatter;
@@ -894,7 +898,8 @@ public class RESTService {
 		if (dataService.getUser(username) == null) {
 			dataService.registerUser(username, password, firstName, surname,
 					email, phoneNr, address, birthday);
-			String jsoInfo = "{\"success\": \"true\"}";
+			String jsoInfo = "{\"success\": \"true\", " + "\"secret\": "
+					+ "\"" +  Base64.getEncoder().encodeToString(dataService.getSecretKey()) + "\"}";
 			try {
 				result = new JSONObject(jsoInfo);
 			} catch (JSONException e) {
@@ -941,12 +946,30 @@ public class RESTService {
 		try {
 			return new JSONObject("{\"success:\" \"false\", " +
 					"\"error\": \"Falsche Angaben im Request! Client " +
-					"ziegt falsches Verhalten!\"}");
+					"zeigt falsches Verhalten!\"}");
 		} catch (JSONException e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
+
+	private void createUserToken(String userid, String username, String userRole, String teamName) {
+		long currentMilliseconds = System.currentTimeMillis();
+		Date creationTime = new Date(currentMilliseconds);
+		Date expireTime = new Date(currentMilliseconds + 900000);
+		String jwt = Jwts.builder()
+				.setAudience("users")  // Defines the audience the token is created for
+				.setSubject("authentication") // Defines for what the token is used
+				.setId(userid) // The user id is the id for the token
+				.setIssuedAt(creationTime) // The creation time of the token
+				.setExpiration(expireTime)
+				.claim("name", username)
+				.claim("role", userRole)
+				.claim("team", teamName)
+				.signWith(SignatureAlgorithm.HS256, Base64.getEncoder().encodeToString(dataService.getSecretKey()))
+				.compact();
+	}
+
 
 }
 

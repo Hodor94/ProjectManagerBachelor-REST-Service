@@ -7,7 +7,7 @@ package entity;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.Parameter;
-import org.jasypt.hibernate5.type.EncryptedDoubleAsStringType;
+//import org.jasypt.hibernate5.type.EncryptedDoubleAsStringType;
 import org.json.JSONObject;
 
 import javax.persistence.*;

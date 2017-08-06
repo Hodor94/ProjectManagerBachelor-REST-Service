@@ -8,7 +8,7 @@ import org.codehaus.jackson.annotate.JsonBackReference;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.Parameter;
-import org.jasypt.hibernate5.type.EncryptedIntegerAsStringType;
+//import org.jasypt.hibernate5.type.EncryptedIntegerAsStringType;
 import org.json.JSONObject;
 
 import javax.persistence.*;

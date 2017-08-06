@@ -158,5 +158,13 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             <artifactId>httpclient</artifactId>
             <version>4.0.2</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>0.2</version>
+        </dependency>
+
     </dependencies>
 </project>

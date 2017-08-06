@@ -20,7 +20,8 @@ import java.util.*;
 public class DataService {
 
 	private final String DATE_FORMAT = "dd.MM.yyyy hh:mm:ss";
-	private static SecretKey secretKey;
+
+	private final SecretKey secretKey;
 	private AppointmentDAO appointmentDAO;
 	private ChatDAO chatDAO;
 	private MessageDAO messageDAO;
@@ -33,14 +34,9 @@ public class DataService {
 	private SimpleDateFormat formatter;
 
 	public DataService() {
-		KeyGenerator keyGen = null;
-		try {
-			keyGen = KeyGenerator.getInstance("AES");
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		}
-		keyGen.init(256); // for example
-		secretKey = keyGen.generateKey();
+		secretKey = generateSecretKey();
+		System.out.println(secretKey.getEncoded());
+		System.out.println(Base64.getEncoder().encodeToString(secretKey.getEncoded()));
 		formatter = new SimpleDateFormat("dd.MM.yyyy");
 		appointmentDAO = new AppointmentDAO();
 		chatDAO = new ChatDAO();
@@ -51,6 +47,23 @@ public class DataService {
 		taskDAO = new TaskDAO();
 		teamDAO = new TeamDAO();
 		userDAO = new UserDAO();
+	}
+
+	// Generates a secret key which is used for user authentication
+	private SecretKey generateSecretKey() {
+		try {
+			KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+			keyGenerator.init(256); // The key size
+			SecretKey secretKey = keyGenerator.generateKey();
+			return secretKey;
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public byte[] getSecretKey() {
+		return secretKey.getEncoded();
 	}
 
 	public UserEntity getUser(String username) {

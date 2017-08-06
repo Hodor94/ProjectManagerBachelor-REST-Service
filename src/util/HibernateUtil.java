@@ -7,12 +7,12 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
-import org.jasypt.hibernate5.type.EncryptedDoubleAsStringType;
+/*import org.jasypt.hibernate5.type.EncryptedDoubleAsStringType;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.jasypt.hibernate5.encryptor.HibernatePBEEncryptorRegistry;
 
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
-import org.jasypt.hibernate5.encryptor.HibernatePBEEncryptorRegistry;
+import org.jasypt.hibernate5.encryptor.HibernatePBEEncryptorRegistry;*/
 
 
 
