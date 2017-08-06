@@ -166,5 +166,13 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             <version>0.2</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/cz.msebera.android/httpclient -->
+        <dependency>
+            <groupId>cz.msebera.android</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.4.1.1</version>
+        </dependency>
+
+
     </dependencies>
 </project>

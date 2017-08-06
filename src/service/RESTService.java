@@ -930,6 +930,10 @@ public class RESTService {
 			password = userInformation.getString("password");
 			if (dataService.login(username, password)) {
 				// TODO usertoken & session token & user data
+				UserEntity user = dataService.getUser(username);
+				System.out.println(createUserToken("" + user.getId(),
+						user.getUsername(), "" + user.getRole(),
+						user.getTeam().getName()));
 				jsonInfo = "{\"success\": \"true\"}";
 				result = new JSONObject(jsonInfo);
 			} else {
@@ -953,7 +957,7 @@ public class RESTService {
 		}
 	}
 
-	private void createUserToken(String userid, String username, String userRole, String teamName) {
+	private String createUserToken(String userid, String username, String userRole, String teamName) {
 		long currentMilliseconds = System.currentTimeMillis();
 		Date creationTime = new Date(currentMilliseconds);
 		Date expireTime = new Date(currentMilliseconds + 900000);
@@ -961,13 +965,14 @@ public class RESTService {
 				.setAudience("users")  // Defines the audience the token is created for
 				.setSubject("authentication") // Defines for what the token is used
 				.setId(userid) // The user id is the id for the token
-				.setIssuedAt(creationTime) // The creation time of the token
+				.setIssuedAt(creationTime) // The creation time of the tokenTVoIJcsxqCpjW3TogihBhjaCpceFua6MHvjFe0
 				.setExpiration(expireTime)
 				.claim("name", username)
 				.claim("role", userRole)
 				.claim("team", teamName)
 				.signWith(SignatureAlgorithm.HS256, Base64.getEncoder().encodeToString(dataService.getSecretKey()))
 				.compact();
+		return jwt;
 	}
 
 
