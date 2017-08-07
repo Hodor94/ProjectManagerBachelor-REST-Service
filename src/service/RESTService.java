@@ -931,9 +931,14 @@ public class RESTService {
 			if (dataService.login(username, password)) {
 				// TODO usertoken & session token & user data
 				UserEntity user = dataService.getUser(username);
-				System.out.println(createUserToken("" + user.getId(),
-						user.getUsername(), "" + user.getRole(),
-						user.getTeam().getName()));
+				if (user.getTeam() != null) {
+					createUserToken("" + user.getId(), username,
+							"" + user.getRole(),
+							user.getTeam().getName());
+				} else {
+					createUserToken("" + user.getId(), username,
+							"" + user.getRole(), "null");
+				}
 				jsonInfo = "{\"success\": \"true\"}";
 				result = new JSONObject(jsonInfo);
 			} else {
