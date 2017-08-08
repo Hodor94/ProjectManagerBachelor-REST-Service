@@ -186,19 +186,41 @@ public class TeamEntity extends GenericEntity {
 		this.chats = chats;
 	}
 
-	// TODO rework
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
 		String result;
 		stringBuilder.append("{");
 		stringBuilder.append("\"id\": " + "\"" + this.getId() + "\",");
-		stringBuilder.append("\"name\": " + "\"" + this.getName() + "\",");
-		stringBuilder.append("\"description\": " + "\"" + this.getDescription()
-				+ "\",");
-		stringBuilder.append("\"admin\": " + this.admin.toSring());
+		stringBuilder.append(appendJSONName(name));
+		stringBuilder.append(appendJSONDescription(description));
+		stringBuilder.append(appendJSONAdmin(admin));
 		stringBuilder.append("}");
 		result = stringBuilder.toString();
 		return result;
+	}
+
+	private String appendJSONName(String name) {
+		if (name != null && !(name.equals(""))) {
+			return "\"name\": " + "\"" + this.getName() + "\", ";
+		} else {
+			return "\"name\": " + null + ", ";
+		}
+	}
+
+	private String appendJSONDescription(String description) {
+		if (description != null && !(description.equals(""))) {
+			return "\"description\": " + "\"" + description + "\", ";
+		} else {
+			return "\"description\": " + null + ", ";
+		}
+	}
+
+	private String appendJSONAdmin(UserEntity admin) {
+		if (admin != null) {
+			return "\"admin\": " + this.admin.toSring();
+		} else {
+			return "\"admin\": " + null;
+		}
 	}
 
 }

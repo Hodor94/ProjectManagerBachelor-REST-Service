@@ -87,18 +87,40 @@ public class MessageEntity extends GenericEntity {
 		return result;
 	}
 
-	// TODO rework
 	public  String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
 		String result;
 		stringBuilder.append("{");
 		stringBuilder.append("\"id\": " + "\"" + this.getId() + "\",");
-		stringBuilder.append("\"author\": " + "\"" + this.author + "\",");
-		stringBuilder.append("\"date\": " + "\"" + this.getDate() + "\",");
-		stringBuilder.append("\"chat\": " + this.getChat().toString());
+		stringBuilder.append(appendJSONAuthor(author));
+		stringBuilder.append(appendJSONDate(date));
+		stringBuilder.append(appendJSONChat(chat));
 		stringBuilder.append("}");
 		result = stringBuilder.toString();
 		return result;
+	}
+
+	private String appendJSONAuthor(UserEntity author) {
+		if (author != null) {
+			return "\"author\": " + author.toSring() + ", ";
+		} else {
+			return "\"author\": " + null + ", ";
+		}
+	}
+
+	private String appendJSONDate(String date) {
+		if (date != null && !(date.equals(""))) {
+			return "\"date\": " + "\"" + date + "\", ";
+		} else {
+			return "\"date\": " + null + ", ";
+		}
+	}
+	private String appendJSONChat(ChatEntity chat) {
+		if (chat != null) {
+			return "\"chat\": " + this.getChat().toString();
+		} else {
+			return "\"chat\": " + null;
+		}
 	}
 
 }

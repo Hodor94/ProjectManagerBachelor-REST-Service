@@ -370,6 +370,7 @@ public class UserEntity extends GenericEntity {
 		this.statistics = statistics;
 	}
 
+	// TODO rework
 	public String toSring() {
 		StringBuilder stringBuilder = new StringBuilder();
 		String result;

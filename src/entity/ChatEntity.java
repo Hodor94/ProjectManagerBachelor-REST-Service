@@ -134,19 +134,43 @@ public class ChatEntity extends GenericEntity {
 		this.users.add(user);
 	}
 
-	//TODO rework
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
 		String result;
 		stringBuilder.append("{");
 		stringBuilder.append("\"id\": " + "\"" + this.getId() + "\",");
-		stringBuilder.append("\"name\": " + "\"" + this.name + "\",");
-		stringBuilder.append("\"team\": " + this.getTeam().toString() + ",");
-		stringBuilder.append("\"creator\": " + this.getCreator().toSring());
+		stringBuilder.append(appendJSONName(name));
+		stringBuilder.append(appendJSONTeamName(team));
+		stringBuilder.append(appendJSONCreatorName(creator));
 		stringBuilder.append("}");
 		result = stringBuilder.toString();
 		return result;
 	}
 
+	private String appendJSONName(String name) {
+		if (name != null && !(name.equals(""))) {
+			return "\"name\": " + "\"" + name + "\", ";
+		} else {
+			return "\"name\": " + null + ", ";
+		}
+	}
+
+	private String appendJSONTeamName(TeamEntity team) {
+		if (team != null && team.getName() != null
+				&& !(team.getName().equals(""))) {
+			return "\"team\": " + "\"" + this.getTeam().getName() + "\", ";
+		} else {
+			return "\"team\": " + null + ", ";
+		}
+	}
+
+	private String appendJSONCreatorName(UserEntity creator) {
+		if (creator != null && creator.getUsername() != null
+				&& !(creator.getUsername().equals(""))) {
+			return "\"creator\": " + "\"" + creator.getUsername() + "\"";
+		} else {
+			return "\"creator\": " + "\"" + creator.getUsername() + "\"";
+		}
+	}
 }
 

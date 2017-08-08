@@ -78,16 +78,23 @@ public class RegisterEntity extends GenericEntity {
 		this.team = team;
 	}
 
-	// TODO rework
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
 		String result;
 		stringBuilder.append("{");
 		stringBuilder.append("\"id\": " + "\"" + this.getId() + "\",");
-		stringBuilder.append("\"name\": " + "\"" + this.getName() + "\"");
+		stringBuilder.append(appendJSONName(name));
 		stringBuilder.append("}");
 		result = stringBuilder.toString();
 		return result;
+	}
+
+	private String appendJSONName(String name) {
+		if (name != null && !(name.equals(""))) {
+			return "\"name\": " + "\"" + name + "\"";
+		} else {
+			return "\"name\": " + null;
+		}
 	}
 
 }

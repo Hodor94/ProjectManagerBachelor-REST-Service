@@ -114,19 +114,41 @@ public class TaskEntity extends GenericEntity {
 		return result;
 	}
 
-	//TODO rework
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
 		String result;
 		stringBuilder.append("{");
 		stringBuilder.append("\"id\": " + "\"" + this.getId() + "\",");
-		stringBuilder.append("\"name\": " + "\"" + this.name + "\",");
-		stringBuilder.append("\"description\": " + "\"" + this.description
-		 					 + "\",");
-		stringBuilder.append("\"deadline\": " + "\"" + this.deadline + "\"");
+		stringBuilder.append(appendJSONName(name));
+		stringBuilder.append(appendJSONDescription(description));
+		stringBuilder.append(appendJSONDeadline(deadline));
 		stringBuilder.append("}");
 		result = stringBuilder.toString();
 		return result;
+	}
+
+	private String appendJSONName(String name) {
+		if (name != null && !(name.equals(""))) {
+			return "\"name\": " + "\"" + name + "\", ";
+		} else {
+			return "\"name\": " + null + ", ";
+		}
+	}
+
+	private String appendJSONDescription(String description) {
+		if (description != null && !(description.equals(""))) {
+			return "\"description\": " + "\"" + description	+ "\", ";
+		} else {
+			return "\"description\": " + null + ", ";
+		}
+	}
+
+	private String appendJSONDeadline(String deadline) {
+		if (deadline != null && !(deadline.equals(""))) {
+			return "\"deadline\": " + "\"" + deadline + "\"";
+		} else {
+			return "\"deadline\": " + null;
+		}
 	}
 
 }
