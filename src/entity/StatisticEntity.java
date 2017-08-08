@@ -108,6 +108,7 @@ public class StatisticEntity extends GenericEntity {
 		this.project = project;
 	}
 
+	//TODO rework
 	public String toString() {
 		String result;
 		StringBuilder stringBuilder = new StringBuilder();

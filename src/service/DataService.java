@@ -18,8 +18,7 @@ import java.util.*;
 // TODO: Proof at every method if user is allowed to perform operation.
 
 public class DataService {
-
-	private final String DATE_FORMAT = "dd.MM.yyyy hh:mm:ss";
+	protected static final String DATE_FORMAT = "dd.MM.yyyy hh:mm:ss";
 
 	private final SecretKey secretKey;
 	private AppointmentDAO appointmentDAO;

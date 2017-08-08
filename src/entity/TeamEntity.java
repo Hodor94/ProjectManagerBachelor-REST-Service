@@ -186,6 +186,7 @@ public class TeamEntity extends GenericEntity {
 		this.chats = chats;
 	}
 
+	// TODO rework
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
 		String result;

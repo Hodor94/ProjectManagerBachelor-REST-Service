@@ -78,7 +78,7 @@ public class RegisterEntity extends GenericEntity {
 		this.team = team;
 	}
 
-	// Todo evtl team usw dazu
+	// TODO rework
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
 		String result;

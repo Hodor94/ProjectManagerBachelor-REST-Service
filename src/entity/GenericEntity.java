@@ -10,6 +10,7 @@ import javax.persistence.*;
 
 @MappedSuperclass
 public class GenericEntity {
+	protected static final String DATE_FORMAT = "dd.MM.yyyy hh:mm:ss";
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

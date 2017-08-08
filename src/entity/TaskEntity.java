@@ -114,6 +114,7 @@ public class TaskEntity extends GenericEntity {
 		return result;
 	}
 
+	//TODO rework
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
 		String result;

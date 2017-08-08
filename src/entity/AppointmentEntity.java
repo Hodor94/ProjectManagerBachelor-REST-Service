@@ -190,6 +190,7 @@ public class AppointmentEntity extends GenericEntity {
 	 * not including users taking part in this appointment and the project of
 	 * the appointment.
 	 */
+	//TODO rework
 	public String toString() {
 		Gson gson = new Gson();
 		StringBuilder stringBuilder = new StringBuilder();

@@ -940,7 +940,7 @@ public class RESTService {
 				}
 				// Append all needed data to response body
 				jsonInfo = "{\"success\": \"true\", \"token\": \"" + token +
-						"\", \"user\": \"" + user.toSring() + "\"}";
+						"\", " + "\"user\": " + user.toSring() + "}";
 				result = new JSONObject(jsonInfo);
 			} else {
 				jsonInfo = "{\"success\": \"false\"}";
@@ -954,7 +954,7 @@ public class RESTService {
 
 	private JSONObject returnClientError() {
 		try {
-			return new JSONObject("{\"success:\" \"false\", " +
+			return new JSONObject("{\"success\": \"false\", " +
 					"\"error\": \"Falsche Angaben im Request! Client " +
 					"zeigt falsches Verhalten!\"}");
 		} catch (JSONException e) {

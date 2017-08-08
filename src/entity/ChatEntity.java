@@ -134,6 +134,7 @@ public class ChatEntity extends GenericEntity {
 		this.users.add(user);
 	}
 
+	//TODO rework
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
 		String result;
