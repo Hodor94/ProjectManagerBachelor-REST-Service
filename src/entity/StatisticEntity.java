@@ -108,23 +108,38 @@ public class StatisticEntity extends GenericEntity {
 		this.project = project;
 	}
 
-	//TODO rework
 	public String toString() {
 		String result;
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("{");
 		stringBuilder.append("\"id\": " + "\"" + this.getId() + "\", ");
-		stringBuilder.append("\"numberOfParticipiation\": " + "\""
+		stringBuilder.append("\"numberOfParticipiation\": " + "\"" // Numbers are never null, no proof needed
 				+ this.numberOfParticipiation + "\", ");
 		stringBuilder.append("\"numberOfAllAppointments\": " + "\""
 				+ this.numberOfAllAppointments + "\", ");
 		stringBuilder.append("\"percentage\": " + "\"" + this.percentage
 				+ "\", ");
-		stringBuilder.append("\"user\": " + this.user.toSring() + ", ");
-		stringBuilder.append("\"project\": " + this.project.toString());
+		stringBuilder.append(appendJSONUserName(user));
+		stringBuilder.append(appendJSONProject(project));
 		stringBuilder.append("}");
 		result = stringBuilder.toString();
 		return result;
+	}
+
+	private String appendJSONUserName(UserEntity user) {
+		if (user != null && user.getUsername() != null && !(user.getUsername().equals(""))) {
+			return "\"user\": " + "\"" + user.getUsername() + "\", ";
+		} else {
+			return "\"user\": " + null + ", ";
+		}
+	}
+
+	private String appendJSONProject(ProjectEntity project) {
+		if (project != null) {
+			return "\"project\": " + project.toString();
+		} else {
+			return "\"project\": " + null;
+		}
 	}
 
 	public void increaseNumberOfAllAppointments() {
@@ -134,4 +149,5 @@ public class StatisticEntity extends GenericEntity {
 	public void increaseNumberOfParticipiation() {
 		numberOfParticipiation++;
 	}
+
 }

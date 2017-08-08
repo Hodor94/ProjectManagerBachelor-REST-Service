@@ -173,14 +173,6 @@ public class AppointmentEntity extends GenericEntity {
 		this.userTakingPart = userTakinPart;
 	}
 
-	// TODO: proof if needed
-	private String calendarToString(Calendar calendar) {
-		String result;
-		SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
-		result = formatter.format(calendar.getTime());
-		return result;
-	}
-
 	/**
 	 * Formats all the information contained by an instance of
 	 * AppointmentEntity except the project and the list of users taking part

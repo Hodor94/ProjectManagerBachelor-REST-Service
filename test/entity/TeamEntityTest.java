@@ -67,7 +67,6 @@ class TeamEntityTest {
 		assertEquals(USER_NAME_TWO, userTwo.getUsername());
 	}
 
-	// TODO add chat and messages
 	@Test
 	public void testRemoveTeam() {
 		DataService service = new DataService();

@@ -217,24 +217,60 @@ public class ProjectEntity extends GenericEntity {
 		return result;
 	}
 
-	// TODO rework
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
 		String result;
 		stringBuilder.append("{\"id\": " + "\"" + this.getId() + "\", ");
-		stringBuilder.append("\"name\": " + "\"" + this.getName() + "\", ");
-		stringBuilder.append("\"description\": " + "\"" + this.description
-				+ "\", ");
-		stringBuilder.append("\"deadline\": " + "\"" + this.getDeadline()
-				+ "\", ");
-		stringBuilder.append("\"numberOfAppoinments\": " + "\""
-				+ this.numberOfAppointments + "\", ");
-		stringBuilder.append("\"manager\": " + this.projectManager.toSring()
-				+ ", ");
-		stringBuilder.append("\"team\": " + this.team.toString());
+		stringBuilder.append(appendJSONName(name));
+		stringBuilder.append(appendJSONDescription(description));
+		stringBuilder.append(appendJSONDeadline(deadline));
+		stringBuilder.append("\"numberOfAppoinments\": " + "\"" // A number is never null so it
+				+ this.numberOfAppointments + "\", ");			// does not need extra method
+		stringBuilder.append(appendJSONprojectManagerName(projectManager));
+		stringBuilder.append(appendJSONTeamName(team));
 		stringBuilder.append("}");
 		result = stringBuilder.toString();
 		return result;
+	}
+
+	private String appendJSONName(String name) {
+		if (name != null && !(name.equals(""))) {
+			return "\"name\": " + "\"" + name + "\", ";
+		} else {
+			return "\"name\": " + null + ", ";
+		}
+	}
+
+	private String appendJSONDescription(String description) {
+		if (description != null && !(description.equals(""))) {
+			return "\"description\": " + "\"" + description + "\", ";
+		} else {
+			return "\"description\": " + null + ", ";
+		}
+	}
+
+	private String appendJSONDeadline(String deadline) {
+		if (deadline != null) {
+			return "\"deadline\": " + "\"" + deadline + "\", ";
+		} else {
+			return "\"deadline:\" " + null + ", ";
+		}
+	}
+
+	private String appendJSONprojectManagerName(UserEntity projectManager) {
+		if (projectManager != null) {
+			return "\"manager\": " + projectManager.toSring() + ", ";
+		} else {
+			return "\"manager\": " + null + ", ";
+		}
+	}
+
+	private String appendJSONTeamName(TeamEntity team) {
+		if (team != null && team.getName() != null && !(team.getName().equals(""))) {
+			return "\"team\": " + "\"" + team.getName() + "\"";
+		} else {
+			return "\"team\": " + null;
+		}
 	}
 
 }

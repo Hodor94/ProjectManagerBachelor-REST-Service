@@ -20,6 +20,7 @@ import java.util.*;
 public class DataService {
 	protected static final String DATE_FORMAT = "dd.MM.yyyy hh:mm:ss";
 
+	// TODO: remove from data service and change to RSA privatekey public key operation
 	private final SecretKey secretKey;
 	private AppointmentDAO appointmentDAO;
 	private ChatDAO chatDAO;
@@ -81,7 +82,6 @@ public class DataService {
 		return result;
 	}
 
-	// TODO: finish usertoken??
 	public boolean login(String username, String password) {
 		UserEntity userToLogin = userDAO.getUserByUsername(username);
 		if (userToLogin != null && userToLogin.getPassword().equals(password)) {

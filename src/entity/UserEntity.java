@@ -370,144 +370,119 @@ public class UserEntity extends GenericEntity {
 		this.statistics = statistics;
 	}
 
-	// TODO rework
 	public String toSring() {
 		StringBuilder stringBuilder = new StringBuilder();
 		String result;
 		stringBuilder.append("{");
 		stringBuilder.append("\"id\": " + "\"" + this.getId() + "\", ");
-		stringBuilder = appendJSONUsername(stringBuilder, username);
-		stringBuilder = appendJSONFirstName(stringBuilder, firstName);
-		stringBuilder = appendJSONSurname(stringBuilder, surname);
-		stringBuilder = appendJSONEmail(stringBuilder, email);
-		stringBuilder = appendJSONPhoneNr(stringBuilder, phoneNr);
-		stringBuilder = appendJSONAddress(stringBuilder, address);
-		stringBuilder = appendJSONTributes(stringBuilder, tributes);
-		stringBuilder = appendJSONBirthday(stringBuilder, birthday);
-		stringBuilder = appendJSONDayOfEntry(stringBuilder, dayOfEntry);
-		stringBuilder = appendJSONUserRole(stringBuilder, role.toString());
-		stringBuilder = appendJSONRegisterName(stringBuilder, register);
+		stringBuilder.append(appendJSONUsername(username));
+		stringBuilder.append(appendJSONFirstName(firstName));
+		stringBuilder.append(appendJSONSurname(surname));
+		stringBuilder.append(appendJSONEmail(email));
+		stringBuilder.append(appendJSONPhoneNr(phoneNr));
+		stringBuilder.append(appendJSONAddress(address));
+		stringBuilder.append(appendJSONTributes(tributes));
+		stringBuilder.append(appendJSONBirthday(birthday));
+		stringBuilder.append(appendJSONDayOfEntry(dayOfEntry));
+		stringBuilder.append(appendJSONUserRole(role.toString()));
+		stringBuilder.append(appendJSONRegisterName(register));
 		stringBuilder.append("}");
 		result = stringBuilder.toString();
 		return result;
 	}
 
 	//Appends the correct json format for the username depending on the value
-	private StringBuilder appendJSONUsername(StringBuilder toAppendTo,
-											 String username) {
+	private String appendJSONUsername(String username) {
 		if (username != null && !(username.equals(""))) {
-			toAppendTo.append("\"username\": " + "\"" + username + "\", ");
+			return "\"username\": " + "\"" + username + "\", ";
 		} else {
-			toAppendTo.append("\"username\": " + null +", ");
+			return "\"username\": " + null +", ";
 		}
-		return toAppendTo;
 	}
 
 	//Appends the correct json format for the first name of the user depending
 	// on the value
-	private StringBuilder appendJSONFirstName(StringBuilder toAppendTo,
-											  String firstName) {
+	private String appendJSONFirstName(String firstName) {
 		if (firstName != null && !(firstName.equals(""))) {
-			toAppendTo.append("\"firstName\": " + "\"" + firstName
-					+ "\", ");
+			return "\"firstName\": " + "\"" + firstName + "\", ";
 		} else {
-			toAppendTo.append("\"firstName\": " + null + ", ");
+			return "\"firstName\": " + null + ", ";
 		}
-		return toAppendTo;
 	}
 
-	private StringBuilder appendJSONSurname(StringBuilder toAppendTo,
-											String surname) {
+	private String appendJSONSurname(String surname) {
 		if (surname != null && !(surname.equals(""))) {
-			toAppendTo.append("\"surname\": " + "\"" + surname + "\", ");
+			return "\"surname\": " + "\"" + surname + "\", ";
 		} else {
-			toAppendTo.append("\"surname\": " + null + ", ");
+			return "\"surname\": " + null + ", ";
 		}
-		return toAppendTo;
 	}
 
-	private StringBuilder appendJSONEmail(StringBuilder toAppendTo,
-										  String email) {
+	private String appendJSONEmail(String email) {
 		if (email != null && !(email.equals(""))) {
-			toAppendTo.append("\"email\": " + "\"" + this.email + "\", ");
+			return "\"email\": " + "\"" + this.email + "\", ";
 		} else {
-			toAppendTo.append("\"email\": " + null + ", ");
+			return "\"email\": " + null + ", ";
 		}
-		return toAppendTo;
 	}
 
-	private StringBuilder appendJSONPhoneNr(StringBuilder toAppendTo,
-							  String phoneNr) {
+	private String appendJSONPhoneNr(String phoneNr) {
 		if (phoneNr != null && !(phoneNr.equals(""))) {
-			toAppendTo.append("\"phoneNr\": " + "\"" + phoneNr + "\", ");
+			return "\"phoneNr\": " + "\"" + phoneNr + "\", ";
 		} else {
-			toAppendTo.append("\"phoneNr\": " + null + ", ");
+			return "\"phoneNr\": " + null + ", ";
 		}
-		return toAppendTo;
 	}
 
-	private StringBuilder appendJSONAddress(StringBuilder toAppendTo,
-											String address) {
+	private String appendJSONAddress(String address) {
 		if (address != null && !(address.equals(""))) {
-			toAppendTo.append("\"address\": " + "\"" + address + "\", ");
+			return "\"address\": " + "\"" + address + "\", ";
 		} else {
-			toAppendTo.append("\"address\": " + null + ", ");
+			return "\"address\": " + null + ", ";
 		}
-		return toAppendTo;
 	}
 
-	private StringBuilder appendJSONTributes(StringBuilder toAppendTo,
-											 String tributes) {
-		if (tributes != null) {
-			toAppendTo.append("\"tributes\": " + "\"" + tributes + "\", ");
+	private String appendJSONTributes(String tributes) {
+		if (tributes != null && !(tributes.equals(""))) {
+			return "\"tributes\": " + "\"" + tributes + "\", ";
 		} else {
-			toAppendTo.append("\"tributes\": " + null + ", ");
+			return "\"tributes\": " + null + ", ";
 		}
-		return toAppendTo;
 	}
 
-	private StringBuilder appendJSONBirthday(StringBuilder toAppendTo,
-											 String birthday) {
+	private String appendJSONBirthday(String birthday) {
 		if (birthday != null && !(birthday.equals(""))) {
-			toAppendTo.append("\"birthday\": " + "\"" + birthday + "\", ");
+			return "\"birthday\": " + "\"" + birthday + "\", ";
 		} else {
-			toAppendTo.append("\"birthday\": " + null + ", ");
+			return "\"birthday\": " + null + ", ";
 		}
-		return toAppendTo;
 	}
 
-	private StringBuilder appendJSONDayOfEntry(StringBuilder toAppendTo,
-											   Calendar dayOfEntry) {
+	private String appendJSONDayOfEntry(Calendar dayOfEntry) {
 		if (dayOfEntry != null) {
 			SimpleDateFormat formatter
 					= new SimpleDateFormat(GenericEntity.DATE_FORMAT);
 			String dayAsSring = formatter.format(dayOfEntry.getTime());
-			toAppendTo.append("\"dayOfEntry\": " + "\"" + dayAsSring + "\", ");
+			return "\"dayOfEntry\": " + "\"" + dayAsSring + "\", ";
 		} else {
-			toAppendTo.append("\"dayOfEntry\": " + null + ", ");
+			return "\"dayOfEntry\": " + null + ", ";
 		}
-		return toAppendTo;
 	}
 
-	private StringBuilder appendJSONUserRole(StringBuilder toAppendTo,
-											 String userRole) {
+	private String appendJSONUserRole(String userRole) {
 		if (userRole != null) {
-			toAppendTo.append("\"userRole\": " + "\"" + userRole + "\", ");
+			return "\"userRole\": " + "\"" + userRole + "\", ";
 		} else {
-			toAppendTo.append("\"userRole\": " + null + ", ");
+			return "\"userRole\": " + null + ", ";
 		}
-		return toAppendTo;
 	}
 
-	private StringBuilder appendJSONRegisterName(StringBuilder toAppendTo,
-												 RegisterEntity register) {
-		if (register != null) {
-			toAppendTo.append("\"registerName\": " + "\"" + register.getName()
-					+ "\"");
+	private String appendJSONRegisterName(RegisterEntity register) {
+		if (register != null && register.getName() != null && !(register.getName().equals(""))) {
+			return "\"registerName\": " + "\"" + register.getName() + "\"";
 		} else {
-			toAppendTo.append("\"registerName\": " + null);
+			return "\"registerName\": " + null;
 		}
-		return toAppendTo;
 	}
 
 }
