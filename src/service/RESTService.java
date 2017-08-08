@@ -898,8 +898,7 @@ public class RESTService {
 		if (dataService.getUser(username) == null) {
 			dataService.registerUser(username, password, firstName, surname,
 					email, phoneNr, address, birthday);
-			String jsoInfo = "{\"success\": \"true\", " + "\"secret\": "
-					+ "\"" +  Base64.getEncoder().encodeToString(dataService.getSecretKey()) + "\"}";
+			String jsoInfo = "{\"success\": \"true\"}";
 			try {
 				result = new JSONObject(jsoInfo);
 			} catch (JSONException e) {
@@ -925,21 +924,23 @@ public class RESTService {
 		String password;
 		JSONObject result;
 		String jsonInfo;
+		String token;
 		try {
 			username = userInformation.getString("username");
 			password = userInformation.getString("password");
 			if (dataService.login(username, password)) {
-				// TODO usertoken & session token & user data
 				UserEntity user = dataService.getUser(username);
 				if (user.getTeam() != null) {
-					createUserToken("" + user.getId(), username,
+					token = createUserToken("" + user.getId(), username,
 							"" + user.getRole(),
 							user.getTeam().getName());
 				} else {
-					createUserToken("" + user.getId(), username,
+					token = createUserToken("" + user.getId(), username,
 							"" + user.getRole(), "null");
 				}
-				jsonInfo = "{\"success\": \"true\"}";
+				// Append all needed data to response body
+				jsonInfo = "{\"success\": \"true\", \"token\": \"" + token +
+						"\", \"user\": \"" + user.toSring() + "\"}";
 				result = new JSONObject(jsonInfo);
 			} else {
 				jsonInfo = "{\"success\": \"false\"}";
@@ -962,7 +963,8 @@ public class RESTService {
 		}
 	}
 
-	private String createUserToken(String userid, String username, String userRole, String teamName) {
+	private String createUserToken(String userid, String username,
+								   String userRole, String teamName) {
 		long currentMilliseconds = System.currentTimeMillis();
 		Date creationTime = new Date(currentMilliseconds);
 		Date expireTime = new Date(currentMilliseconds + 900000);
@@ -970,13 +972,17 @@ public class RESTService {
 				.setAudience("users")  // Defines the audience the token is created for
 				.setSubject("authentication") // Defines for what the token is used
 				.setId(userid) // The user id is the id for the token
-				.setIssuedAt(creationTime) // The creation time of the tokenTVoIJcsxqCpjW3TogihBhjaCpceFua6MHvjFe0
-				.setExpiration(expireTime)
-				.claim("name", username)
-				.claim("role", userRole)
-				.claim("team", teamName)
-				.signWith(SignatureAlgorithm.HS256, Base64.getEncoder().encodeToString(dataService.getSecretKey()))
-				.compact();
+				.setIssuedAt(creationTime) // The creation time of the token
+				.setExpiration(expireTime) // The time the token expires
+				.claim("name", username) // username
+				.claim("role", userRole) // The role of the user
+				.claim("team", teamName) // the team name of the user, null
+										   // if he/she has none
+				.signWith(				   // Signature of the token
+						SignatureAlgorithm.HS256,
+						Base64.getEncoder()
+								.encodeToString(dataService.getSecretKey()))
+				.compact(); // Finishes the creation of the token
 		return jwt;
 	}
 
