@@ -1,5 +1,6 @@
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import service.DataService;
 import service.RESTService;
 
 /**
@@ -8,13 +9,6 @@ import service.RESTService;
 public class MainTest {
 
 	public static void main(String[] args) {
-		RESTService service = new RESTService();
-		JSONObject testUser = null;
-		try {
-			testUser = new JSONObject("{\"username\": \"yolo\"," +
-					"\"password\": \"swag\"}");
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
+		DataService service = new DataService();
 	}
 }

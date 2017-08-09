@@ -17,18 +17,35 @@ import cz.msebera.android.httpclient.impl.client.HttpClientBuilder;
 import service.DataService;
 import service.RESTService;
 
+import javax.xml.crypto.Data;
+
 /**
  * Created by Raphael on 14.06.2017.
  */
 public class Main {
+	private static RESTService restService = new RESTService();
 
 	public static void main(String[] args) {
-		String username = "EatMyStardust";
+		String username = "testUser";
 		String password = "troll";
+		String resultOfRegistration;
 		DataService dataService = new DataService();
-		System.out.println(dataService.registerUser(username, password,
-				null, null,
-				null, null, null, null));
+		if (dataService.getUser(username) == null) {
+			try {
+				JSONObject registerUserInfo = new JSONObject("{\"username\": "
+						+ "\"" + username + "\", " + "\"password\": " + "\""
+						+ password + "\", \"firstName\": " + null + ", " +
+						"\"surname\": " + null + ", \"email\": " + null +
+						", \"phoneNr\": " + null + ", \"address\": " + null +
+						", \"birthday\": " + null +
+						"}");
+				resultOfRegistration = restService.registerUser
+						(registerUserInfo).toString();
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}
+		System.out.println(restService.getSecretKey().getEncoded());
 		UserEntity user = dataService.getUser(username);
 		System.out.println(user.toSring());
 		JSONObject loginInfo = null;
@@ -39,7 +56,6 @@ public class Main {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		RESTService restService = new RESTService();
 		if (loginInfo != null) {
 			response = restService.loginUser(loginInfo);
 		}

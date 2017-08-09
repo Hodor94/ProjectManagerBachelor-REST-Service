@@ -41,6 +41,11 @@ public class RESTService {
 	private DataService dataService = new DataService();
 	private SecretKey secretKey;
 
+	// TODO delete
+	public SecretKey getSecretKey() {
+		return secretKey;
+	}
+
 	// TEST
 	private Calendar testDate = Calendar.getInstance();
 	private SimpleDateFormat formatter;
@@ -972,22 +977,26 @@ public class RESTService {
 		long currentMilliseconds = System.currentTimeMillis();
 		Date creationTime = new Date(currentMilliseconds);
 		Date expireTime = new Date(currentMilliseconds + 900000);
-		String jwt = Jwts.builder()
-				.setAudience("users")  // Defines the audience the token is created for
-				.setSubject("authentication") // Defines for what the token is used
-				.setId(userid) // The user id is the id for the token
-				.setIssuedAt(creationTime) // The creation time of the token
-				.setExpiration(expireTime) // The time the token expires
-				.claim("name", username) // username
-				.claim("role", userRole) // The role of the user
-				.claim("team", teamName) // the team name of the user, null
-										   // if he/she has none
-				.signWith(				   // Signature of the token
-						SignatureAlgorithm.HS256,
-						Base64.getEncoder()
-								.encodeToString(secretKey.getEncoded()))
-				.compact(); // Finishes the creation of the token
-		return jwt;
+		if (secretKey == null) {
+			return "CREATION FAILED";
+		} else {
+			String jwt = Jwts.builder()
+					.setAudience("users")  // Defines the audience the token is created for
+					.setSubject("authentication") // Defines for what the token is used
+					.setId(userid) // The user id is the id for the token
+					.setIssuedAt(creationTime) // The creation time of the token
+					.setExpiration(expireTime) // The time the token expires
+					.claim("name", username) // username
+					.claim("role", userRole) // The role of the user
+					.claim("team", teamName) // the team name of the user, null
+					// if he/she has none
+					.signWith(                   // Signature of the token
+							SignatureAlgorithm.HS256,
+							Base64.getEncoder()
+									.encodeToString(secretKey.getEncoded()))
+					.compact(); // Finishes the creation of the token
+			return jwt;
+		}
 	}
 
 
