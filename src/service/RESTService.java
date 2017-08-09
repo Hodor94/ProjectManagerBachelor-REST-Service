@@ -39,7 +39,7 @@ import java.util.Date;
 public class RESTService {
 
 	private DataService dataService = new DataService();
-	private SecretKey secretKey;
+	private final SecretKey secretKey = dataService.generateSecretKey();
 
 	// TODO delete
 	public SecretKey getSecretKey() {
@@ -888,9 +888,6 @@ public class RESTService {
 		String phoneNr = null;
 		String address = null;
 		String birthday = null;
-		if (secretKey == null) {
-			secretKey = dataService.generateSecretKey();
-		}
 		try {
 			// Get values of the incoming json object.
 			username = userInformation.getString("username");
