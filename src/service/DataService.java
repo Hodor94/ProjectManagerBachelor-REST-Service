@@ -20,8 +20,6 @@ import java.util.*;
 public class DataService {
 	protected static final String DATE_FORMAT = "dd.MM.yyyy hh:mm:ss";
 
-	// TODO: remove from data service and change to RSA privatekey public key operation
-	private final SecretKey secretKey;
 	private AppointmentDAO appointmentDAO;
 	private ChatDAO chatDAO;
 	private MessageDAO messageDAO;
@@ -34,9 +32,6 @@ public class DataService {
 	private SimpleDateFormat formatter;
 
 	public DataService() {
-		secretKey = generateSecretKey();
-		System.out.println(secretKey.getEncoded());
-		System.out.println(Base64.getEncoder().encodeToString(secretKey.getEncoded()));
 		formatter = new SimpleDateFormat("dd.MM.yyyy");
 		appointmentDAO = new AppointmentDAO();
 		chatDAO = new ChatDAO();
@@ -50,7 +45,7 @@ public class DataService {
 	}
 
 	// Generates a secret key which is used for user authentication
-	private SecretKey generateSecretKey() {
+	protected SecretKey generateSecretKey() {
 		try {
 			KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
 			keyGenerator.init(256); // The key size
@@ -60,10 +55,6 @@ public class DataService {
 			e.printStackTrace();
 			return null;
 		}
-	}
-
-	public byte[] getSecretKey() {
-		return secretKey.getEncoded();
 	}
 
 	public UserEntity getUser(String username) {

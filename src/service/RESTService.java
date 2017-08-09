@@ -39,6 +39,7 @@ import java.util.Date;
 public class RESTService {
 
 	private DataService dataService = new DataService();
+	private SecretKey secretKey;
 
 	// TEST
 	private Calendar testDate = Calendar.getInstance();
@@ -882,6 +883,9 @@ public class RESTService {
 		String phoneNr = null;
 		String address = null;
 		String birthday = null;
+		if (secretKey == null) {
+			secretKey = dataService.generateSecretKey();
+		}
 		try {
 			// Get values of the incoming json object.
 			username = userInformation.getString("username");
@@ -981,7 +985,7 @@ public class RESTService {
 				.signWith(				   // Signature of the token
 						SignatureAlgorithm.HS256,
 						Base64.getEncoder()
-								.encodeToString(dataService.getSecretKey()))
+								.encodeToString(secretKey.getEncoded()))
 				.compact(); // Finishes the creation of the token
 		return jwt;
 	}
