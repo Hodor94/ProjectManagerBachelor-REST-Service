@@ -9,6 +9,7 @@ import javax.crypto.SecretKey;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
+import com.sun.jersey.json.impl.reader.JsonFormatException;
 import entity.*;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
@@ -39,12 +40,9 @@ import java.util.Date;
 public class RESTService {
 
 	private DataService dataService = new DataService();
-	private final SecretKey secretKey = dataService.generateSecretKey();
-
-	// TODO delete
-	public SecretKey getSecretKey() {
-		return secretKey;
-	}
+	byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary("c2VjcmV0");//this has to be base-64 encoded, it reads 'secret' if we de-encoded it
+	Key signingKey = new SecretKeySpec(apiKeySecretBytes,
+			SignatureAlgorithm.HS256.getJcaName());
 
 	// TEST
 	private Calendar testDate = Calendar.getInstance();
@@ -974,7 +972,7 @@ public class RESTService {
 		long currentMilliseconds = System.currentTimeMillis();
 		Date creationTime = new Date(currentMilliseconds);
 		Date expireTime = new Date(currentMilliseconds + 900000);
-		if (secretKey == null) {
+		if (signingKey == null) {
 			return "CREATION FAILED";
 		} else {
 			String jwt = Jwts.builder()
@@ -987,12 +985,46 @@ public class RESTService {
 					.claim("role", userRole) // The role of the user
 					.claim("team", teamName) // the team name of the user, null
 					// if he/she has none
-					.signWith(                   // Signature of the token
+					/*.signWith(                   // Signature of the token
 							SignatureAlgorithm.HS256,
 							Base64.getEncoder()
-									.encodeToString(secretKey.getEncoded()))
+									.encodeToString(secretKey.getEncoded())) */
+					.signWith(SignatureAlgorithm.HS256, signingKey)
 					.compact(); // Finishes the creation of the token
 			return jwt;
+		}
+	}
+
+	public JSONObject testValidateToken(JSONObject data) {
+		JSONObject result = null;
+		try {
+			String token = data.getString("token");
+			if (validateUserToken(token)) {
+				result = new JSONObject("\"success\": \"true\"");
+			}
+		} catch (JSONException e) {
+			try {
+				result = new JSONObject("{\"success\": \"false\", " +
+						"\"reason\": \"Wrong format of request\"}");
+			} catch (JSONException exc) {
+
+			}
+		}
+		return result;
+	}
+
+	public boolean validateUserToken(String token) {
+		try {
+			System.out.println(Jwts.parser()/*.setSigningKey(Base64.getEncoder()
+					.encodeToString
+								(secretKey.getEncoded()))*/.setSigningKey(signingKey)
+					.parseClaimsJws(token)
+					.getBody().getSubject().equals("authentication"));
+			//System.out.println(claims.getId());
+			//System.out.println(claims.getExpiration().toString());
+			return true;
+		} catch (SignatureException exc) {
+			return false;
 		}
 	}
 
