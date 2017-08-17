@@ -55,6 +55,11 @@
           <element id="library" level="project" name="Maven: io.jsonwebtoken:jjwt:0.2" />
           <element id="library" level="project" name="Maven: org.slf4j:slf4j-api:1.7.6" />
           <element id="library" level="project" name="Maven: cz.msebera.android:httpclient:4.4.1.1" />
+          <element id="library" level="project" name="Maven: com.nimbusds:nimbus-jose-jwt:4.41.1" />
+          <element id="library" level="project" name="Maven: com.github.stephenc.jcip:jcip-annotations:1.0-1" />
+          <element id="library" level="project" name="Maven: net.minidev:json-smart:2.3" />
+          <element id="library" level="project" name="Maven: net.minidev:accessors-smart:1.2" />
+          <element id="library" level="project" name="Maven: org.ow2.asm:asm:5.0.4" />
         </element>
       </element>
       <element id="directory" name="META-INF">

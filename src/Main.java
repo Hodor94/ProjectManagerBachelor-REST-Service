@@ -66,7 +66,7 @@ public class Main {
 		}
 		if (result != null) {
 			setToken(result);
-			System.out.println(restService.validateUserToken(token));
+			System.out.println(restService.validateToken(token));
 		}
 
 	}

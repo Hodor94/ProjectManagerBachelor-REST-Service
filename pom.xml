@@ -173,6 +173,13 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             <version>4.4.1.1</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt -->
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+            <version>4.41.1</version>
+        </dependency>
+
 
     </dependencies>
 </project>
