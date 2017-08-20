@@ -1,93 +1,83 @@
-import com.sun.org.apache.regexp.internal.RE;
-import cz.msebera.android.httpclient.client.ClientProtocolException;
-import entity.UserEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import javax.crypto.spec.SecretKeySpec;
+import javax.xml.bind.DatatypeConverter;
+import java.security.Key;
+import java.util.Date;
+import java.util.UUID;
 
-import cz.msebera.android.httpclient.client.HttpClient;
-import cz.msebera.android.httpclient.impl.client.HttpClientBuilder;
-import cz.msebera.android.httpclient.entity.*;
-import service.DataService;
-import service.RESTService;
-
-import javax.xml.crypto.Data;
-
-/**
- * Created by Raphael on 14.06.2017.
- */
 public class Main {
-	private static RESTService restService = new RESTService();
-	public static String token;
 
 	public static void main(String[] args) {
-		JSONObject result = null;
-		StringBuilder stringBuilder = new StringBuilder();
-		HttpClient client = HttpClientBuilder.create().build();
-		cz.msebera.android.httpclient.client.methods.HttpPost loginRequest =
-				new cz.msebera.android.httpclient.client.methods.HttpPost
-				("http://localhost:5500/ProjectManager-0.0.1-SNAPSHOT" +
-						"/pmservice/login");
-		JSONObject user = createUserInfo("EatMyStardust94", "admin");
-		if (user != null) {
-			cz.msebera.android.httpclient.entity.StringEntity stringEntity =
-					new cz.msebera.android.httpclient.entity.StringEntity(user.toString(), "UTF-8");
-			stringEntity.setContentType("application/json");
-			if (stringEntity != null) {
-				loginRequest.setEntity(stringEntity);
-				try {
-					cz.msebera.android.httpclient.HttpResponse response
-							= client.execute(loginRequest);
-					InputStream inputStream = response.getEntity().getContent();
-					if (inputStream != null) {
-						BufferedReader reader = new BufferedReader(new
-								InputStreamReader(inputStream));
-						String tempJson;
-						while ((tempJson = reader.readLine()) != null) {
-							stringBuilder.append(tempJson);
-						}
-						result = new JSONObject(stringBuilder.toString());
-					}
-				} catch (ClientProtocolException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		if (result != null) {
-			setToken(result);
-			System.out.println(restService.validateToken(token));
-		}
+		SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
-	}
+		long nowMillis = System.currentTimeMillis();
+		Date now = new Date(nowMillis);
 
-	private static JSONObject createUserInfo(String username, String password) {
-		JSONObject result = null;
-		try {
-			result = new JSONObject("{\"username\": \"" + username + "\"" +
-					", \"password\": \"" + password + "\"}");
-		} catch (JSONException exc) {
-			exc.printStackTrace();
-		}
-		return result;
-	}
+		String random = UUID.randomUUID().toString();
+		System.out.println("random string: " + random);
 
-	private static void setToken(JSONObject userData) {
-		try {
-			token = userData.getString("token");
-			System.out.println(token);
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
+		Key signingKeyRandom = new SecretKeySpec(DatatypeConverter
+				.parseBase64Binary(random),
+				signatureAlgorithm
+				.getJcaName());
+
+		//We will sign our JWT with our ApiKey secret
+		byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary
+				("secret");
+		Key signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
+
+		//Let's set the JWT Claims
+		JwtBuilder builderOne = Jwts.builder().setId("1")
+				.setIssuedAt(now)
+				.setSubject("users")
+				.setIssuer("authentcation")
+				.signWith(signatureAlgorithm, signingKey);
+
+		JwtBuilder builderTwo = Jwts.builder().setId("2")
+				.setIssuedAt(now)
+				.setSubject("users")
+				.setIssuer("authentcation")
+				.signWith(signatureAlgorithm, signingKeyRandom);
+
+		//if it has been specified, let's add the expiration
+		long expTime = now.getTime() + 900000;
+		builderOne.setExpiration(new Date(expTime));
+
+		//Builds the JWT and serializes it to a compact, URL-safe string
+		String tokenOne = builderOne.compact();
+		System.out.println("TokenOne: " + tokenOne);
+		System.out.println("Key encoded One: " + signingKey.getEncoded());
+		System.out.println("DatatypeConverter One: " + DatatypeConverter
+				.parseBase64Binary("secret"));
+
+		String tokenTwo = builderTwo.compact();
+		System.out.println("Token Two: " + tokenOne);
+		System.out.println("Key encoded Two: " + signingKeyRandom.getEncoded());
+		System.out.println("DatatypeConverter Two: " + DatatypeConverter
+				.parseBase64Binary(random));
+
+		Claims claimsOne = Jwts.parser()
+				.setSigningKey(DatatypeConverter
+						.parseBase64Binary("secret"))
+				.parseClaimsJws(tokenOne)
+				.getBody();
+		System.out.println("ID: " + claimsOne.getId());
+		System.out.println("Subject: " + claimsOne.getSubject());
+		System.out.println("Issuer: " + claimsOne.getIssuer());
+		System.out.println("exp time: " + claimsOne.getExpiration().toString());
+
+		Claims claimsTwo = Jwts.parser()
+				.setSigningKey(DatatypeConverter.parseBase64Binary(random))
+				.parseClaimsJws(tokenTwo)
+				.getBody();
+		System.out.println("ID: " + claimsTwo.getId());
+		System.out.println("Subject: " + claimsTwo.getSubject());
+		System.out.println("Issuer: " + claimsTwo.getIssuer());
+		System.out.println("exp time: " + claimsTwo.getExpiration().toString());
 	}
+	// TODO WATCH!!!
 }

@@ -10,15 +10,15 @@
 
         <property name="hibernate.enable_lazy_load_no_trans">true</property>
 
-        <!-- For real use -->
+        <!-- For real use
         <property name="connection.url">
             jdbc:mysql://localhost/projectManager
         </property>
         <property name="connection.username">grum</property>
         <property name="connection.password">OoHeedei1eiw8gaa</property>
+        -->
 
-
-        <!-- For debugging
+        <!-- For debugging -->
         <property name="connection.url">
             jdbc:mysql://localhost/evsdb
         </property>
@@ -29,7 +29,7 @@
         <property name="connection.password">
             evs2016!
         </property>
-    -->
+
 
         <property name="hibernate.connection.CharSet">utf8</property>
         <property name="hibernate.connection.characterEncoding">utf8</property>

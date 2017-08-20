@@ -19,15 +19,13 @@ import org.codehaus.jettison.json.JSONObject;
 
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Calendar;
+import java.util.*;
 
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 import java.security.Key;
+
 import io.jsonwebtoken.*;
-import java.util.Date;
 
 // TODO watch UserEntity and make with:
 // TODO: MessageEntity - alles - Überlegung: Wie identifizieren
@@ -39,12 +37,11 @@ import java.util.Date;
 public class RESTService {
 
 	private DataService dataService = new DataService();
-	private final SecretKey secretKey = dataService.generateSecretKey();
+	private final String secret = UUID.randomUUID().toString();
+	private final SignatureAlgorithm signatureAlgorithm
+			= SignatureAlgorithm.HS256;
+	private final Key secretKey = generateKey();
 
-	// TODO delete
-	public SecretKey getSecretKey() {
-		return secretKey;
-	}
 
 	// TEST
 	private Calendar testDate = Calendar.getInstance();
@@ -958,6 +955,34 @@ public class RESTService {
 		return result;
 	}
 
+	@POST
+	@Path("/test")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject testvalidateToken(JSONObject jsonObject) {
+		JSONObject result = null;
+		String response;
+		try {
+			String token = jsonObject.getString("token");
+			if (validateToken(token)) {
+				response = "{\"success\": \"true\", \"reason\": \"Token is " +
+						"valid\"}";
+			} else {
+				response = "{\"success\": \"false\", \"reason\": \"Token is " +
+						"invalid\"}";
+			}
+		} catch (JSONException e) {
+			response = "{\"success\": \"false\", \"reason\": \"No token " +
+					"sent\"}";
+		}
+		try {
+			result = new JSONObject(response);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
 	private JSONObject returnClientError() {
 		try {
 			return new JSONObject("{\"success\": \"false\", " +
@@ -969,32 +994,59 @@ public class RESTService {
 		}
 	}
 
-	// TODO
 	private String createUserToken(String userid, String username,
 								   String userRole, String teamName) {
 		long currentMilliseconds = System.currentTimeMillis();
 		Date creationTime = new Date(currentMilliseconds);
 		Date expireTime = new Date(currentMilliseconds + 900000);
-		if (secretKey == null) {
-			return "CREATION FAILED";
+		JwtBuilder builder = Jwts.builder()
+				.setAudience("users")
+				.setSubject("authentication") // Defines for what the token is used
+				.setId(userid) // The user id is the id for the token
+				.setIssuedAt(creationTime) // The creation time of the token
+				.setExpiration(expireTime) // The time the token expires
+				.claim("name", username) // username
+				.claim("role", userRole) // The role of the user
+				.claim("team", teamName) // the team name of the user, null
+										   // if he/she has none
+				.signWith(                   // Signature of the token
+						SignatureAlgorithm.HS256, secretKey);
+		// Finishes token
+		String jwt = builder.compact();
+		return jwt;
+	}
+
+	private Key generateKey() {
+		byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary(secret);
+		Key signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
+		return signingKey;
+	}
+
+	private boolean validateToken(String token) {
+		Claims claims = Jwts.parser()
+				.setSigningKey(DatatypeConverter.parseBase64Binary(secret))
+				.parseClaimsJws(token)
+				.getBody();
+		long millis = System.currentTimeMillis();
+		Date now = new Date(millis);
+		Date exp = claims.getExpiration();
+		if (claims.getExpiration().after(now)) {
+			return true;
 		} else {
-			String jwt = Jwts.builder()
-					.setAudience("users")  // Defines the audience the token is created for
-					.setSubject("authentication") // Defines for what the token is used
-					.setId(userid) // The user id is the id for the token
-					.setIssuedAt(creationTime) // The creation time of the token
-					.setExpiration(expireTime) // The time the token expires
-					.claim("name", username) // username
-					.claim("role", userRole) // The role of the user
-					.claim("team", teamName) // the team name of the user, null
-					// if he/she has none
-					.signWith(                   // Signature of the token
-							SignatureAlgorithm.HS256,
-							Base64.getEncoder()
-									.encodeToString(secretKey.getEncoded()))
-					.compact(); // Finishes the creation of the token
-			return jwt;
+			return false;
 		}
+	}
+
+	private Map<String, String> getTokenValues(String token) {
+		HashMap<String, String> result = new HashMap<>();
+		Claims claims = Jwts.parser().setSigningKey(DatatypeConverter
+				.parseBase64Binary(secret))
+				.parseClaimsJws(token)
+				.getBody();
+		result.put("role", (String) claims.get("role"));
+		result.put("team", (String) claims.get("team"));
+		result.put("name", (String) claims.get("name"));
+		return result;
 	}
 
 
