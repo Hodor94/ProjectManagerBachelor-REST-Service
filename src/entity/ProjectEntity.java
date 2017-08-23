@@ -235,7 +235,7 @@ public class ProjectEntity extends GenericEntity {
 
 	private String appendJSONName(String name) {
 		if (name != null && !(name.equals(""))) {
-			return "\"name\": " + "\"" + name + "\", ";
+			return "\"name\": " + "\"" + encodeToUTF8(name) + "\", ";
 		} else {
 			return "\"name\": " + null + ", ";
 		}
@@ -243,7 +243,8 @@ public class ProjectEntity extends GenericEntity {
 
 	private String appendJSONDescription(String description) {
 		if (description != null && !(description.equals(""))) {
-			return "\"description\": " + "\"" + description + "\", ";
+			return "\"description\": " + "\""
+					+ encodeToUTF8(description) + "\", ";
 		} else {
 			return "\"description\": " + null + ", ";
 		}
@@ -251,7 +252,7 @@ public class ProjectEntity extends GenericEntity {
 
 	private String appendJSONDeadline(String deadline) {
 		if (deadline != null) {
-			return "\"deadline\": " + "\"" + deadline + "\", ";
+			return "\"deadline\": " + "\"" + encodeToUTF8(deadline) + "\", ";
 		} else {
 			return "\"deadline:\" " + null + ", ";
 		}
@@ -267,7 +268,7 @@ public class ProjectEntity extends GenericEntity {
 
 	private String appendJSONTeamName(TeamEntity team) {
 		if (team != null && team.getName() != null && !(team.getName().equals(""))) {
-			return "\"team\": " + "\"" + team.getName() + "\"";
+			return "\"team\": " + "\"" + encodeToUTF8(team.getName()) + "\"";
 		} else {
 			return "\"team\": " + null;
 		}

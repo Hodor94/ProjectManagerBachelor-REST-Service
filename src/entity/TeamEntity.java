@@ -201,7 +201,7 @@ public class TeamEntity extends GenericEntity {
 
 	private String appendJSONName(String name) {
 		if (name != null && !(name.equals(""))) {
-			return "\"name\": " + "\"" + this.getName() + "\", ";
+			return "\"name\": " + "\"" + encodeToUTF8(name) + "\", ";
 		} else {
 			return "\"name\": " + null + ", ";
 		}
@@ -209,7 +209,8 @@ public class TeamEntity extends GenericEntity {
 
 	private String appendJSONDescription(String description) {
 		if (description != null && !(description.equals(""))) {
-			return "\"description\": " + "\"" + description + "\", ";
+			return "\"description\": " + "\""
+					+ encodeToUTF8(description) + "\", ";
 		} else {
 			return "\"description\": " + null + ", ";
 		}

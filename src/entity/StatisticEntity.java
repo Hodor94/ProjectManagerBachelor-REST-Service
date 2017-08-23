@@ -128,7 +128,8 @@ public class StatisticEntity extends GenericEntity {
 
 	private String appendJSONUserName(UserEntity user) {
 		if (user != null && user.getUsername() != null && !(user.getUsername().equals(""))) {
-			return "\"user\": " + "\"" + user.getUsername() + "\", ";
+			return "\"user\": " + "\""
+					+ encodeToUTF8(user.getUsername()) + "\", ";
 		} else {
 			return "\"user\": " + null + ", ";
 		}
