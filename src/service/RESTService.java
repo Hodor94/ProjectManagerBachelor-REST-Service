@@ -6,9 +6,11 @@ package service;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.print.attribute.standard.Media;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
+import cz.msebera.android.httpclient.HttpResponse;
 import entity.*;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
@@ -17,11 +19,14 @@ import org.codehaus.jettison.json.JSONException;
 import org.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 import javax.crypto.spec.SecretKeySpec;
+import javax.ws.rs.core.Response;
 import javax.xml.bind.DatatypeConverter;
 import java.security.Key;
 
@@ -945,6 +950,7 @@ public class RESTService {
 				jsonInfo = "{\"success\": \"true\", \"token\": \"" + token +
 						"\", " + "\"user\": " + user.toSring() + "}";
 				result = new JSONObject(jsonInfo);
+
 			} else {
 				jsonInfo = "{\"success\": \"false\"}";
 				result = new JSONObject(jsonInfo);

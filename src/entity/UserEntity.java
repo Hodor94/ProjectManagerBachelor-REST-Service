@@ -15,6 +15,7 @@ import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -386,9 +387,18 @@ public class UserEntity extends GenericEntity {
 		stringBuilder.append(appendJSONDayOfEntry(dayOfEntry));
 		stringBuilder.append(appendJSONUserRole(role.toString()));
 		stringBuilder.append(appendJSONRegisterName(register));
+		stringBuilder.append(appendTeamName(team));
 		stringBuilder.append("}");
 		result = stringBuilder.toString();
 		return result;
+	}
+
+	private String appendTeamName(TeamEntity team) {
+		if (team != null) {
+			return "\"team\": \"" + team.getName() + "\"";
+		} else {
+			return "\"team\": " + null;
+		}
 	}
 
 	//Appends the correct json format for the username depending on the value
@@ -400,11 +410,28 @@ public class UserEntity extends GenericEntity {
 		}
 	}
 
+	// TODO rework all append methods with this as model
 	//Appends the correct json format for the first name of the user depending
 	// on the value
 	private String appendJSONFirstName(String firstName) {
 		if (firstName != null && !(firstName.equals(""))) {
-			return "\"firstName\": " + "\"" + firstName + "\", ";
+			byte[] bytes = null;
+			try {
+				bytes = firstName.getBytes("ISO-8859-1");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+			if (bytes != null) {
+				try {
+					return "\"firstName\": " + "\""
+							+ new String(bytes, "UTF-8") +
+							"\", ";
+				} catch (UnsupportedEncodingException e) {
+					return null;
+				}
+			} else {
+				return null;
+			}
 		} else {
 			return "\"firstName\": " + null + ", ";
 		}
@@ -479,9 +506,9 @@ public class UserEntity extends GenericEntity {
 
 	private String appendJSONRegisterName(RegisterEntity register) {
 		if (register != null && register.getName() != null && !(register.getName().equals(""))) {
-			return "\"registerName\": " + "\"" + register.getName() + "\"";
+			return "\"registerName\": " + "\"" + register.getName() + "\", ";
 		} else {
-			return "\"registerName\": " + null;
+			return "\"registerName\": " + null + ", ";
 		}
 	}
 
