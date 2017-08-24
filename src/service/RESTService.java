@@ -381,18 +381,39 @@ public class RESTService {
 	}
 
 	@GET
-	@Path("/team/{teamName}")
+	@Path("/team")
+	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getTeam(@PathParam("teamName") String teamName) {
-		DataService service = new DataService();
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
-		JSONObject result;
-		TeamEntity team = service.getTeam(teamName);
-		if (team != null) {
-			result = mapper.convertValue(team.toString(), JSONObject.class);
-		} else {
-			result = mapper.convertValue("null", JSONObject.class);
+	public JSONObject getTeam(JSONObject team) {
+		String token = null;
+		String teamName = null;
+		JSONObject result = null;
+		try {
+			token = team.getString("token");
+			teamName = team.getString("team");
+			if (token != null && teamName != null && !(token.equals(""))
+					&& !(teamName.equals(""))) {
+				if (validateToken(token)) {
+					TeamEntity fetchedTeam = dataService.getTeam(teamName);
+					if (fetchedTeam != null) {
+						try {
+							result = new JSONObject("{\"success\": \"true\", " +
+									"\"team\":" + fetchedTeam.toString() + "}");
+						} catch (JSONException e) {
+							e.printStackTrace();
+							result = returnServerError();
+						}
+					} else {
+						result = returnEmptyResult();
+					}
+				} else {
+					result = returnTokenError();
+				}
+			} else {
+				result = returnEmptyResult();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
 		}
 		return result;
 	}
@@ -577,6 +598,7 @@ public class RESTService {
 		return result;
 	}
 
+	// TODO rework
 	@GET
 	@Path("/appointment/{projectName}/{appointmentId}/{teamName}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -599,6 +621,7 @@ public class RESTService {
 		return result;
 	}
 
+	// TODO rework
 	@GET
 	@Path("/appointment/{projectName}/{appointmentId}/{teamName}/project")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -623,6 +646,7 @@ public class RESTService {
 		return result;
 	}
 
+	// TODO rework
 	@GET
 	@Path("/appointment/{projectName}/{appointmentId}/{teamName}/users")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -661,6 +685,7 @@ public class RESTService {
 		return result;
 	}
 
+	// TODO rework
 	@GET
 	@Path("/register/{registerName}/{teamName}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -680,6 +705,7 @@ public class RESTService {
 		return result;
 	}
 
+	// TODO rework
 	@GET
 	@Path("/register/{registerName}/{teamName}/users")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -714,6 +740,7 @@ public class RESTService {
 		return result;
 	}
 
+	// TODO rework
 	@GET
 	@Path("/register/{registerName}/{teamName}/team")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -731,6 +758,7 @@ public class RESTService {
 		return result;
 	}
 
+	// TODO rework
 	@GET
 	@Path("/project/{projectname}/{teamname}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -749,6 +777,7 @@ public class RESTService {
 		return result;
 	}
 
+	// TODO rework
 	@GET
 	@Path("/project/{projectName}/{teamName}/appointments")
 	public JSONObject getProjectsAppointments(
@@ -784,6 +813,7 @@ public class RESTService {
 		return result;
 	}
 
+	// TODO rework
 	@GET
 	@Path("/project/{projectName}/{teamName}/users")
 	public JSONObject getProjectsUsers(
@@ -818,6 +848,7 @@ public class RESTService {
 		return result;
 	}
 
+	// TODO rework
 	@GET
 	@Path("/project/{projectName}/{teamName}/statistics")
 	public JSONObject getProjectsStatistics(
@@ -852,6 +883,7 @@ public class RESTService {
 		return result;
 	}
 
+	// TODO rework
 	@GET
 	@Path("/statistic/{teamName}/{projectName}/{username}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -961,32 +993,29 @@ public class RESTService {
 		return result;
 	}
 
-	@POST
-	@Path("/test")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject testvalidateToken(JSONObject jsonObject) {
-		JSONObject result = null;
-		String response;
+	private JSONObject returnEmptyResult() {
 		try {
-			String token = jsonObject.getString("token");
-			if (validateToken(token)) {
-				response = "{\"success\": \"true\", \"reason\": \"Token is " +
-						"valid\"}";
-			} else {
-				response = "{\"success\": \"false\", \"reason\": \"Token is " +
-						"invalid\"}";
-			}
-		} catch (JSONException e) {
-			response = "{\"success\": \"false\", \"reason\": \"No token " +
-					"sent\"}";
-		}
-		try {
-			result = new JSONObject(response);
+			JSONObject result = new JSONObject("{\"success\": \"false\"," +
+					" \"reason\": \"Die angeforderten Daten existieren " +
+					"nicht!\"}");
+			return result;
 		} catch (JSONException e) {
 			e.printStackTrace();
+			return null;
 		}
-		return result;
+	}
+
+	private JSONObject returnTokenError() {
+		try {
+			JSONObject result = new JSONObject("{\"success\": \"false\", " +
+					"\"reason\": \"Die Berechtigung für diese Aktion ist " +
+					"nicht gewährleistet! Bitte loggen Sie sich erneut " +
+					"ein!\"}");
+			return result;
+		} catch (JSONException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	private JSONObject returnClientError() {
@@ -994,6 +1023,18 @@ public class RESTService {
 			return new JSONObject("{\"success\": \"false\", " +
 					"\"error\": \"Falsche Angaben im Request! Client " +
 					"zeigt falsches Verhalten!\"}");
+		} catch (JSONException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private JSONObject returnServerError() {
+		try {
+			return new JSONObject("{\"success\": \"false\", " +
+					"\"reason\": \"Der Server zeigt falsches Verhalten! " +
+					"Bitte melden Sie dies an den Administrator unter " +
+					"grum02@gw.uni-passau.de.\"}");
 		} catch (JSONException e) {
 			e.printStackTrace();
 			return null;
@@ -1054,7 +1095,6 @@ public class RESTService {
 		result.put("name", (String) claims.get("name"));
 		return result;
 	}
-
 
 }
 

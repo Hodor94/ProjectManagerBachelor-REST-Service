@@ -216,6 +216,7 @@ public class DataService {
 			projectDAO.saveOrUpdate(project);
 			if (manager.getRole() != UserRole.ADMINISTRATOR) {
 				manager.setRole(UserRole.PROJECT_OWNER);
+				manager.setAdminOfProject(project);
 			}
 			manager.getProjectsTakingPart().add(project);
 			manager.getStatistics().add(newStatistic);

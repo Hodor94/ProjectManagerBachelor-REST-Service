@@ -90,6 +90,10 @@ public class UserEntity extends GenericEntity {
 	@JoinColumn(name = "team")
 	private TeamEntity team;
 
+	@OneToOne
+	@JoinColumn(name = "adminOfProject")
+	private ProjectEntity adminOfProject;
+
 	@JsonIgnore
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@ManyToMany(cascade = CascadeType.ALL)
@@ -387,10 +391,19 @@ public class UserEntity extends GenericEntity {
 		stringBuilder.append(appendJSONDayOfEntry(dayOfEntry));
 		stringBuilder.append(appendJSONUserRole(role.toString()));
 		stringBuilder.append(appendJSONRegisterName(register));
+		stringBuilder.append(appendJSONAdminOfProject(adminOfProject));
 		stringBuilder.append(appendTeamName(team));
 		stringBuilder.append("}");
 		result = stringBuilder.toString();
 		return result;
+	}
+
+	private String appendJSONAdminOfProject(ProjectEntity adminOfProject) {
+		if (adminOfProject != null && role == UserRole.PROJECT_OWNER) {
+			return "\"adminOfProject\": \"" + adminOfProject.getName() + "\", ";
+		} else {
+			return "\"adminOfProject\": " + null + ", ";
+		}
 	}
 
 	private String appendTeamName(TeamEntity team) {
@@ -500,5 +513,12 @@ public class UserEntity extends GenericEntity {
 		}
 	}
 
+	public ProjectEntity getAdminOfProject() {
+		return adminOfProject;
+	}
+
+	public void setAdminOfProject(ProjectEntity adminOfProject) {
+		this.adminOfProject = adminOfProject;
+	}
 }
 
