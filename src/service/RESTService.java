@@ -199,7 +199,7 @@ public class RESTService {
 		return null;
 	}
 
-	@GET
+	@POST
 	@Path("/user")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
