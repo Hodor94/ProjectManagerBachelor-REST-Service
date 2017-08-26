@@ -200,17 +200,34 @@ public class RESTService {
 	}
 
 	@GET
-	@Path("/user/{username}")
+	@Path("/user")
 	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getUser(@PathParam("username") String username) {
-		UserEntity user = dataService.getUser(username);
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
+	@Consumes(MediaType.APPLICATION_JSON)
+	public JSONObject getUser(JSONObject userData) {
 		JSONObject result;
-		if (user != null) {
-			result = mapper.convertValue(user.toSring(), JSONObject.class);
-		} else {
-			result = mapper.convertValue(null, JSONObject.class);
+		String token = null;
+		String username = null;
+		try {
+			token = userData.getString("token");
+			username = userData.getString("username");
+			if (token != null && !(token.equals("")) && username != null
+					&& !(username.equals(""))) {
+				if (validateToken(token)) {
+					UserEntity fetchedUser = dataService.getUser(username);
+					if (fetchedUser != null) {
+						result = new JSONObject("{\"success\": \"true\", "
+								+ " \"user\": " + fetchedUser.toSring() + "}");
+					} else {
+						result = returnEmptyResult();
+					}
+				} else {
+					result = returnTokenError();
+				}
+			} else {
+				result = returnClientError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
 		}
 		return result;
 	}
