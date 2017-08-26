@@ -620,9 +620,9 @@ public class RESTService {
 	@Path("/appointment/{projectName}/{appointmentId}/{teamName}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject getAppointment
-			(@PathParam("projectName") String projectName,
-			 @PathParam("appointmentId") long appointmentId,
-			 @PathParam("teamName") String teamName) {
+	(@PathParam("projectName") String projectName,
+	 @PathParam("appointmentId") long appointmentId,
+	 @PathParam("teamName") String teamName) {
 		DataService service = new DataService();
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
@@ -1072,7 +1072,7 @@ public class RESTService {
 				.claim("name", username) // username
 				.claim("role", userRole) // The role of the user
 				.claim("team", teamName) // the team name of the user, null
-										   // if he/she has none
+				// if he/she has none
 				.signWith(                   // Signature of the token
 						SignatureAlgorithm.HS256, secretKey);
 		// Finishes token
@@ -1087,16 +1087,20 @@ public class RESTService {
 	}
 
 	private boolean validateToken(String token) {
-		Claims claims = Jwts.parser()
-				.setSigningKey(DatatypeConverter.parseBase64Binary(secret))
-				.parseClaimsJws(token)
-				.getBody();
-		long millis = System.currentTimeMillis();
-		Date now = new Date(millis);
-		Date exp = claims.getExpiration();
-		if (claims.getExpiration().after(now)) {
-			return true;
-		} else {
+		try {
+			Claims claims = Jwts.parser()
+					.setSigningKey(DatatypeConverter.parseBase64Binary(secret))
+					.parseClaimsJws(token)
+					.getBody();
+			long millis = System.currentTimeMillis();
+			Date now = new Date(millis);
+			Date exp = claims.getExpiration();
+			if (claims.getExpiration().after(now)) {
+				return true;
+			} else {
+				return false;
+			}
+		} catch (SignatureException exc) {
 			return false;
 		}
 	}
