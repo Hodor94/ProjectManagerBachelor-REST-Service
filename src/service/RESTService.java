@@ -1074,10 +1074,15 @@ public class RESTService {
 					= new SignedJWT(new JWSHeader(JWSAlgorithm.HS256),
 					claimsSet);
 
+			// Sign the token
+			signedJWT.sign(signer);
+
 			// Finish token
 			token = signedJWT.serialize();
 		} catch (KeyLengthException e) {
-			e.printStackTrace();
+			token = null;
+		} catch (JOSEException e) {
+			token = null;
 		}
 		return token;
 	}
