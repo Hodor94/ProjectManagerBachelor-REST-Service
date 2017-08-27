@@ -4,13 +4,14 @@ package service;
  * Created by Raphael on 15.06.2017.
  */
 
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.print.attribute.standard.Media;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
-import cz.msebera.android.httpclient.HttpResponse;
+import com.nimbusds.jose.*;
+import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import entity.*;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
@@ -19,22 +20,16 @@ import org.codehaus.jettison.json.JSONException;
 import org.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import javax.crypto.spec.SecretKeySpec;
-import javax.ws.rs.core.Response;
 import javax.xml.bind.DatatypeConverter;
 import java.security.Key;
 
 import io.jsonwebtoken.*;
 
-// TODO watch UserEntity and make with:
-// TODO: MessageEntity - alles - Überlegung: Wie identifizieren
-// TODO: StatisticEntity - alles - Überlegung: Wie identifizieren
 // Todo: POST, UPDATE UND DELETE Methoden
 
 @JsonSerialize
@@ -42,15 +37,9 @@ import io.jsonwebtoken.*;
 public class RESTService {
 
 	private DataService dataService = new DataService();
-	private final String secret = UUID.randomUUID().toString();
-	private final SignatureAlgorithm signatureAlgorithm
-			= SignatureAlgorithm.HS256;
-	private final Key secretKey = generateKey();
-
-
-	// TEST
-	private Calendar testDate = Calendar.getInstance();
-	private SimpleDateFormat formatter;
+	//private final String secret = UUID.randomUUID().toString();
+	private final byte[] SHARED_SECRET = generateSharedSecret();
+	private final long EXPIRE_TIME = 900000;
 
 	@Path("/setUp/")
 	public String setUp() {
@@ -1062,58 +1051,59 @@ public class RESTService {
 								   String userRole, String teamName) {
 		long currentMilliseconds = System.currentTimeMillis();
 		Date creationTime = new Date(currentMilliseconds);
-		Date expireTime = new Date(currentMilliseconds + 900000);
-		JwtBuilder builder = Jwts.builder()
-				.setAudience("users")
-				.setSubject("authentication") // Defines for what the token is used
-				.setId(userid) // The user id is the id for the token
-				.setIssuedAt(creationTime) // The creation time of the token
-				.setExpiration(expireTime) // The time the token expires
-				.claim("name", username) // username
-				.claim("role", userRole) // The role of the user
-				.claim("team", teamName) // the team name of the user, null
-				// if he/she has none
-				.signWith(                   // Signature of the token
-						SignatureAlgorithm.HS256, secretKey);
-		// Finishes token
-		String jwt = builder.compact();
-		return jwt;
+		Date expireTime = new Date(currentMilliseconds + EXPIRE_TIME);
+		String token = null;
+		try {
+			// Create HMAC signer
+			JWSSigner signer = new MACSigner(SHARED_SECRET);
+
+			// Prepare JWT
+			JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+					.audience("users")
+					.subject("authentication") // Defines for what the token is used
+					.jwtID(userid)	// The user id is the id for the token
+					.issueTime(creationTime)	// The creation time of the token
+					.expirationTime(expireTime)	// The time the token expires
+					.claim("name", username) // Username
+					.claim("role", userRole) // The role of the user
+					.claim("team", teamName) // The team name of the user
+			.build();
+
+			// Combine header and claims
+			SignedJWT signedJWT
+					= new SignedJWT(new JWSHeader(JWSAlgorithm.HS256),
+					claimsSet);
+
+			// Finish token
+			token = signedJWT.serialize();
+		} catch (KeyLengthException e) {
+			e.printStackTrace();
+		}
+		return token;
 	}
 
-	private Key generateKey() {
-		byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary(secret);
-		Key signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
-		return signingKey;
+	private byte[] generateSharedSecret() {
+		// Generate random 256-bit shared secret
+		SecureRandom random = new SecureRandom();
+		byte[] result = new byte[32];
+		random.nextBytes(result);
+		return result;
 	}
 
 	private boolean validateToken(String token) {
-		try {
-			Claims claims = Jwts.parser()
-					.setSigningKey(DatatypeConverter.parseBase64Binary(secret))
-					.parseClaimsJws(token)
-					.getBody();
-			long millis = System.currentTimeMillis();
-			Date now = new Date(millis);
-			Date exp = claims.getExpiration();
-			if (claims.getExpiration().after(now)) {
-				return true;
-			} else {
-				return false;
+		boolean result = false;
+		if (token != null) {
+			try {
+				JWSVerifier verifier = new MACVerifier(SHARED_SECRET);
+				SignedJWT jwt = SignedJWT.parse(token);
+				// Verify token
+				result = jwt.verify(verifier);
+			} catch (JOSEException e) {
+				// Do nothing
+			} catch (ParseException e) {
+				// Do nothing
 			}
-		} catch (SignatureException exc) {
-			return false;
 		}
-	}
-
-	private Map<String, String> getTokenValues(String token) {
-		HashMap<String, String> result = new HashMap<>();
-		Claims claims = Jwts.parser().setSigningKey(DatatypeConverter
-				.parseBase64Binary(secret))
-				.parseClaimsJws(token)
-				.getBody();
-		result.put("role", (String) claims.get("role"));
-		result.put("team", (String) claims.get("team"));
-		result.put("name", (String) claims.get("name"));
 		return result;
 	}
 

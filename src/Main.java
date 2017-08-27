@@ -1,3 +1,8 @@
+import com.nimbusds.jose.*;
+import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
@@ -8,41 +13,52 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 import java.io.UnsupportedEncodingException;
 import java.security.Key;
+import java.security.SecureRandom;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.UUID;
 
 public class Main {
 
 	public static void main(String[] args) {
-		String test = "äöü@ÄÖÜ";
-		String ä = "ä";
-		byte[] byteÄ = ä.getBytes();
-		System.out.println(ä);
-		System.out.println(byteÄ);
-		byte[] bytes = null;
+		SecureRandom random = new SecureRandom();
+		byte[] sharedSecret = new byte[32];
+		random.nextBytes(sharedSecret);
+		JWSSigner signer = null;
+		SignedJWT verify = null;
 		try {
-			bytes = "AÄÖÜäöüßA".getBytes("ISO-8859-1");
-			System.out.println("Bytes: " + bytes);
-			String bachToString = new String(bytes, "ISO-8859-1");
-			System.out.println("Wieder text: " + bachToString);
-		} catch (UnsupportedEncodingException e) {
+			signer = new MACSigner(sharedSecret);
+		} catch (KeyLengthException e) {
 			e.printStackTrace();
 		}
-		String unreadable = null;
+		JWTClaimsSet claims = new JWTClaimsSet.Builder()
+				.subject("alice")
+				.issuer("https://c2id.com")
+				.expirationTime(new Date(new Date().getTime() + 60 * 1000))
+				.build();
+
+		SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256),
+				claims);
 		try {
-			 unreadable = new String(test.getBytes("UTF-8"), "ISO-8859-15");
-		} catch (UnsupportedEncodingException e) {
+			signedJWT.sign(signer);
+		} catch (JOSEException e) {
 			e.printStackTrace();
 		}
-		System.out.println(test);
-		System.out.println(unreadable);
-		String readable = null;
+		String token = signedJWT.serialize();
+		System.out.println(token);
+
 		try {
-			readable = new String(unreadable.getBytes("ISO-8859-15"),
-					"UTF-8");
-		} catch (UnsupportedEncodingException e) {
+			verify = SignedJWT.parse(token);
+		} catch (ParseException e) {
 			e.printStackTrace();
 		}
-		System.out.println(readable);
+
+		try {
+			JWSVerifier verifier = new MACVerifier(sharedSecret);
+			System.out.println(verify.verify(verifier));
+		} catch (JOSEException e) {
+			e.printStackTrace();
+		}
+
 	}
 }
