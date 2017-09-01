@@ -20,6 +20,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 
+import java.io.*;
 import java.security.SecureRandom;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -914,6 +915,42 @@ public class RESTService {
 		return result;
 	}
 
+	//--------------------------------------------------------------------------
+
+	@POST
+	@Path("/create/team")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject createTeam(JSONObject data) {
+		JSONObject result;
+		try {
+			String token = data.getString("token");
+			if (validateToken(token)) {
+				String teamName = data.getString("teamName");
+				TeamEntity fetchedTeam = dataService.getTeam(teamName);
+				if (fetchedTeam == null) {
+					String description = data.getString("teamDescription");
+					String admin = data.getString("admin");
+					if (dataService.createNewTeam(teamName, description,
+							admin)) {
+						UserEntity user = dataService.getUser(admin);
+						result = new JSONObject("{\"success\": \"true\", "
+								+ "\"teamName\": \"" + teamName + "\"}");
+					} else {
+						result = returnServerError();
+					}
+				} else {
+					result = returnExistingError();
+				}
+			} else {
+				result = returnTokenError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
 	@POST
 	@Path("/register/user")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -997,6 +1034,17 @@ public class RESTService {
 			result = returnClientError();
 		}
 		return result;
+	}
+
+	private JSONObject returnExistingError() {
+		try {
+			return new JSONObject("{\"success\": \"false\", \"reason\": " +
+					"\"Die von Ihnen angeforderte Aktion konnte nicht " +
+					"ausgeführt werden, da die Daten schon existieren. " +
+					"Versuchen Sie einen anderen Bezeichner!\"}");
+		} catch (JSONException exc) {
+			return null;
+		}
 	}
 
 	private JSONObject returnEmptyResult() {
@@ -1089,9 +1137,27 @@ public class RESTService {
 
 	private byte[] generateSharedSecret() {
 		// Generate random 256-bit shared secret
-		SecureRandom random = new SecureRandom();
+		FileInputStream fis;
+		FileOutputStream fos;
 		byte[] result = new byte[32];
-		random.nextBytes(result);
+		try {
+			fis = new FileInputStream(new File("resources.txt"));
+			byte[] read = new byte[32];
+			fis.read(read);
+			fis.close();
+			if (read == null) {
+				SecureRandom random = new SecureRandom();
+				random.nextBytes(result);
+				fos = new FileOutputStream(new File("resources.txt"));
+				fos.write(result);
+			} else {
+				result = read;
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return result;
 	}
 

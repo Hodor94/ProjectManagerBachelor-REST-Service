@@ -20,6 +20,8 @@ public class MainTest {
 		RESTService service = new RESTService();
 		JSONObject register = null;
 		JSONObject login = null;
+		JSONObject getUser = null;
+		String token = null;
 		try {
 			register = new JSONObject("{\"firstName\": \"Raphael\", " +
 					"\"surname\": \"ÄÖÜ\", \"birthday\": \"03.01.1994\", " +
@@ -47,6 +49,19 @@ public class MainTest {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		System.out.println(responseLogin.toString());
+		try {
+			token = responseLogin.getString("token");
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		if (token != null) {
+			try {
+				JSONObject getUserData = new JSONObject("{\"token\":" +
+						" \"" + token + "\", \"username\": \"admin\"}");
+				service.getUser(getUserData);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }

@@ -180,6 +180,11 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             <version>4.41.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.5</version>
+        </dependency>
 
     </dependencies>
 </project>

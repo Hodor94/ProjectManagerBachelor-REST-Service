@@ -3,27 +3,39 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import org.hibernate.boot.jaxb.SourceType;
 
-import javax.crypto.spec.SecretKeySpec;
-import javax.xml.bind.DatatypeConverter;
-import java.io.UnsupportedEncodingException;
-import java.security.Key;
+import java.io.*;
 import java.security.SecureRandom;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.UUID;
 
 public class Main {
 
 	public static void main(String[] args) {
 		SecureRandom random = new SecureRandom();
 		byte[] sharedSecret = new byte[32];
+		byte[] read = new byte[32];
 		random.nextBytes(sharedSecret);
+		try {
+			FileOutputStream outputStream
+					= new FileOutputStream(new File("resources.txt"));
+			org.apache.commons.io.IOUtils.write(sharedSecret, outputStream);
+			outputStream.close();
+			FileInputStream fis = new FileInputStream(new File("resources" +
+					".txt"));
+			fis.read(read);
+			System.out.println("Read from file: " + read);
+			System.out.println(read == null);
+			JWSSigner testSigner = new MACSigner(read);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (KeyLengthException e) {
+			e.printStackTrace();
+		}
+
+		//----------------------------------------------------------------------
 		JWSSigner signer = null;
 		SignedJWT verify = null;
 		try {

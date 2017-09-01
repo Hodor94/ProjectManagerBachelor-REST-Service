@@ -164,13 +164,16 @@ public class DataService {
 		return calendar;
 	}
 
-	// TODO set value of dayOfEntry
 	public boolean createNewTeam(String name, String description, String adminName) {
 		boolean result = false;
 		UserEntity admin = userDAO.getUserByUsername(adminName);
 		TeamEntity team = teamDAO.getTeamByTeamName(name);
 		if (admin != null && team == null) {
 			admin.setRole(UserRole.ADMINISTRATOR);
+			Date now = new Date(System.currentTimeMillis());
+			Calendar dayOfEntry = Calendar.getInstance();
+			dayOfEntry.setTime(now);
+			admin.setDayOfEntry(dayOfEntry);
 			team = new TeamEntity(name, description, admin);
 			team.getUsers().add(admin);
 			admin.setTeam(team);
