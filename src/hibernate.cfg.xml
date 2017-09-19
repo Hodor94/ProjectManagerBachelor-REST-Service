@@ -20,7 +20,7 @@
 
         <!-- For debugging -->
         <property name="connection.url">
-            jdbc:mysql://localhost/evsdb?useUnicode=true;characterEncoding=UTF-8
+            jdbc:mysql://localhost/evsdb?useUnicode=true&amp;characterEncoding=UTF-8&amp;createDatabaseIfNotExist=true
         </property>
 
         <property name="connection.username">
@@ -61,7 +61,7 @@
         <property name="current_session_context_class">thread</property>
 
         <!-- DB schema will be updated if needed -->
-        <property name="hbm2ddl.auto">create-drop</property>
+        <property name="hibernate.hbm2ddl.auto">create-drop</property>
 
         <property name="hibernate.event.merge.entity_copy_observer">allow
         </property>
