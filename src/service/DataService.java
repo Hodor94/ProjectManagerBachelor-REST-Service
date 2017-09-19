@@ -29,6 +29,7 @@ public class DataService {
 	private TaskDAO taskDAO;
 	private TeamDAO teamDAO;
 	private UserDAO userDAO;
+	private static SecretKey secretKey;
 	private SimpleDateFormat formatter;
 
 	public DataService() {
@@ -42,6 +43,14 @@ public class DataService {
 		taskDAO = new TaskDAO();
 		teamDAO = new TeamDAO();
 		userDAO = new UserDAO();
+		KeyGenerator keyGenerator;
+		try {
+			 keyGenerator = KeyGenerator.getInstance("AES");
+			 keyGenerator.init(256);
+			 secretKey = keyGenerator.generateKey();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
 	}
 
 	// Generates a secret key which is used for user authentication
@@ -697,50 +706,20 @@ public class DataService {
 		return userDAO.getAll();
 	}
 
-	public void setUpDataForRESTService() {
-		registerUser("test-user", "test-password",
-				"test-first-name", "test-surname",
-				"test-email", "test-phone-Nr",
-				"test-address", "03.01.1994 00:00:00");
-		registerUser("test-user-2", "test-password",
-				"test-first-name", "test-surname",
-				"test-email", "test-phone-Nr",
-				"test-address", "03.01.1994 00:00:00");
-		createNewTeam("test-team", "test-description",
-				"test-user");
-		addUserToTeam("test-team", "test-user-2");
-		createNewTask("test-task", "Just testing",
-				"03.01.1994 00:00:00", "test-team");
-		createNewTask("test-task-two", "Just testing",
-				"03.01.1994 00:00:00", "test-team");
-		setWorkerToTask("test-task", "test-user",
-				"test-team");
-		setWorkerToTask("test-task-two", "test-user",
-				"test-team");
-		createNewProject("test-team","test-project",
-				"for testing", "test-user",
-				"03.01.1994 00:00:00");
-		addUserToProject("test-user-2", "test-project",
-				"test-team");
-		createNewAppointment("test-appointment",
-				"test-description", "03.01.1994 00:00:00",
-				"test-project", "test-team");
-		addUserToAppointment("test-user", "test-project",
-				"test-team", 1);
-		createNewRegister("test-register", "test-team");
-		setUsersRegister("test-user", "test-register",
-				"test-team");
-		ArrayList<String> usersForChat = new ArrayList<String>();
-		usersForChat.add("test-user");
-		usersForChat.add("test-user-2");
-		createNewChat("test-chat", usersForChat, "test-team",
-				"test-user");
-		createNewMessage("ONE", "12.07.2017 14:32:00",
-				"test-user", "test-chat",
-				"test-team", "test-user");
-		createNewMessage("TWO", "12.07.2017 14:32:00",
-				"test-user", "test-chat",
-				"test-team", "test-user");
+	public Collection<TeamEntity> getAllTeams() {
+		return teamDAO.getAll();
+	}
+
+	public TeamEntity editTeam(TeamEntity team, String teamName,
+							String teamDescription) {
+		boolean result = false;
+		TeamEntity fetchedTeam = teamDAO.get(team.getId());
+		if (fetchedTeam != null) {
+			fetchedTeam.setName(teamName);
+			fetchedTeam.setDescription(teamDescription);
+			teamDAO.saveOrUpdate(fetchedTeam);
+		}
+		return fetchedTeam;
 	}
 }
 

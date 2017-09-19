@@ -20,7 +20,7 @@
 
         <!-- For debugging -->
         <property name="connection.url">
-            jdbc:mysql://localhost/evsdb
+            jdbc:mysql://localhost/evsdb?useUnicode=true;characterEncoding=UTF-8
         </property>
 
         <property name="connection.username">

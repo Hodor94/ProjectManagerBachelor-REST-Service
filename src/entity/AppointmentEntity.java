@@ -25,20 +25,12 @@ import java.util.List;
 public class AppointmentEntity extends GenericEntity {
 
 	// Attributes not related to any entities
-
-	@ColumnTransformer(read = "AES_DECRYPT(name, 'DataService.secretKey')",
-					   write = "AES_ENCRYPT(?, 'DataService.secretKey')")
 	@Column(name = "name")
 	private String name;
 
-	@ColumnTransformer(read = "AES_DECRYPT(description, 'DataService" +
-			".secretKey')",
-					   write = "AES_ENCRYPT(?, 'DataService.secretKey')")
 	@Column(name = "description")
 	private String description;
 
-	@ColumnTransformer(read = "AES_DECRYPT(deadline, 'DataService.secretKey')",
-					   write = "AES_ENCRYPT(?, 'DataService.secretKey')")
 	@Column(name = "deadline")
 	private String deadline; // The date of the appointment.
 

@@ -20,8 +20,6 @@ import java.util.List;
 public class ChatEntity extends GenericEntity {
 
 	// Attributes with no relation to other entities
-	@ColumnTransformer(read = "AES_DECRYPT(name, 'DataService.secretKey')",
-					   write = "AES_ENCRYPT(?, 'DataService.secretKey')")
 	@Column(name = "name")
 	private String name;
 

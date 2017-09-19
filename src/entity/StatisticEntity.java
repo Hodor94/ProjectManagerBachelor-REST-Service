@@ -30,15 +30,12 @@ public class StatisticEntity extends GenericEntity {
 
 	// Attributes without any relation to other entities
 	@Column(name = "numberOfParticipiation")
-	//@Type(type = "encryptedDouble")
 	private double numberOfParticipiation;
 
 	@Column(name = "percentage")
-	//@Type(type = "encryptedDouble")
 	private double percentage;
 
 	@Column(name = "numberOfAllAppointments")
-	//@Type(type = "encryptedDouble")
 	private double numberOfAllAppointments;
 
 	// Attributes related to other entities

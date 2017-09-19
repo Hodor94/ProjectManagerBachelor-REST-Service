@@ -18,13 +18,9 @@ import java.util.Calendar;
 public class MessageEntity extends GenericEntity {
 
 	// Attributes without relation to other entities.
-	@ColumnTransformer(read = "AES_DECRYPT(message, 'DataService.secretKey')",
-					   write = "AES_ENCRYPT(?, 'DataService.secretKey')")
 	@Column(name = "message")
 	private String message;
 
-	@ColumnTransformer(read = "AES_DECRYPT(date, 'DataService.secretKey')",
-					   write = "AES_ENCRYPT(?, 'DataService.secretKey')")
 	@Column(name = "date")
 	private String date;
 

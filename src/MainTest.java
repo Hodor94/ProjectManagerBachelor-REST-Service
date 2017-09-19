@@ -3,6 +3,7 @@ import cz.msebera.android.httpclient.HttpResponse;
 import cz.msebera.android.httpclient.client.methods.HttpPost;
 import cz.msebera.android.httpclient.entity.StringEntity;
 import cz.msebera.android.httpclient.impl.client.HttpClientBuilder;
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import service.DataService;
@@ -58,10 +59,38 @@ public class MainTest {
 			try {
 				JSONObject getUserData = new JSONObject("{\"token\":" +
 						" \"" + token + "\", \"username\": \"admin\"}");
-				service.getUser(getUserData);
+				JSONObject getUserResult = service.getUser(getUserData);
+				System.out.println(getUserResult.toString());
+				JSONObject createTeam
+						= new JSONObject("{\"token\": \"" + token
+						+ "\", \"teamName\": \"testTeam\", " +
+						"\"teamDescription\": \"Just for testing\", " +
+						"\"admin\": \"admin\"}");
+				JSONObject responseCreateTeam = service.createTeam(createTeam);
+				System.out.println(responseCreateTeam.toString());
+				JSONObject getAllTeams = new JSONObject("{\"token\": " +
+						"\"" + token + "\"}");
+				JSONObject responseGetTeams = service.getTeams(getAllTeams);
+				System.out.println(responseGetTeams.toString());
+				String fetchedTeams = (String) responseGetTeams.get("teams");
+				System.out.println(fetchedTeams);
+				JSONObject fetchTeam
+						= new JSONObject("{\"token\": \"" + token + "\", " +
+						"\"teamName\": \"" + "testTeam" + "\"}");
+				JSONObject fetchedTeam = new JSONObject(service.getTeam
+						(fetchTeam).toString());
+				System.out.println(fetchedTeam.toString());
+				JSONObject editTeam = new JSONObject("{\"token\": \"" +
+						token + "\", \"teamName\": \"" + "CHANGES" + "\", " +
+						"\"teamDescription\": \"" + "CHANGES" + "\", " +
+						"\"admin\": \"" + "admin" + "\"}");
+				JSONObject editResult = service.editTeam(editTeam);
+				System.out.println(editResult.toString());
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
 		}
+
+
 	}
 }

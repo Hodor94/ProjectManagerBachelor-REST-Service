@@ -4,6 +4,7 @@ package service;
  * Created by Raphael on 15.06.2017.
  */
 
+import javax.print.attribute.standard.Media;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
@@ -30,8 +31,7 @@ import javax.xml.bind.DatatypeConverter;
 import java.security.Key;
 
 import io.jsonwebtoken.*;
-
-// Todo: POST, UPDATE UND DELETE Methoden
+import sun.security.provider.SHA;
 
 @JsonSerialize
 @Path("/pmservice")
@@ -41,13 +41,6 @@ public class RESTService {
 	//private final String secret = UUID.randomUUID().toString();
 	private final byte[] SHARED_SECRET = generateSharedSecret();
 	private final long EXPIRE_TIME = 900000;
-
-	@Path("/setUp/")
-	public String setUp() {
-		DataService service = new DataService();
-		service.setUpDataForRESTService();
-		return "Success";
-	}
 
 	@GET
 	@Path("/chat/{chatname}/{teamname}/{creator}")
@@ -187,39 +180,6 @@ public class RESTService {
 	public JSONArray getUsers() {
 		dataService.getAllUsers();
 		return null;
-	}
-
-	@POST
-	@Path("/user")
-	@Produces(MediaType.APPLICATION_JSON)
-	@Consumes(MediaType.APPLICATION_JSON)
-	public JSONObject getUser(JSONObject userData) {
-		JSONObject result;
-		String token = null;
-		String username = null;
-		try {
-			token = userData.getString("token");
-			username = userData.getString("username");
-			if (token != null && !(token.equals("")) && username != null
-					&& !(username.equals(""))) {
-				if (validateToken(token)) {
-					UserEntity fetchedUser = dataService.getUser(username);
-					if (fetchedUser != null) {
-						result = new JSONObject("{\"success\": \"true\", "
-								+ " \"user\": " + fetchedUser.toSring() + "}");
-					} else {
-						result = returnEmptyResult();
-					}
-				} else {
-					result = returnTokenError();
-				}
-			} else {
-				result = returnClientError();
-			}
-		} catch (JSONException e) {
-			result = returnClientError();
-		}
-		return result;
 	}
 
 	@GET
@@ -383,44 +343,6 @@ public class RESTService {
 					JSONObject.class);
 		} else {
 			result = null;
-		}
-		return result;
-	}
-
-	@GET
-	@Path("/team")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getTeam(JSONObject team) {
-		String token = null;
-		String teamName = null;
-		JSONObject result = null;
-		try {
-			token = team.getString("token");
-			teamName = team.getString("team");
-			if (token != null && teamName != null && !(token.equals(""))
-					&& !(teamName.equals(""))) {
-				if (validateToken(token)) {
-					TeamEntity fetchedTeam = dataService.getTeam(teamName);
-					if (fetchedTeam != null) {
-						try {
-							result = new JSONObject("{\"success\": \"true\", " +
-									"\"team\":" + fetchedTeam.toString() + "}");
-						} catch (JSONException e) {
-							e.printStackTrace();
-							result = returnServerError();
-						}
-					} else {
-						result = returnEmptyResult();
-					}
-				} else {
-					result = returnTokenError();
-				}
-			} else {
-				result = returnEmptyResult();
-			}
-		} catch (JSONException e) {
-			result = returnClientError();
 		}
 		return result;
 	}
@@ -918,9 +840,168 @@ public class RESTService {
 	//--------------------------------------------------------------------------
 
 	@POST
-	@Path("/create/team")
+	@Path("/users")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject getAllUsers(JSONObject data) {
+		String token;
+		JSONObject result;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				List<UserEntity> allUsers
+						= (List<UserEntity>) dataService.getAllUsers();
+				if (allUsers != null) {
+					StringBuilder stringBuilder = new StringBuilder();
+					stringBuilder.append("{");
+					for (int i = 0; i < allUsers.size(); i++) {
+						UserEntity user = allUsers.get(i);
+						stringBuilder.append(user.getUsername() + " ");
+											}
+					stringBuilder.append("}");
+					result = new JSONObject();
+					result.put("success", "true");
+					result.put("users", stringBuilder.toString());
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnTokenError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/edit/team")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject editTeam(JSONObject data) {
+		JSONObject result;
+		String token;
+		String admin;
+		String teamName;
+		String teamDescription;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				if (isAdminOfTeam(token)) {
+					admin = data.getString("admin");
+					if (admin != null) {
+						teamName = data.getString("teamName");
+						teamDescription = data.getString("teamDescription");
+						TeamEntity notExistingTeam = dataService.getTeam
+								(teamName);
+						if (notExistingTeam == null) {
+							UserEntity teamsAdmin = dataService.getUser(admin);
+							String formerTeamName
+									= teamsAdmin.getTeam().getName();
+							TeamEntity toEdit = teamsAdmin.getTeam();
+							TeamEntity edited = dataService.editTeam(toEdit,
+									teamName, teamDescription);
+							teamsAdmin.setTeam(edited);
+							result = new JSONObject("{\"success\" : " +
+									"\"true\", \"teamName\": \"" + teamName +
+									"\"}");
+						} else {
+							result = returnExistingError();
+						}
+					} else {
+						result = returnClientError();
+					}
+				} else {
+					result = returnTokenError();
+				}
+			} else {
+				result = returnTokenError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/team")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject getTeam(JSONObject team) {
+		String token = null;
+		String teamName = null;
+		JSONObject result = null;
+		try {
+			token = team.getString("token");
+			teamName = team.getString("team");
+			if (token != null && teamName != null && !(token.equals(""))
+					&& !(teamName.equals(""))) {
+				if (validateToken(token)) {
+					TeamEntity fetchedTeam = dataService.getTeam(teamName);
+					if (fetchedTeam != null) {
+						try {
+							result = new JSONObject("{\"success\": " +
+									"\"true\", " + "\"team\":"
+									+ fetchedTeam.toString() + "}");
+						} catch (JSONException e) {
+							result = returnServerError();
+						}
+					} else {
+						result = returnEmptyResult();
+					}
+				} else {
+					result = returnTokenError();
+				}
+			} else {
+				result = returnEmptyResult();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+
+	@POST
+	@Path("/teams")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject getTeams(JSONObject data) {
+		JSONObject result;
+		try {
+			String token = data.getString("token");
+			if (validateToken(token)) {
+				List<TeamEntity> teams = (List<TeamEntity>) dataService.getAllTeams();
+				if (teams != null) {
+					StringBuilder stringBuilder = new StringBuilder();
+					stringBuilder.append("{");
+					for (int i = 0; i < teams.size(); i++) {
+						stringBuilder.append(teams.get(i).getName() + ",");
+					}
+					stringBuilder.append("}");
+					result = new JSONObject();
+					try {
+						result.put("success", "true");
+						result.put("teams", stringBuilder.toString());
+					} catch (JSONException e) {
+						result = returnServerError();
+					}
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnTokenError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/create/team")
+	@Consumes(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 	public JSONObject createTeam(JSONObject data) {
 		JSONObject result;
 		try {
@@ -934,8 +1015,12 @@ public class RESTService {
 					if (dataService.createNewTeam(teamName, description,
 							admin)) {
 						UserEntity user = dataService.getUser(admin);
+						String newToken = createUserToken("" + user.getId(),
+								user.getUsername(), "" + user.getRole(),
+								user.getTeam().getName());
 						result = new JSONObject("{\"success\": \"true\", "
-								+ "\"teamName\": \"" + teamName + "\"}");
+								+ "\"teamName\": \"" + teamName + "\", " +
+								"\"token\": \"" + newToken + "\"}");
 					} else {
 						result = returnServerError();
 					}
@@ -944,6 +1029,39 @@ public class RESTService {
 				}
 			} else {
 				result = returnTokenError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/user")
+	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public JSONObject getUser(JSONObject userData) {
+		JSONObject result;
+		String token = null;
+		String username = null;
+		try {
+			token = userData.getString("token");
+			username = userData.getString("username");
+			if (token != null && !(token.equals("")) && username != null
+					&& !(username.equals(""))) {
+				if (validateToken(token)) {
+					UserEntity fetchedUser = dataService.getUser(username);
+					if (fetchedUser != null) {
+						result = new JSONObject("{\"success\": \"true\", "
+								+ " \"user\": " + fetchedUser.toSring() + "}");
+					} else {
+						result = returnEmptyResult();
+					}
+				} else {
+					result = returnTokenError();
+				}
+			} else {
+				result = returnClientError();
 			}
 		} catch (JSONException e) {
 			result = returnClientError();
@@ -1109,13 +1227,13 @@ public class RESTService {
 			JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
 					.audience("users")
 					.subject("authentication") // Defines for what the token is used
-					.jwtID(userid)	// The user id is the id for the token
-					.issueTime(creationTime)	// The creation time of the token
-					.expirationTime(expireTime)	// The time the token expires
+					.jwtID(userid)    // The user id is the id for the token
+					.issueTime(creationTime)    // The creation time of the token
+					.expirationTime(expireTime)    // The time the token expires
 					.claim("name", username) // Username
 					.claim("role", userRole) // The role of the user
 					.claim("team", teamName) // The team name of the user
-			.build();
+					.build();
 
 			// Combine header and claims
 			SignedJWT signedJWT
@@ -1169,6 +1287,30 @@ public class RESTService {
 				SignedJWT jwt = SignedJWT.parse(token);
 				// Verify token
 				result = jwt.verify(verifier);
+			} catch (JOSEException e) {
+				// Do nothing
+			} catch (ParseException e) {
+				// Do nothing
+			}
+		}
+		return result;
+	}
+
+	private boolean isAdminOfTeam(String token) {
+		boolean result = false;
+		if (token != null) {
+			try {
+				JWSVerifier verifier = new MACVerifier(SHARED_SECRET);
+				SignedJWT jwt = SignedJWT.parse(token);
+				JWTClaimsSet claims = jwt.getJWTClaimsSet();
+				String username = (String) claims.getClaim("name");
+				String userRole = (String) claims.getClaim("role");
+				String teamName = (String) claims.getClaim("team");
+				UserEntity user = dataService.getUser(username);
+				if (user != null && userRole.equals("" + user.getRole()) &&
+						teamName.equals(user.getTeam().getName())) {
+					result = true;
+				}
 			} catch (JOSEException e) {
 				// Do nothing
 			} catch (ParseException e) {

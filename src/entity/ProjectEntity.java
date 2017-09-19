@@ -35,24 +35,16 @@ import java.util.List;
 public class ProjectEntity extends GenericEntity {
 
 	// Attributes without any relation to other entities
-	@ColumnTransformer(read = "AES_DECRYPT(name, 'DataService.secretKey')",
-			write = "AES_ENCRYPT(?, 'DataService.secretKey')")
 	@Column(name = "name")
 	private String name;
 
-	@ColumnTransformer(read = "AES_DECRYPT(description, 'DataService" +
-			".secretKey')",
-			write = "AES_ENCRYPT(?, 'DataService.secretKey')")
 	@Column(name = "description")
 	private String description;
 
-	@ColumnTransformer(read = "AES_DECRYPT(deadline, 'DataService.secretKey')",
-			write = "AES_ENCRYPT(?, 'DataService.secretKey')")
 	@Column(name = "deadline")
 	private String deadline;
 
 	@Column(name = "numberOfAppointments")
-	// @Type(type = "encryptedInteger")
 	private int numberOfAppointments;
 
 	// Attributes related to other entities

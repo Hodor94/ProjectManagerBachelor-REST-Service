@@ -20,19 +20,12 @@ import java.util.Calendar;
 public class TaskEntity extends GenericEntity {
 
 	// Attributes - not related to any other Entity
-	@ColumnTransformer(read = "AES_DECRYPT(name, 'DataService.secretKey')",
-					   write = "AES_ENCRYPT(?, 'DataService.secretKey')")
 	@Column(name = "name")
 	private String name;
 
-	@ColumnTransformer(read = "AES_DECRYPT(description, 'DataService" +
-			".secretKey')",
-					   write = "AES_ENCRYPT(?, 'DataService.secretKey')")
 	@Column(name = "description")
 	private String description;
 
-	@ColumnTransformer(read = "AES_DECRYPT(deadline, 'DataService.secretKey')",
-					   write = "AES_ENCRYPT(?, 'DataService.secretKey')")
 	@Column(name = "deadline")
 	private String deadline;
 

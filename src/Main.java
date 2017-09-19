@@ -12,6 +12,7 @@ import java.util.Date;
 public class Main {
 
 	public static void main(String[] args) {
+		/*
 		SecureRandom random = new SecureRandom();
 		byte[] sharedSecret = new byte[32];
 		byte[] read = new byte[32];
@@ -70,6 +71,15 @@ public class Main {
 			System.out.println(verify.verify(verifier));
 		} catch (JOSEException e) {
 			e.printStackTrace();
+		} */
+
+		String testTeams =  "{yolo swag chill}";
+		System.out.println(testTeams);
+		String cuttedTestTeams = testTeams.substring(1, testTeams.length()-1);
+		System.out.println(cuttedTestTeams);
+		String[] noSpaces = cuttedTestTeams.split("\\s+");
+		for (String text : noSpaces) {
+			System.out.println(text);
 		}
 
 	}

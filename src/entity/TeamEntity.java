@@ -21,13 +21,9 @@ import java.util.List;
 public class TeamEntity extends GenericEntity {
 
 	// Attributes without relations to other entities
-	@ColumnTransformer(read = "AES_DECRYPT(name, 'DataService.secretKey')",
-					   write = "AES_ENCRYPT(?, 'DataService.secretKey')")
 	@Column(name = "name")
 	private String name;
 
-	@ColumnTransformer(read = "AES_DECRYPT(description, 'DataService.secretKey')",
-					write = "AES_ENCRYPT(?, 'DataService.secretKey')")
 	@Column(name = "description")
 	private String description;
 
@@ -201,7 +197,7 @@ public class TeamEntity extends GenericEntity {
 
 	private String appendJSONName(String name) {
 		if (name != null && !(name.equals(""))) {
-			return "\"name\": " + "\"" + encodeToUTF8(name) + "\", ";
+			return "\"name\": " + "\"" + name + "\", ";
 		} else {
 			return "\"name\": " + null + ", ";
 		}
@@ -209,8 +205,7 @@ public class TeamEntity extends GenericEntity {
 
 	private String appendJSONDescription(String description) {
 		if (description != null && !(description.equals(""))) {
-			return "\"description\": " + "\""
-					+ encodeToUTF8(description) + "\", ";
+			return "\"description\": " + "\"" + description + "\", ";
 		} else {
 			return "\"description\": " + null + ", ";
 		}
@@ -218,7 +213,7 @@ public class TeamEntity extends GenericEntity {
 
 	private String appendJSONAdmin(UserEntity admin) {
 		if (admin != null) {
-			return "\"admin\": " + this.admin.toSring();
+			return "\"admin\": " + admin.getUsername();
 		} else {
 			return "\"admin\": " + null;
 		}

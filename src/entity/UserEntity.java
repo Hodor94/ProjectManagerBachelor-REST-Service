@@ -31,40 +31,26 @@ public class UserEntity extends GenericEntity {
 	private String username;
 
 	@Column(name = "password")
-	@ColumnTransformer(read = "AES_DECRYPT(password, 'DataService.secretKey')",
-			write = "AES_ENCRYPT(?, 'DataService.secretKey')")
 	private String password;
 
-	@ColumnTransformer(read = "AES_DECRYPT(firstName, 'DataService.secretKey')",
-			write = "AES_ENCRYPT(?, 'DataService.secretKey')")
 	@Column(name = "firstName")
 	private String firstName;
 
-	@ColumnTransformer(read = "AES_DECRYPT(surname, 'DataService.secretKey')",
-			write = "AES_ENCRYPT(?, 'DataService.secretKey')")
 	@Column(name = "surname")
 	private String surname;
 
-	@ColumnTransformer(read = "AES_DECRYPT(email, 'DataService.secretKey')",
-			write = "AES_ENCRYPT(?, 'DataService.secretKey')")
 	@Column(name = "email")
 	private String email;
 
-	@ColumnTransformer(read = "AES_DECRYPT(phoneNumber, 'DataService.secretKey')",
-			write = "AES_ENCRYPT(?, 'DataService.secretKey')")
 	@Column(name = "phoneNumber")
 	private String phoneNr;
 
-	@ColumnTransformer(read = "AES_DECRYPT(address, 'DataService.secretKey')",
-			write = "AES_ENCRYPT(?, 'DataService.secretKey')")
 	@Column(name = "address")
 	private String address;
 
 	@Column(name = "tributes")
 	private String tributes;
 
-	@ColumnTransformer(read = "AES_DECRYPT(birthday, 'DataService.secretKey')",
-			write = "AES_ENCRYPT(?, 'DataService.secretKey')")
 	@Column(name = "birthday")
 	private String birthday;
 
@@ -408,7 +394,7 @@ public class UserEntity extends GenericEntity {
 
 	private String appendTeamName(TeamEntity team) {
 		if (team != null) {
-			return "\"team\": \"" + encodeToUTF8(team.getName()) + "\"";
+			return "\"team\": \"" + team.getName() + "\"";
 		} else {
 			return "\"team\": " + null;
 		}
@@ -417,7 +403,7 @@ public class UserEntity extends GenericEntity {
 	//Appends the correct json format for the username depending on the value
 	private String appendJSONUsername(String username) {
 		if (username != null && !(username.equals(""))) {
-			return "\"username\": " + "\"" + encodeToUTF8(username) + "\", ";
+			return "\"username\": " + "\"" + username + "\", ";
 		} else {
 			return "\"username\": " + null + ", ";
 		}
@@ -428,9 +414,7 @@ public class UserEntity extends GenericEntity {
 	private String appendJSONFirstName(String firstName) {
 		if (firstName != null && !(firstName.equals(""))) {
 
-			return "\"firstName\": " + "\""
-					+ encodeToUTF8(firstName) +
-					"\", ";
+			return "\"firstName\": " + "\"" + firstName + "\", ";
 		} else {
 			return "\"firstName\": " + null + ", ";
 		}
@@ -438,7 +422,7 @@ public class UserEntity extends GenericEntity {
 
 	private String appendJSONSurname(String surname) {
 		if (surname != null && !(surname.equals(""))) {
-			return "\"surname\": " + "\"" + encodeToUTF8(surname) + "\", ";
+			return "\"surname\": " + "\"" + surname + "\", ";
 		} else {
 			return "\"surname\": " + null + ", ";
 		}
@@ -446,7 +430,7 @@ public class UserEntity extends GenericEntity {
 
 	private String appendJSONEmail(String email) {
 		if (email != null && !(email.equals(""))) {
-			return "\"email\": " + "\"" + encodeToUTF8(email) + "\", ";
+			return "\"email\": " + "\"" + email + "\", ";
 		} else {
 			return "\"email\": " + null + ", ";
 		}
@@ -454,7 +438,7 @@ public class UserEntity extends GenericEntity {
 
 	private String appendJSONPhoneNr(String phoneNr) {
 		if (phoneNr != null && !(phoneNr.equals(""))) {
-			return "\"phoneNr\": " + "\"" + encodeToUTF8(phoneNr) + "\", ";
+			return "\"phoneNr\": " + "\"" + phoneNr + "\", ";
 		} else {
 			return "\"phoneNr\": " + null + ", ";
 		}
@@ -462,7 +446,7 @@ public class UserEntity extends GenericEntity {
 
 	private String appendJSONAddress(String address) {
 		if (address != null && !(address.equals(""))) {
-			return "\"address\": " + "\"" + encodeToUTF8(address) + "\", ";
+			return "\"address\": " + "\"" + address + "\", ";
 		} else {
 			return "\"address\": " + null + ", ";
 		}
@@ -470,7 +454,7 @@ public class UserEntity extends GenericEntity {
 
 	private String appendJSONTributes(String tributes) {
 		if (tributes != null && !(tributes.equals(""))) {
-			return "\"tributes\": " + "\"" + encodeToUTF8(tributes) + "\", ";
+			return "\"tributes\": " + "\"" + tributes + "\", ";
 		} else {
 			return "\"tributes\": " + null + ", ";
 		}
@@ -478,7 +462,7 @@ public class UserEntity extends GenericEntity {
 
 	private String appendJSONBirthday(String birthday) {
 		if (birthday != null && !(birthday.equals(""))) {
-			return "\"birthday\": " + "\"" + encodeToUTF8(birthday) + "\", ";
+			return "\"birthday\": " + "\"" + birthday + "\", ";
 		} else {
 			return "\"birthday\": " + null + ", ";
 		}
@@ -489,8 +473,7 @@ public class UserEntity extends GenericEntity {
 			SimpleDateFormat formatter
 					= new SimpleDateFormat(GenericEntity.DATE_FORMAT);
 			String dayAsSring = formatter.format(dayOfEntry.getTime());
-			return "\"dayOfEntry\": " + "\"" + encodeToUTF8(dayAsSring) +
-					"\", ";
+			return "\"dayOfEntry\": " + "\"" + dayAsSring + "\", ";
 		} else {
 			return "\"dayOfEntry\": " + null + ", ";
 		}
@@ -498,7 +481,7 @@ public class UserEntity extends GenericEntity {
 
 	private String appendJSONUserRole(String userRole) {
 		if (userRole != null) {
-			return "\"userRole\": " + "\"" + encodeToUTF8(userRole) + "\", ";
+			return "\"userRole\": " + "\"" + userRole + "\", ";
 		} else {
 			return "\"userRole\": " + null + ", ";
 		}
@@ -506,8 +489,7 @@ public class UserEntity extends GenericEntity {
 
 	private String appendJSONRegisterName(RegisterEntity register) {
 		if (register != null && register.getName() != null && !(register.getName().equals(""))) {
-			return "\"registerName\": " + "\""
-					+ encodeToUTF8(register.getName()) + "\", ";
+			return "\"registerName\": " + "\"" + register.getName() + "\", ";
 		} else {
 			return "\"registerName\": " + null + ", ";
 		}
