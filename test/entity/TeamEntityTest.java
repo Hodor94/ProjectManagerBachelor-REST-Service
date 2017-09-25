@@ -13,6 +13,7 @@ import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 
 
 /**
@@ -122,6 +123,33 @@ class TeamEntityTest {
 		assertEquals(TEAM_NAME, team.getName());
 		assertEquals(DESCRIPTION, team.getDescription());
 		assertEquals(1, team.getUsers().size());
+	}
+
+	@Test
+	public void testRequests() {
+		DataService service = new DataService();
+		// Register two users
+		service.registerUser(USER_NAME_ONE, "", "", "",
+				"", "", "", BIRTHDAY);
+		service.registerUser(USER_NAME_TWO, "", "", "",
+				"", "", "", BIRTHDAY);
+		UserEntity userOne = service.getUser(USER_NAME_ONE);
+		UserEntity userTwo = service.getUser(USER_NAME_TWO);
+		assertNotNull(userOne);
+		assertNotNull(userTwo);
+		// Create new team
+		service.createNewTeam(TEAM_NAME, DESCRIPTION, USER_NAME_ONE);
+		TeamEntity team = service.getTeam(TEAM_NAME);
+		assertNotNull(team);
+		assertEquals(0, team.getRequestsOfUsers().size());
+		// User two sends request to team for joining it
+		// User two tries it twice. It is expected to be stored once.
+		service.addRequestToTeam(team, userTwo);
+		team = service.getTeam(TEAM_NAME);
+		assertEquals(1, team.getRequestsOfUsers().size());
+		service.addRequestToTeam(team, userTwo);
+		team = service.getTeam(TEAM_NAME);
+		assertEquals(1, team.getRequestsOfUsers().size());
 	}
 
 }

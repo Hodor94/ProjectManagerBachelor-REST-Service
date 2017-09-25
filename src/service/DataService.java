@@ -710,7 +710,7 @@ public class DataService {
 		return teamDAO.getAll();
 	}
 
-	public TeamEntity editTeam(TeamEntity team, String teamName,
+	public boolean editTeam(TeamEntity team, String teamName,
 							String teamDescription) {
 		boolean result = false;
 		TeamEntity fetchedTeam = teamDAO.get(team.getId());
@@ -718,8 +718,69 @@ public class DataService {
 			fetchedTeam.setName(teamName);
 			fetchedTeam.setDescription(teamDescription);
 			teamDAO.saveOrUpdate(fetchedTeam);
+			result = true;
 		}
-		return fetchedTeam;
+		return result;
+	}
+
+	public boolean editUser(UserEntity toEdit, String firstName, String surname,
+							String address, String phoneNr, String email,
+							String birthday) {
+		boolean result = false;
+		UserEntity fetchedUser = userDAO.get(toEdit.getId());
+		if (fetchedUser != null) {
+			toEdit.setFirstName(firstName);
+			toEdit.setSurname(surname);
+			toEdit.setAddress(address);
+			toEdit.setPhoneNr(phoneNr);
+			toEdit.setEmail(email);
+			toEdit.setBirthday(birthday);
+			userDAO.saveOrUpdate(toEdit);
+			result = true;
+		}
+		return result;
+	}
+
+	public boolean addInvitationToUser(UserEntity user, TeamEntity team) {
+		if (user != null && team != null) {
+			String teamName = team.getName();
+			user.addInvitation(teamName);
+			userDAO.saveOrUpdate(user);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public boolean removeInvitationFromUser(UserEntity user, TeamEntity team) {
+		boolean result;
+		if (user != null && team != null) {
+			result = user.removeInvitation(team.getName());
+		} else {
+			result = false;
+		}
+		return result;
+	}
+
+	public boolean addRequestToTeam(TeamEntity team, UserEntity user) {
+		if (team != null && user != null) {
+			String username = user.getUsername();
+			team.addRequestOfUser(username);
+			teamDAO.saveOrUpdate(team);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public boolean removeRequestOfTeam(TeamEntity team, UserEntity user) {
+		boolean result;
+		if (team != null && user != null) {
+			result = team.removeRequestOfUser(user.getUsername());
+		} else {
+			result = false;
+		}
+		return result;
 	}
 }
 

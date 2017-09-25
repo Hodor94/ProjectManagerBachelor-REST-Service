@@ -12,13 +12,13 @@
 
         <!-- For real use
         <property name="connection.url">
-            jdbc:mysql://localhost/projectManager
+            jdbc:mysql://localhost/projectManager?useUnicode=true&amp;characterEncoding=UTF-8&amp;createDatabaseIfNotExist=true
         </property>
         <property name="connection.username">grum</property>
         <property name="connection.password">OoHeedei1eiw8gaa</property>
         -->
 
-        <!-- For debugging -->
+        <!-- For debugging and testing -->
         <property name="connection.url">
             jdbc:mysql://localhost/evsdb?useUnicode=true&amp;characterEncoding=UTF-8&amp;createDatabaseIfNotExist=true
         </property>
@@ -29,6 +29,7 @@
         <property name="connection.password">
             evs2016!
         </property>
+
 
 
         <property name="hibernate.connection.CharSet">utf8</property>

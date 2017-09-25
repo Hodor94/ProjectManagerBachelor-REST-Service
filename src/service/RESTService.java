@@ -43,6 +43,13 @@ public class RESTService {
 	private final long EXPIRE_TIME = 900000;
 
 	@GET
+	@Path("/test")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String test() {
+		return "TEST SUCCESS!";
+	}
+
+	@GET
 	@Path("/chat/{chatname}/{teamname}/{creator}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject getChat(@PathParam("chatname") String chatName,
@@ -839,6 +846,54 @@ public class RESTService {
 
 	//--------------------------------------------------------------------------
 
+	// Todo: Ask for invitations and for requests
+	// Todo: Ask for updates -> InitialService at client side
+
+	@POST
+	@Path("/edit/user")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public JSONObject editUser(JSONObject userData) {
+		JSONObject result;
+		String token;
+		String username;
+		String firstName;
+		String surname;
+		String address;
+		String phoneNr;
+		String email;
+		String birthday;
+		try {
+			token = userData.getString("token");
+			if (validateToken(token)) {
+				username = userData.getString("username");
+				UserEntity fetchedUser = dataService.getUser(username);
+				if (fetchedUser != null) {
+					firstName = userData.getString("firstName");
+					surname = userData.getString("surname");
+					address = userData.getString("address");
+					phoneNr = userData.getString("phoneNr");
+					email = userData.getString("email");
+					birthday = userData.getString("birthday");
+					if (dataService.editUser(fetchedUser, firstName, surname,
+							address, phoneNr, email, birthday)) {
+						result
+								= new JSONObject("{\"success\": \"true\"}");
+					} else {
+						result = returnServerError();
+					}
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnTokenError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
 	@POST
 	@Path("/users")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -856,8 +911,8 @@ public class RESTService {
 					stringBuilder.append("{");
 					for (int i = 0; i < allUsers.size(); i++) {
 						UserEntity user = allUsers.get(i);
-						stringBuilder.append(user.getUsername() + " ");
-											}
+						stringBuilder.append(user.getUsername() + ",");
+					}
 					stringBuilder.append("}");
 					result = new JSONObject();
 					result.put("success", "true");
@@ -892,22 +947,27 @@ public class RESTService {
 					if (admin != null) {
 						teamName = data.getString("teamName");
 						teamDescription = data.getString("teamDescription");
-						TeamEntity notExistingTeam = dataService.getTeam
+						TeamEntity fetchedTeam = dataService.getTeam
 								(teamName);
-						if (notExistingTeam == null) {
-							UserEntity teamsAdmin = dataService.getUser(admin);
-							String formerTeamName
-									= teamsAdmin.getTeam().getName();
-							TeamEntity toEdit = teamsAdmin.getTeam();
-							TeamEntity edited = dataService.editTeam(toEdit,
-									teamName, teamDescription);
-							teamsAdmin.setTeam(edited);
-							result = new JSONObject("{\"success\" : " +
-									"\"true\", \"teamName\": \"" + teamName +
-									"\"}");
+						if (fetchedTeam != null) {
+							UserEntity teamsAdmin
+									= dataService.getUser(admin);
+							if (fetchedTeam.getAdmin().getUsername()
+									.equals(admin)) {
+								if (dataService.editTeam(fetchedTeam, teamName,
+										teamDescription)) {
+									result = new JSONObject("{\"success\" : " +
+											"\"true\"}");
+								} else {
+									result = returnServerError();
+								}
+							} else {
+								result = returnTokenError();
+							}
 						} else {
-							result = returnExistingError();
+							result = returnEmptyResult();
 						}
+
 					} else {
 						result = returnClientError();
 					}
@@ -1181,8 +1241,7 @@ public class RESTService {
 		try {
 			JSONObject result = new JSONObject("{\"success\": \"false\", " +
 					"\"reason\": \"Die Berechtigung für diese Aktion ist " +
-					"nicht gewährleistet! Bitte loggen Sie sich erneut " +
-					"ein!\"}");
+					"nicht gewährleistet!\"}");
 			return result;
 		} catch (JSONException e) {
 			e.printStackTrace();

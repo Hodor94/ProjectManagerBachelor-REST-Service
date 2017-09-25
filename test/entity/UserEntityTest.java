@@ -21,6 +21,7 @@ class UserEntityTest {
 	private static TeamEntity testTeam;
 	private static final String DESCRIPTION = "testDescription";
 	private static final String USER_NAME = "testuser";
+	private static final String USER_NAME_TWO = "user two";
 	private static final String PASSWORD = "testpassword";
 	private static final String FIRST_NAME = "firstName";
 	private static final String SURNAME = "surname";
@@ -168,6 +169,33 @@ class UserEntityTest {
 		assertNotEquals(null, userTwo);
 		assertEquals(null, userTwo.getTeam());
 		assertEquals(null, team);
+	}
+
+	@Test
+	public void testInvitations() {
+		// TODO updated checken
+		DataService service = new DataService();
+		// Register two users
+		service.registerUser(USER_NAME_TWO, "", "",
+				"", "", "", "", BIRTHDAY);
+		service.registerUser(USER_NAME, "", "", "",
+				"", "", "", BIRTHDAY);
+		UserEntity userOne = service.getUser(USER_NAME);
+		UserEntity userTwo = service.getUser(USER_NAME_TWO);
+		assertNotNull(userOne);
+		assertNotNull(userTwo);
+		assertEquals(0, userTwo.getInvitationsOfTeams().size());
+		// Create new team
+		service.createNewTeam(TEAM_NAME, DESCRIPTION, USER_NAME);
+		TeamEntity team = service.getTeam(TEAM_NAME);
+		assertNotNull(team);
+		// Invite user two twice. Size of invitation List shell be 1.
+		service.addInvitationToUser(userTwo, team);
+		userTwo = service.getUser(USER_NAME_TWO);
+		assertEquals(1, userTwo.getInvitationsOfTeams().size());
+		service.addInvitationToUser(userTwo, team);
+		userTwo = service.getUser(USER_NAME_TWO);
+		assertEquals(1, userTwo.getInvitationsOfTeams().size());
 	}
 
 }

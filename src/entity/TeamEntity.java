@@ -20,6 +20,14 @@ import java.util.List;
 @Table(name = "team")
 public class TeamEntity extends GenericEntity {
 
+	// Normal attributes
+	@ElementCollection
+	@Column(name = "requests")
+	private List<String> requestsOfUsers;
+
+	@Column(name = "updated")
+	private boolean updated;
+
 	// Attributes without relations to other entities
 	@Column(name = "name")
 	private String name;
@@ -72,6 +80,8 @@ public class TeamEntity extends GenericEntity {
 		tasks = new ArrayList<TaskEntity>();
 		registers = new ArrayList<RegisterEntity>();
 		chats = new ArrayList<ChatEntity>();
+		requestsOfUsers = new ArrayList<>();
+		updated = false;
 	}
 
 	/**
@@ -99,6 +109,8 @@ public class TeamEntity extends GenericEntity {
 		this.tasks = tasks;
 		this.registers = registers;
 		this.chats = chats;
+		requestsOfUsers = new ArrayList<>();
+		updated = false;
 	}
 
 	/**
@@ -116,6 +128,8 @@ public class TeamEntity extends GenericEntity {
 		this.tasks = new ArrayList<TaskEntity>();
 		this.registers = new ArrayList<RegisterEntity>();
 		this.chats = new ArrayList<ChatEntity>();
+		requestsOfUsers = new ArrayList<>();
+		updated = false;
 	}
 
 	public String getName() {
@@ -219,4 +233,37 @@ public class TeamEntity extends GenericEntity {
 		}
 	}
 
+	public void addRequestOfUser(String username) {
+		if (requestsOfUsers == null) {
+			requestsOfUsers = new ArrayList<>();
+			requestsOfUsers.add(username);
+			updated = true;
+		} else {
+			if (!requestsOfUsers.contains(username)) {
+				requestsOfUsers.add(username);
+				updated = true;
+			}
+		}
+	}
+
+	public boolean removeRequestOfUser(String username) {
+		boolean result = false;
+		if (requestsOfUsers != null) {
+			requestsOfUsers.remove(username);
+		}
+		if (!requestsOfUsers.contains(username)) {
+			result = true;
+			updated = true;
+		}
+		return result;
+	}
+
+	public List<String> getRequestsOfUsers() {
+		return requestsOfUsers;
+	}
+
+
+	public boolean isUpdated() {
+		return updated;
+	}
 }

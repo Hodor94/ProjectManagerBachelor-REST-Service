@@ -26,6 +26,14 @@ import java.util.List;
 
 public class UserEntity extends GenericEntity {
 
+	// Normal attributes
+	@ElementCollection
+	@Column(name = "invitations")
+	private List<String> invitationsOfTeams;
+
+	@Column(name = "updated")
+	private boolean updated;
+
 	// Attributes - no relation to other entities
 	@Column(name = "username")
 	private String username;
@@ -58,7 +66,7 @@ public class UserEntity extends GenericEntity {
 	private Calendar dayOfEntry;
 
 	@Column(name = "role")
-	UserRole role;
+	private UserRole role;
 
 	// Attributes which are related to other entities
 	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -109,11 +117,13 @@ public class UserEntity extends GenericEntity {
 		role = UserRole.USER;
 		register = null;
 		team = null;
-		appointmentsTakingPart = new ArrayList<AppointmentEntity>();
-		projectsTakingPart = new ArrayList<ProjectEntity>();
-		chats = new ArrayList<ChatEntity>();
-		tasks = new ArrayList<TaskEntity>();
-		statistics = new ArrayList<StatisticEntity>();
+		appointmentsTakingPart = new ArrayList<>();
+		projectsTakingPart = new ArrayList<>();
+		chats = new ArrayList<>();
+		tasks = new ArrayList<>();
+		statistics = new ArrayList<>();
+		invitationsOfTeams = new ArrayList<>();
+		updated = false;
 	}
 
 	/**
@@ -164,6 +174,8 @@ public class UserEntity extends GenericEntity {
 		this.chats = chats;
 		this.tasks = tasks;
 		this.statistics = statistics;
+		invitationsOfTeams = new ArrayList<>();
+		updated = false;
 	}
 
 	public UserEntity(String username, String password, String firstName,
@@ -183,6 +195,8 @@ public class UserEntity extends GenericEntity {
 		chats = new ArrayList<ChatEntity>();
 		tasks = new ArrayList<TaskEntity>();
 		statistics = new ArrayList<StatisticEntity>();
+		invitationsOfTeams = new ArrayList<>();
+		updated = false;
 	}
 
 	public String getUsername() {
@@ -501,6 +515,39 @@ public class UserEntity extends GenericEntity {
 
 	public void setAdminOfProject(ProjectEntity adminOfProject) {
 		this.adminOfProject = adminOfProject;
+	}
+
+	public void addInvitation(String teamName) {
+		if (invitationsOfTeams == null) {
+			invitationsOfTeams = new ArrayList<>();
+			invitationsOfTeams.add(teamName);
+			updated = true;
+		} else {
+			if (!invitationsOfTeams.contains(teamName)) {
+				invitationsOfTeams.add(teamName);
+				updated = true;
+			}
+		}
+	}
+
+	public List<String> getInvitationsOfTeams() {
+		return invitationsOfTeams;
+	}
+
+	public boolean removeInvitation(String teamName) {
+		boolean result = false;
+		if (invitationsOfTeams != null) {
+			invitationsOfTeams.remove(teamName);
+		}
+		if (!invitationsOfTeams.contains(username)) {
+			result = true;
+			updated = true;
+		}
+		return result;
+	}
+
+	public boolean isUpdated() {
+		return updated;
 	}
 }
 
