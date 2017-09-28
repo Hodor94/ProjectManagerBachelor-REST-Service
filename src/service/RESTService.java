@@ -42,812 +42,194 @@ public class RESTService {
 	private final byte[] SHARED_SECRET = generateSharedSecret();
 	private final long EXPIRE_TIME = 900000;
 
-	@GET
-	@Path("/test")
-	@Produces(MediaType.TEXT_PLAIN)
-	public String test() {
-		return "TEST SUCCESS!";
-	}
-
-	@GET
-	@Path("/chat/{chatname}/{teamname}/{creator}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getChat(@PathParam("chatname") String chatName,
-							  @PathParam("teamname") String teamName,
-							  @PathParam("creator") String creatorName) {
-		ChatEntity chat = dataService.getChat(chatName, teamName, creatorName);
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
-		JSONObject result;
-		if (chat != null) {
-			result = mapper.convertValue(chat.toString(), JSONObject.class);
-		} else {
-			result = mapper.convertValue(null, JSONObject.class);
-		}
-		return result;
-	}
-
-	// TODO Orientier dich HIER
-	@GET
-	@Path("/task/{taskName}/{teamName}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getTask(@PathParam("taskName") String taskName,
-							  @PathParam("teamName") String teamName) {
-		TaskEntity task = dataService.getTask(taskName, teamName);
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
-		JSONObject result;
-		if (task != null) {
-			result = mapper.convertValue(task.toString(), JSONObject.class);
-		} else {
-			result = mapper.convertValue(null, JSONObject.class);
-		}
-		return result;
-	}
-
-	@GET
-	@Path("/task/{taskName}/{teamName}/worker")
-	@Produces(MediaType.APPLICATION_JSON)
-	public String getTasksWorker(@PathParam("taskName") String taskName,
-								 @PathParam("teamName") String teamName) {
-		TaskEntity task = dataService.getTask(taskName, teamName);
-		String result;
-		if (task != null && task.getWorker() != null) {
-			result = task.getWorker().toSring();
-		} else {
-			result = "null";
-		}
-		return result;
-	}
-
-	@GET
-	@Path("/task/{taskName}/{teamName}/team")
-	public String getTasksTeam(@PathParam("taskName") String taskName,
-							   @PathParam("teamName") String teamName) {
-		TaskEntity task = dataService.getTask(taskName, teamName);
-		String result;
-		if (task != null && task.getTeam() != null) {
-			result = task.getTeam().toString();
-		} else {
-			result = "null";
-		}
-		return result;
-	}
-
-	@GET
-	@Path("/chat/{chatname}/{teamname}/{creator}/messages")
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getChatsMessages(@PathParam("chatname") String chatName,
-									   @PathParam("teamname") String teamName,
-									   @PathParam("creator") String creatorName) {
-		StringBuilder stringBuilder;
-		ObjectMapper mapper;
-		JSONObject result;
-		ChatEntity chat = dataService.getChat(chatName, teamName, creatorName);
-		if (chat != null && chat.getMessages().size() != 0) {
-			stringBuilder = new StringBuilder();
-			stringBuilder.append("{\"messages\": [");
-			mapper = new ObjectMapper();
-			mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS,
-					false);
-			ArrayList<MessageEntity> messages
-					= new ArrayList<MessageEntity>(chat.getMessages());
-			for (int i = 0; i < messages.size(); i++) {
-				if (i != (messages.size() - 1)) {
-					stringBuilder.append(messages.get(i).toString() + ", ");
-				} else {
-					stringBuilder.append(messages.get(i).toString() + "]}");
-				}
-			}
-			result = mapper.convertValue(stringBuilder.toString(),
-					JSONObject.class);
-		} else {
-			result = null;
-		}
-		return result;
-	}
-
-	@GET
-	@Path("//chat/{chatname}/{teamname}/{creator}/users")
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getChatsUsers(@PathParam("chatname") String chatName,
-									@PathParam("teamname") String teamName,
-									@PathParam("creator") String creatorName) {
-		StringBuilder stringBuilder;
-		ObjectMapper mapper;
-		JSONObject result;
-		ChatEntity chat = dataService.getChat(chatName, teamName, creatorName);
-		if (chat != null && chat.getUsers().size() != 0) {
-			stringBuilder = new StringBuilder();
-			stringBuilder.append("{\"users\": [");
-			mapper = new ObjectMapper();
-			mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS,
-					false);
-			ArrayList<UserEntity> users
-					= new ArrayList<UserEntity>(chat.getUsers());
-			for (int i = 0; i < users.size(); i++) {
-				if (i != (users.size() - 1)) {
-					stringBuilder.append(users.get(i).toSring() + ", ");
-				} else {
-					stringBuilder.append(users.get(i).toSring() + "]}");
-				}
-			}
-			result = mapper.convertValue(stringBuilder.toString(),
-					JSONObject.class);
-		} else {
-			result = null;
-		}
-		return result;
-	}
-
-	// TODO: rework
-	@GET
-	@Path("/users/")
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONArray getUsers() {
-		dataService.getAllUsers();
-		return null;
-	}
-
-	@GET
-	@Path("/user/{username}/tasks")
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getUsersTasks(@PathParam("username") String username) {
-		DataService service = new DataService();
-		StringBuilder stringBuilder;
-		ObjectMapper mapper;
-		JSONObject result;
-		UserEntity user = service.getUser(username);
-		if (user != null && user.getTasks() != null) {
-			stringBuilder = new StringBuilder();
-			mapper = new ObjectMapper();
-			mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS,
-					false);
-			stringBuilder.append("{\"tasks\": [");
-			ArrayList<TaskEntity> tasks
-					= new ArrayList<TaskEntity>(user.getTasks());
-			for (int i = 0; i < tasks.size(); i++) {
-				if (i != (tasks.size() - 1)) {
-					stringBuilder.append(tasks.get(i).toString() + ", ");
-				} else {
-					stringBuilder.append(tasks.get(i).toString() + "]}");
-				}
-			}
-			result = mapper.convertValue(stringBuilder.toString(),
-					JSONObject.class);
-		} else {
-			result = null;
-
-		}
-		return result;
-	}
-
-	// TODO Orientier dich hier für arrays
-	@GET
-	@Path("/user/{username}/appointments")
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getUsersAppointments(@PathParam("username") String username) {
-		DataService service = new DataService();
-		StringBuilder stringBuilder;
-		ObjectMapper mapper;
-		JSONObject result;
-		UserEntity user = service.getUser(username);
-		if (user != null && (user.getAppointmentsTakingPart().size() != 0)) {
-			stringBuilder = new StringBuilder();
-			mapper = new ObjectMapper();
-			mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS,
-					false);
-			ArrayList<AppointmentEntity> appointments
-					= new ArrayList<AppointmentEntity>(
-					user.getAppointmentsTakingPart());
-			stringBuilder.append("{\"appointments\": [");
-			for (int i = 0; i < appointments.size(); i++) {
-				if (i != (appointments.size() - 1)) {
-					stringBuilder.append(appointments.get(i).toString() + ", ");
-				} else {
-					stringBuilder.append(appointments.get(i).toString() + "]}");
-				}
-			}
-			result = mapper.convertValue(stringBuilder.toString(),
-					JSONObject.class);
-		} else {
-			result = null;
-		}
-		return result;
-	}
-
-	@GET
-	@Path("/user/{username}/projects")
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getUsersProjects(@PathParam("username") String username) {
-		DataService service = new DataService();
-		StringBuilder stringBuilder;
-		ObjectMapper mapper;
-		JSONObject result;
-		UserEntity user = service.getUser(username);
-		if (user != null && (user.getProjectsTakingPart().size() != 0)) {
-			stringBuilder = new StringBuilder();
-			mapper = new ObjectMapper();
-			mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS,
-					false);
-			stringBuilder.append("{\"projects\": [");
-			ArrayList<ProjectEntity> projects
-					= new ArrayList<ProjectEntity>
-					(user.getProjectsTakingPart());
-			for (int i = 0; i < projects.size(); i++) {
-				if (i != (projects.size() - 1)) {
-					stringBuilder.append(projects.get(i).toString() + ", ");
-				} else {
-					stringBuilder.append(projects.get(i) + "]}");
-				}
-			}
-			result = mapper.convertValue(stringBuilder.toString(),
-					JSONObject.class);
-		} else {
-			result = null;
-		}
-		return result;
-	}
-
-	@GET
-	@Path("/user/{username}/statistics")
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getUsersStatistics(
-			@PathParam("username") String username) {
-		DataService service = new DataService();
-		StringBuilder stringBuilder;
-		ObjectMapper mapper;
-		JSONObject result;
-		UserEntity user = service.getUser(username);
-		if (user != null && (user.getStatistics().size() != 0)) {
-			stringBuilder = new StringBuilder();
-			mapper = new ObjectMapper();
-			mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS,
-					false);
-			ArrayList<StatisticEntity> statistics
-					= new ArrayList<StatisticEntity>(user.getStatistics());
-			stringBuilder.append("{\"statistics\": [");
-			for (int i = 0; i < statistics.size(); i++) {
-				if (i != (statistics.size() - 1)) {
-					stringBuilder.append(statistics.get(i).toString() + ", ");
-				} else {
-					stringBuilder.append(statistics.get(i).toString() + "]}");
-				}
-			}
-			result = mapper.convertValue(stringBuilder.toString(),
-					JSONObject.class);
-		} else {
-			result = null;
-		}
-		return result;
-	}
-
-	@GET
-	@Path("/user/{username}/chats")
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getUsersChats(@PathParam("username") String username) {
-		DataService service = new DataService();
-		StringBuilder stringBuilder;
-		ObjectMapper mapper;
-		JSONObject result;
-		UserEntity user = service.getUser(username);
-		if (user != null && user.getChats().size() != 0) {
-			stringBuilder = new StringBuilder();
-			mapper = new ObjectMapper();
-			mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS,
-					false);
-			stringBuilder.append("{\"chats\": [");
-			ArrayList<ChatEntity> chats
-					= new ArrayList<ChatEntity>(user.getChats());
-			for (int i = 0; i < chats.size(); i++) {
-				if (i != (chats.size() - 1)) {
-					stringBuilder.append(chats.get(i).toString() + ", ");
-				} else {
-					stringBuilder.append(chats.get(i).toString() + "]}");
-				}
-			}
-			result = mapper.convertValue(stringBuilder.toString(),
-					JSONObject.class);
-		} else {
-			result = null;
-		}
-		return result;
-	}
-
-	@GET
-	@Path("/team/{teamName}/users")
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getTeamsUsers(@PathParam("teamName") String teamName) {
-		DataService service = new DataService();
-		StringBuilder stringBuilder;
-		ObjectMapper mapper;
-		JSONObject result;
-		TeamEntity team = service.getTeam(teamName);
-		if (team != null && team.getUsers().size() != 0) {
-			stringBuilder = new StringBuilder();
-			stringBuilder.append("{\"users\": [");
-			mapper = new ObjectMapper();
-			mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS,
-					false);
-			ArrayList<UserEntity> users =
-					new ArrayList<UserEntity>(team.getUsers());
-			for (int i = 0; i < users.size(); i++) {
-				if (i != (users.size() - 1)) {
-					stringBuilder.append(users.get(i).toSring() + ", ");
-				} else {
-					stringBuilder.append(users.get(i).toSring() + "]}");
-				}
-			}
-			result = mapper.convertValue(stringBuilder.toString(),
-					JSONObject.class);
-		} else {
-			result = null;
-		}
-		return result;
-	}
-
-	@GET
-	@Path("/team/{teamName}/projects")
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getTeamsProjects(@PathParam("teamName") String teamName) {
-		DataService service = new DataService();
-		StringBuilder stringBuilder;
-		ObjectMapper mapper;
-		JSONObject result;
-		TeamEntity team = service.getTeam(teamName);
-		if (team != null && team.getProjects().size() != 0) {
-			stringBuilder = new StringBuilder();
-			stringBuilder.append("{\"projects\": [");
-			mapper = new ObjectMapper();
-			mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS,
-					false);
-			ArrayList<ProjectEntity> projects
-					= new ArrayList<ProjectEntity>(team.getProjects());
-			for (int i = 0; i < projects.size(); i++) {
-				if (i != (projects.size() - 1)) {
-					stringBuilder.append(projects.get(i).toString() + ", ");
-				} else {
-					stringBuilder.append(projects.get(i).toString() + "]}");
-				}
-			}
-			result = mapper.convertValue(stringBuilder.toString(),
-					JSONObject.class);
-		} else {
-			result = null;
-		}
-		return result;
-	}
-
-	@GET
-	@Path("/team/{teamName}/tasks")
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getTeamsTasks(@PathParam("teamName") String teamName) {
-		DataService service = new DataService();
-		StringBuilder stringBuilder;
-		ObjectMapper mapper;
-		JSONObject result;
-		TeamEntity team = service.getTeam(teamName);
-		if (team != null && team.getTasks().size() != 0) {
-			stringBuilder = new StringBuilder();
-			stringBuilder.append("{\"tasks\": [");
-			mapper = new ObjectMapper();
-			mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS,
-					false);
-			ArrayList<TaskEntity> tasks
-					= new ArrayList<TaskEntity>(team.getTasks());
-			for (int i = 0; i < tasks.size(); i++) {
-				if (i != (tasks.size() - 1)) {
-					stringBuilder.append(tasks.get(i).toString() + ", ");
-				} else {
-					stringBuilder.append(tasks.get(i).toString() + "]}");
-				}
-			}
-			result = mapper.convertValue(stringBuilder.toString(),
-					JSONObject.class);
-		} else {
-			result = null;
-		}
-		return result;
-	}
-
-	@GET
-	@Path("/team/{teamName}/registers")
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getTeamsRegisters(@PathParam("teamName") String teamName) {
-		DataService service = new DataService();
-		StringBuilder stringBuilder;
-		ObjectMapper mapper;
-		JSONObject result;
-		TeamEntity team = service.getTeam(teamName);
-		if (team != null && team.getRegisters().size() != 0) {
-			stringBuilder = new StringBuilder();
-			stringBuilder.append("{\"registers\": [");
-			mapper = new ObjectMapper();
-			mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS,
-					false);
-			ArrayList<RegisterEntity> registers
-					= new ArrayList<RegisterEntity>(team.getRegisters());
-			for (int i = 0; i < registers.size(); i++) {
-				if (i != (registers.size() - 1)) {
-					stringBuilder.append(registers.get(i).toString() + ", ");
-				} else {
-					stringBuilder.append(registers.get(i).toString() + "]}");
-				}
-			}
-			result = mapper.convertValue(stringBuilder.toString(),
-					JSONObject.class);
-		} else {
-			result = null;
-		}
-		return result;
-	}
-
-	@GET
-	@Path("/team/{teamName}/chats")
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getTeamsChats(@PathParam("teamName") String teamName) {
-		DataService service = new DataService();
-		StringBuilder stringBuilder;
-		ObjectMapper mapper;
-		JSONObject result;
-		TeamEntity team = service.getTeam(teamName);
-		if (team != null && team.getChats().size() != 0) {
-			stringBuilder = new StringBuilder();
-			stringBuilder.append("{\"chats\": [");
-			mapper = new ObjectMapper();
-			mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS,
-					false);
-			ArrayList<ChatEntity> chats
-					= new ArrayList<ChatEntity>(team.getChats());
-			for (int i = 0; i < chats.size(); i++) {
-				if (i != (chats.size() - 1)) {
-					stringBuilder.append(chats.get(i).toString() + ", ");
-				} else {
-					stringBuilder.append(chats.get(i).toString() + "]}");
-				}
-			}
-			result = mapper.convertValue(stringBuilder.toString(),
-					JSONObject.class);
-		} else {
-			result = null;
-		}
-		return result;
-	}
-
-	@GET
-	@Path("/team/{teamName}/admin")
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getTeamsAdmin(@PathParam("teamName") String teamName) {
-		DataService service = new DataService();
-		ObjectMapper mapper;
-		JSONObject result;
-		TeamEntity team = service.getTeam(teamName);
-		if (team != null && team.getAdmin() != null) {
-			mapper = new ObjectMapper();
-			mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS,
-					false);
-			result = mapper.convertValue(team.getAdmin().toSring(),
-					JSONObject.class);
-		} else {
-			result = null;
-		}
-		return result;
-	}
-
-	// TODO rework
-	@GET
-	@Path("/appointment/{projectName}/{appointmentId}/{teamName}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getAppointment
-	(@PathParam("projectName") String projectName,
-	 @PathParam("appointmentId") long appointmentId,
-	 @PathParam("teamName") String teamName) {
-		DataService service = new DataService();
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
-		JSONObject result;
-		AppointmentEntity appointment = service.getAppointment(projectName,
-				appointmentId, teamName);
-		if (appointment != null) {
-			result = mapper.convertValue(appointment.toString(),
-					JSONObject.class);
-		} else {
-			result = mapper.convertValue(null, JSONObject.class);
-		}
-		return result;
-	}
-
-	// TODO rework
-	@GET
-	@Path("/appointment/{projectName}/{appointmentId}/{teamName}/project")
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getAppointmentsProject(
-			@PathParam("projectName") String projectName,
-			@PathParam("appointmentId") long appointmentId,
-			@PathParam("teamName") String teamName) {
-		DataService service = new DataService();
-		ObjectMapper mapper;
-		JSONObject result;
-		AppointmentEntity appointment
-				= service.getAppointment(projectName, appointmentId, teamName);
-		if (appointment != null && appointment.getProject() != null) {
-			mapper = new ObjectMapper();
-			mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS,
-					false);
-			result = mapper.convertValue(appointment.getProject().toString(),
-					JSONObject.class);
-		} else {
-			result = null;
-		}
-		return result;
-	}
-
-	// TODO rework
-	@GET
-	@Path("/appointment/{projectName}/{appointmentId}/{teamName}/users")
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getAppoinmentsUsers(
-			@PathParam("projectName") String projectName,
-			@PathParam("appointmentId") long appointmentId,
-			@PathParam("teamName") String teamName
-	) {
-		DataService service = new DataService();
-		StringBuilder stringBuilder;
-		ObjectMapper mapper;
-		JSONObject result;
-		AppointmentEntity appointment =
-				service.getAppointment(projectName, appointmentId, teamName);
-		if (appointment != null
-				&& appointment.getUserTakinPart().size() != 0) {
-			stringBuilder = new StringBuilder();
-			stringBuilder.append("{\"users\": [");
-			mapper = new ObjectMapper();
-			mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS,
-					false);
-			ArrayList<UserEntity> users
-					= new ArrayList<UserEntity>(appointment.getUserTakinPart());
-			for (int i = 0; i < users.size(); i++) {
-				if (i != (users.size() - 1)) {
-					stringBuilder.append(users.get(i).toSring() + ", ");
-				} else {
-					stringBuilder.append(users.get(i).toSring() + "]}");
-				}
-			}
-			result = mapper.convertValue(stringBuilder.toString(),
-					JSONObject.class);
-		} else {
-			result = null;
-		}
-		return result;
-	}
-
-	// TODO rework
-	@GET
-	@Path("/register/{registerName}/{teamName}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getRegister(
-			@PathParam("registerName") String registerName,
-			@PathParam("teamName") String teamName) {
-		DataService service = new DataService();
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
-		JSONObject result;
-		RegisterEntity register = service.getRegister(registerName, teamName);
-		if (register != null) {
-			result = mapper.convertValue(register.toString(), JSONObject.class);
-		} else {
-			result = mapper.convertValue(null, JSONObject.class);
-		}
-		return result;
-	}
-
-	// TODO rework
-	@GET
-	@Path("/register/{registerName}/{teamName}/users")
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getRegistersUsers(
-			@PathParam("registerName") String registerName,
-			@PathParam("teamName") String teamName) {
-		DataService service = new DataService();
-		StringBuilder stringBuilder;
-		ObjectMapper mapper;
-		JSONObject result;
-		RegisterEntity register = service.getRegister(registerName, teamName);
-		if (register != null && register.getUsers().size() != 0) {
-			stringBuilder = new StringBuilder();
-			stringBuilder.append("{\"users\": [");
-			mapper = new ObjectMapper();
-			mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS,
-					false);
-			ArrayList<UserEntity> users
-					= new ArrayList<UserEntity>(register.getUsers());
-			for (int i = 0; i < users.size(); i++) {
-				if (i != (users.size() - 1)) {
-					stringBuilder.append(users.get(i).toSring() + ", ");
-				} else {
-					stringBuilder.append(users.get(i).toSring() + "]}");
-				}
-			}
-			result = mapper.convertValue(stringBuilder.toString(),
-					JSONObject.class);
-		} else {
-			result = null;
-		}
-		return result;
-	}
-
-	// TODO rework
-	@GET
-	@Path("/register/{registerName}/{teamName}/team")
-	@Produces(MediaType.APPLICATION_JSON)
-	public String getRegistersTeam(
-			@PathParam("registerName") String registerName,
-			@PathParam("teamName") String teamName) {
-		DataService service = new DataService();
-		String result;
-		RegisterEntity register = service.getRegister(registerName, teamName);
-		if (register != null && register.getTeam() != null) {
-			result = register.getTeam().toString();
-		} else {
-			result = "null";
-		}
-		return result;
-	}
-
-	// TODO rework
-	@GET
-	@Path("/project/{projectname}/{teamname}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getProject(@PathParam("projectname") String projectName,
-								 @PathParam("teamname") String teamName) {
-		DataService service = new DataService();
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
-		JSONObject result;
-		ProjectEntity project = service.getProject(projectName, teamName);
-		if (project != null) {
-			result = mapper.convertValue(project.toString(), JSONObject.class);
-		} else {
-			result = mapper.convertValue(null, JSONObject.class);
-		}
-		return result;
-	}
-
-	// TODO rework
-	@GET
-	@Path("/project/{projectName}/{teamName}/appointments")
-	public JSONObject getProjectsAppointments(
-			@PathParam("projectName") String projectName,
-			@PathParam("teamName") String teamName
-	) {
-		DataService service = new DataService();
-		StringBuilder stringBuilder;
-		ObjectMapper mapper;
-		JSONObject result;
-		ProjectEntity project = service.getProject(projectName, teamName);
-		if (project != null && project.getAppointments().size() != 0) {
-			stringBuilder = new StringBuilder();
-			stringBuilder.append("{\"appointments\": [");
-			mapper = new ObjectMapper();
-			mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS,
-					false);
-			ArrayList<AppointmentEntity> appointments
-					= new ArrayList<AppointmentEntity>
-					(project.getAppointments());
-			for (int i = 0; i < appointments.size(); i++) {
-				if (i != (appointments.size() - 1)) {
-					stringBuilder.append(appointments.get(i).toString() + ", ");
-				} else {
-					stringBuilder.append(appointments.get(i).toString() + "]}");
-				}
-			}
-			result = mapper.convertValue(stringBuilder.toString(),
-					JSONObject.class);
-		} else {
-			result = null;
-		}
-		return result;
-	}
-
-	// TODO rework
-	@GET
-	@Path("/project/{projectName}/{teamName}/users")
-	public JSONObject getProjectsUsers(
-			@PathParam("projectName") String projectName,
-			@PathParam("teamName") String teamName
-	) {
-		DataService service = new DataService();
-		StringBuilder stringBuilder;
-		ObjectMapper mapper;
-		JSONObject result;
-		ProjectEntity project = service.getProject(projectName, teamName);
-		if (project != null && project.getUsers().size() != 0) {
-			stringBuilder = new StringBuilder();
-			stringBuilder.append("{\"users\": [");
-			mapper = new ObjectMapper();
-			mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS,
-					false);
-			ArrayList<UserEntity> users
-					= new ArrayList<UserEntity>(project.getUsers());
-			for (int i = 0; i < users.size(); i++) {
-				if (i != (users.size() - 1)) {
-					stringBuilder.append(users.get(i).toString() + ", ");
-				} else {
-					stringBuilder.append(users.get(i).toString() + "]}");
-				}
-			}
-			result = mapper.convertValue(stringBuilder.toString(),
-					JSONObject.class);
-		} else {
-			result = null;
-		}
-		return result;
-	}
-
-	// TODO rework
-	@GET
-	@Path("/project/{projectName}/{teamName}/statistics")
-	public JSONObject getProjectsStatistics(
-			@PathParam("projectName") String projectName,
-			@PathParam("teamName") String teamName
-	) {
-		DataService service = new DataService();
-		StringBuilder stringBuilder;
-		ObjectMapper mapper;
-		JSONObject result;
-		ProjectEntity project = service.getProject(projectName, teamName);
-		if (project != null && project.getStatistics().size() != 0) {
-			stringBuilder = new StringBuilder();
-			stringBuilder.append("{\"statistics\": [");
-			mapper = new ObjectMapper();
-			mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS,
-					false);
-			ArrayList<StatisticEntity> statistics
-					= new ArrayList<StatisticEntity>(project.getStatistics());
-			for (int i = 0; i < statistics.size(); i++) {
-				if (i != (statistics.size() - 1)) {
-					stringBuilder.append(statistics.get(i).toString() + ", ");
-				} else {
-					stringBuilder.append(statistics.get(i).toString() + "]}");
-				}
-			}
-			result = mapper.convertValue(stringBuilder.toString(),
-					JSONObject.class);
-		} else {
-			result = null;
-		}
-		return result;
-	}
-
-	// TODO rework
-	@GET
-	@Path("/statistic/{teamName}/{projectName}/{username}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getStatistic(
-			@PathParam("projectName") String projectName,
-			@PathParam("teamName") String teamName,
-			@PathParam("username") String username) {
-		DataService service = new DataService();
-		JSONObject result;
-		ObjectMapper mapper;
-		StatisticEntity statistic = service.getStatisticOfUser(username,
-				projectName, teamName);
-		if (statistic != null) {
-			mapper = new ObjectMapper();
-			mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS,
-					false);
-			result = mapper.convertValue(statistic.toString(),
-					JSONObject.class);
-		} else {
-			result = null;
-		}
-		return result;
-	}
-
 	//--------------------------------------------------------------------------
 
-	// Todo: Ask for invitations and for requests
 	// Todo: Ask for updates -> InitialService at client side
+	// TODO: test with ping
+
+	@GET
+	@Path("/ping")
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject ping() {
+		try {
+			return new JSONObject("{\"success\": \"true\"}");
+		} catch (JSONException e) {
+			return null;
+		}
+	}
+
+	@POST
+	@Path("/request")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject addRequestToTeam(JSONObject data) {
+		JSONObject result;
+		String token;
+		String username;
+		String teamName;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				username = data.getString("username");
+				teamName = data.getString("teamName");
+				UserEntity user = dataService.getUser(username);
+				TeamEntity team = dataService.getTeam(teamName);
+				if (user != null && team != null) {
+					if (dataService.addRequestToTeam(team, user)) {
+						result = new JSONObject("{\"success\": \"true\"}");
+					} else {
+						result = returnServerError();
+					}
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnTokenError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	// TODO test
+	@POST
+	@Path("/requests")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject getRequestsOfTeam(JSONObject data) {
+		JSONObject result;
+		String token;
+		String teamName;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				teamName = data.getString("teamName");
+				TeamEntity team = dataService.getTeam(teamName);
+				if (team != null) {
+					if (isAdminOfTeam(token, teamName)) {
+						List<String> requests = new ArrayList<>();
+						requests = team.getRequestsOfUsers();
+						if (requests.size() != 0) {
+							StringBuilder stringBuilder = new StringBuilder();
+							for (int i = 0; i < requests.size(); i++) {
+								if (i != requests.size() - 1) {
+									stringBuilder.append(requests.get(i) + ",");
+								} else {
+									stringBuilder.append(requests.get(i));
+								}
+							}
+							result = new JSONObject("{\"success\": " +
+									"\"true\", \""
+									+ stringBuilder.toString() + "\"}");
+						} else {
+							result = new JSONObject("{\"success\": " +
+									"\"true\", \"requests\": \"Keine " +
+									"Anfragen von Usern vorhanden.\"}");
+						}
+					} else {
+						result = returnTokenError();
+					}
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnTokenError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/invite")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject inviteUserToTeam(JSONObject data) {
+		JSONObject result;
+		String token;
+		String usernameToInvite;
+		String teamName;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				usernameToInvite = data.getString("usernameToInvite");
+				teamName = data.getString("teamName");
+				UserEntity toInvite = dataService.getUser(usernameToInvite);
+				TeamEntity team = dataService.getTeam(teamName);
+				if (toInvite.getTeam() == null) {
+					if (toInvite != null && team != null) {
+						if (isAdminOfTeam(token, teamName)) {
+							if (dataService.addInvitationToUser(toInvite, team)) {
+								result = new JSONObject("{\"success\": " +
+										"\"true\"}");
+							} else {
+								result = returnServerError();
+							}
+						} else {
+							result = returnTokenError();
+						}
+					} else {
+						result = returnEmptyResult();
+					}
+				} else {
+					result = returnTokenError();
+				}
+			} else {
+				result = returnUserAlreadyInTeam();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	// TODO test
+	@POST
+	@Path("/invitations")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject getInvitationsOfUser(JSONObject data) {
+		String token;
+		String username;
+		JSONObject result;
+		try {
+			token = data.getString("token");
+			username = data.getString("username");
+			UserEntity user = dataService.getUser(username);
+			if (validateToken(token)) {
+				if (user != null) {
+					List<String> invitations = new ArrayList<>();
+					invitations = user.getInvitationsOfTeams();
+					if (invitations.size() != 0) {
+						StringBuilder stringBuilder = new StringBuilder();
+						for (int i = 0; i < invitations.size(); i++) {
+							if (i != (invitations.size() - 1)) {
+								stringBuilder.append(invitations.get(i) + ",");
+							} else {
+								stringBuilder.append(invitations.get(i));
+							}
+						}
+						result = new JSONObject("{\"success\": " +
+								"\"true\", \"invitations\": \""
+								+ stringBuilder.toString() + "\"}");
+					} else {
+						result = new JSONObject("{\"success\": " +
+								"\"true\", \"invitations\": \"Keine " +
+								"Einladungen zu Teams vorhanden.\"}");
+					}
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnTokenError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
 
 	@POST
 	@Path("/edit/user")
@@ -941,11 +323,11 @@ public class RESTService {
 		String teamDescription;
 		try {
 			token = data.getString("token");
+			teamName = data.getString("teamName");
 			if (validateToken(token)) {
-				if (isAdminOfTeam(token)) {
+				if (isAdminOfTeam(token, teamName)) {
 					admin = data.getString("admin");
 					if (admin != null) {
-						teamName = data.getString("teamName");
 						teamDescription = data.getString("teamDescription");
 						TeamEntity fetchedTeam = dataService.getTeam
 								(teamName);
@@ -1232,7 +614,6 @@ public class RESTService {
 					"nicht!\"}");
 			return result;
 		} catch (JSONException e) {
-			e.printStackTrace();
 			return null;
 		}
 	}
@@ -1244,7 +625,6 @@ public class RESTService {
 					"nicht gewährleistet!\"}");
 			return result;
 		} catch (JSONException e) {
-			e.printStackTrace();
 			return null;
 		}
 	}
@@ -1255,7 +635,6 @@ public class RESTService {
 					"\"error\": \"Falsche Angaben im Request! Client " +
 					"zeigt falsches Verhalten!\"}");
 		} catch (JSONException e) {
-			e.printStackTrace();
 			return null;
 		}
 	}
@@ -1267,7 +646,25 @@ public class RESTService {
 					"Bitte melden Sie dies an den Administrator unter " +
 					"grum02@gw.uni-passau.de.\"}");
 		} catch (JSONException e) {
-			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private JSONObject returnUserAlreadyInTeam() {
+		try {
+			return new JSONObject("{\"success\": \"false\", " +
+					"\"reason\": \"Der eingeladene Nutzer ist bereits in " +
+					"einem Team.\"}");
+		} catch (JSONException e) {
+			return null;
+		}
+	}
+
+	private JSONObject returnUpdatedMessage() {
+		try {
+			return new JSONObject("{\"success\": \"false\", \"reason\":" +
+					" \"Keine Änderungen vorhanden!\"}");
+		} catch (JSONException e) {
 			return null;
 		}
 	}
@@ -1355,7 +752,7 @@ public class RESTService {
 		return result;
 	}
 
-	private boolean isAdminOfTeam(String token) {
+	private boolean isAdminOfTeam(String token, String teamNameSent) {
 		boolean result = false;
 		if (token != null) {
 			try {
@@ -1367,7 +764,7 @@ public class RESTService {
 				String teamName = (String) claims.getClaim("team");
 				UserEntity user = dataService.getUser(username);
 				if (user != null && userRole.equals("" + user.getRole()) &&
-						teamName.equals(user.getTeam().getName())) {
+						teamName.equals(teamNameSent)) {
 					result = true;
 				}
 			} catch (JOSEException e) {
