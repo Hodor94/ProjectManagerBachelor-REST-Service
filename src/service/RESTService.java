@@ -4,7 +4,7 @@ package service;
  * Created by Raphael on 15.06.2017.
  */
 
-import javax.print.attribute.standard.Media;
+import javax.annotation.PreDestroy;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
@@ -37,10 +37,12 @@ import sun.security.provider.SHA;
 @Path("/pmservice")
 public class RESTService {
 
+	private final String REQUEST = "request";
+	private final String INVITATION = "invitation";
 	private DataService dataService = new DataService();
-	//private final String secret = UUID.randomUUID().toString();
 	private final byte[] SHARED_SECRET = generateSharedSecret();
-	private final long EXPIRE_TIME = 900000;
+	private final long EXPIRE_TIME = 900000; // Within a 15 minutes period a
+	// token is valid
 
 	//--------------------------------------------------------------------------
 
@@ -56,6 +58,321 @@ public class RESTService {
 		} catch (JSONException e) {
 			return null;
 		}
+	}
+
+	// TODO test
+	@POST
+	@Path("/team/members")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject getTeamMembers(JSONObject data) {
+		JSONObject result;
+		String token;
+		String teamName;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				teamName = data.getString("teamName");
+				TeamEntity team = dataService.getTeam(teamName);
+				if (team != null) {
+					List<UserEntity> teamsMembers = team.getUsers();
+					ArrayList<JSONObject> members = new ArrayList<>();
+					for (UserEntity user : teamsMembers) {
+						JSONObject userInfo;
+						if (user.getRegister() != null) {
+							userInfo = new JSONObject(
+									"{\"username\": \""
+											+ user.getUsername()
+											+ "\", \"regiser\": " +
+											"\"" + user.getRegister()
+											.getName() + "\"}");
+							members.add(userInfo);
+						} else {
+							userInfo = new JSONObject("{\"username\": " +
+									"\"" + user.getUsername() + "\", " +
+									"\"register\": \"null\"}");
+							members.add(userInfo);
+						}
+					}
+					result = new JSONObject();
+					result.put("success", "true");
+					result.put("members", members);
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnTokenError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/create/register")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject createRegister(JSONObject data) {
+		JSONObject result;
+		String token;
+		String teamName;
+		String registerName;
+		String username;
+		String color;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				teamName = data.getString("teamName");
+				registerName = data.getString("registerName");
+				username = data.getString("username");
+				color = data.getString("color");
+				TeamEntity team = dataService.getTeam(teamName);
+				RegisterEntity register
+						= dataService.getRegister(registerName, teamName);
+				if (team != null && register == null) {
+					if (team.getAdmin().getUsername().equals(username)) {
+						if (dataService.createNewRegister(registerName,
+								teamName, color)) {
+							result = new JSONObject("{\"success\": \"true\"}");
+						} else {
+							result = returnServerError();
+						}
+					} else {
+						result = returnTokenError();
+					}
+				} else {
+					result = returnExistingError();
+				}
+			} else {
+				result = returnTokenError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/team/registers")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject getRegisters(JSONObject data) {
+		JSONObject result;
+		String token;
+		String teamName;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				teamName = data.getString("teamName");
+				TeamEntity team = dataService.getTeam(teamName);
+				if (team != null) {
+					List<JSONObject> registerNames = new ArrayList<>();
+					List<RegisterEntity> registerEntities = team.getRegisters();
+					if (registerEntities.size() != 0) {
+						for (RegisterEntity register : registerEntities) {
+							JSONObject registerData = new JSONObject();
+							registerData.put("registerName",
+									register.getName());
+							registerData.put("color", register.getColor());
+							registerNames.add(registerData);
+						}
+						result = new JSONObject();
+						result.put("success", "true");
+						result.put("registers", registerNames);
+					} else {
+						result = new JSONObject();
+						result.put("success", "true");
+						result.put("registers", "null");
+					}
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnTokenError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	public JSONObject getTeamMemebers(JSONObject data) {
+		JSONObject result;
+		String token;
+		String teamName;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				teamName = data.getString("teamName");
+				TeamEntity team = dataService.getTeam(teamName);
+				if (team != null) {
+					// TODO
+					result = null;
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnTokenError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/answer")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject answerInvitationOrRequest(JSONObject data) {
+		JSONObject result;
+		String token;
+		String username;
+		String teamName;
+		String agreeOrDisagree;
+		String invitationOrRequest;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				username = data.getString("username");
+				teamName = data.getString("teamName");
+				UserEntity user = dataService.getUser(username);
+				TeamEntity team = dataService.getTeam(teamName);
+				if (user != null && team != null) {
+					agreeOrDisagree
+							= data.getString("agreeOrDisagree");
+					invitationOrRequest
+							= data.getString("invitationOrRequest");
+					result = prepareAnswer(user, team, agreeOrDisagree,
+							invitationOrRequest);
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnTokenError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	private JSONObject prepareAnswer(UserEntity user, TeamEntity team,
+									 String agreeOrDisagree,
+									 String invitationOrRequest) {
+		JSONObject result;
+		if (invitationOrRequest.equals("invitation")) {
+			result = answerInvitation(user, team, agreeOrDisagree);
+		} else {
+			result = answerRequest(user, team, agreeOrDisagree);
+		}
+		return result;
+	}
+
+	private JSONObject answerInvitation(UserEntity user, TeamEntity team,
+										String agreeOrDisagree) {
+		JSONObject result;
+		List<String> invitationsOfUser = new ArrayList<>();
+		invitationsOfUser = user.getInvitationsOfTeams();
+		if (invitationsOfUser.size() != 0) {
+			if (invitationsOfUser.contains(team.getName())) {
+				if (dealWithInvitation(agreeOrDisagree,
+						invitationsOfUser, team, user)) {
+					try {
+						result = new JSONObject("{\"success\":" +
+								" \"true\", \"team\": " +
+								"\"" + team.getName() + "\"," +
+								"\"type\": \"" + INVITATION + "\"}");
+					} catch (JSONException e) {
+						result = returnClientError();
+					}
+				} else {
+					try {
+						result = new JSONObject("{\"success\":" +
+								"\"true\", \"type\": \"" + INVITATION + "\"}");
+					} catch (JSONException e) {
+						result = returnClientError();
+					}
+				}
+			} else {
+				result = returnEmptyResult();
+			}
+		} else {
+			result = returnEmptyResult();
+		}
+		return result;
+	}
+
+	private JSONObject answerRequest(UserEntity user, TeamEntity team,
+									 String agreeOrDisagree) {
+		JSONObject result;
+		List<String> requestOfTeam = new ArrayList<>();
+		requestOfTeam = team.getRequestsOfUsers();
+		if (requestOfTeam.size() != 0) {
+			if (requestOfTeam.contains(user.getUsername())) {
+				if (dealWithRequest(agreeOrDisagree,
+						requestOfTeam, team, user)) {
+					try {
+						result = new JSONObject("{\"success\":" +
+								" \"true\", \"team\": " +
+								"\"" + team.getName() + "\", " +
+								"\"type\": \"" + REQUEST + "\"}");
+					} catch (JSONException e) {
+						result = returnClientError();
+					}
+				} else {
+					try {
+						result = new JSONObject("{\"success\":" +
+								"\"true\", \"type\": \"" + REQUEST + "\"}");
+					} catch (JSONException e) {
+						result = returnClientError();
+					}
+				}
+			} else {
+				result = returnEmptyResult();
+			}
+		} else {
+			result = returnEmptyResult();
+		}
+		return result;
+	}
+
+	private boolean dealWithRequest(String agreeOrDisagree,
+									List<String> requestOfTeam,
+									TeamEntity team, UserEntity user) {
+		boolean result;
+		if (agreeOrDisagree.equals("agree")) {
+			user.setTeam(team);
+			team.setRequestsOfUsers(new ArrayList<>());
+			dataService.saveUser(user);
+			dataService.saveTeam(team);
+			result = true;
+		} else {
+			requestOfTeam.remove(user.getUsername());
+			team.setRequestsOfUsers(requestOfTeam);
+			dataService.saveTeam(team);
+			result = false;
+		}
+		return result;
+	}
+
+	private boolean dealWithInvitation(String agreeOrDisagree,
+									   List<String> invitations,
+									   TeamEntity team, UserEntity user) {
+		boolean result;
+		if (agreeOrDisagree.equals("agree")) {
+			user.setTeam(team);
+			user.setInvitationsOfTeams(new ArrayList<String>());
+			dataService.saveUser(user);
+			result = true;
+		} else {
+			invitations.remove(team.getName());
+			user.setInvitationsOfTeams(invitations);
+			dataService.saveUser(user);
+			result = false;
+		}
+		return result;
 	}
 
 	@POST
@@ -101,31 +418,33 @@ public class RESTService {
 		JSONObject result;
 		String token;
 		String teamName;
+		String username;
 		try {
 			token = data.getString("token");
+			teamName = data.getString("teamName");
+			username = data.getString("username");
 			if (validateToken(token)) {
-				teamName = data.getString("teamName");
-				TeamEntity team = dataService.getTeam(teamName);
-				if (team != null) {
-					if (isAdminOfTeam(token, teamName)) {
+				TeamEntity teamEntity = dataService.getTeam(teamName);
+				if (teamEntity != null) {
+					if (teamEntity.getAdmin().getUsername().equals(username)) {
 						List<String> requests = new ArrayList<>();
-						requests = team.getRequestsOfUsers();
+						requests = teamEntity.getRequestsOfUsers();
 						if (requests.size() != 0) {
 							StringBuilder stringBuilder = new StringBuilder();
 							for (int i = 0; i < requests.size(); i++) {
-								if (i != requests.size() - 1) {
+								if (i != (requests.size() - 1)) {
 									stringBuilder.append(requests.get(i) + ",");
 								} else {
 									stringBuilder.append(requests.get(i));
 								}
 							}
 							result = new JSONObject("{\"success\": " +
-									"\"true\", \""
+									"\"true\", \"requests\": \""
 									+ stringBuilder.toString() + "\"}");
 						} else {
-							result = new JSONObject("{\"success\": " +
-									"\"true\", \"requests\": \"Keine " +
-									"Anfragen von Usern vorhanden.\"}");
+							result = new JSONObject();
+							result.put("success", "true");
+							result.put("requests", "null");
 						}
 					} else {
 						result = returnTokenError();
@@ -215,9 +534,9 @@ public class RESTService {
 								"\"true\", \"invitations\": \""
 								+ stringBuilder.toString() + "\"}");
 					} else {
-						result = new JSONObject("{\"success\": " +
-								"\"true\", \"invitations\": \"Keine " +
-								"Einladungen zu Teams vorhanden.\"}");
+						result = new JSONObject();
+						result.put("success", "true");
+						result.put("invitations", "null");
 					}
 				} else {
 					result = returnEmptyResult();
@@ -610,7 +929,7 @@ public class RESTService {
 	private JSONObject returnEmptyResult() {
 		try {
 			JSONObject result = new JSONObject("{\"success\": \"false\"," +
-					" \"reason\": \"Die angeforderten Daten existieren " +
+					" \"reason\": \"Die angefragten Daten existieren " +
 					"nicht!\"}");
 			return result;
 		} catch (JSONException e) {

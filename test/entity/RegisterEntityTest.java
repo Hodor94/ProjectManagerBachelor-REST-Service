@@ -51,7 +51,7 @@ class RegisterEntityTest {
 		TeamDAO teamDAO = new TeamDAO();
 		teamDAO.saveOrUpdate(testTeam);
 		DataService service = new DataService();
-		service.createNewRegister(REGISTER_NAME, TEAM_NAME);
+		service.createNewRegister(REGISTER_NAME, TEAM_NAME, "#ffffff");
 		RegisterDAO registerDAO = new RegisterDAO();
 		RegisterEntity register = service.getRegister(REGISTER_NAME, TEAM_NAME);
 		assertEquals(testRegister.getName(), register.getName());
@@ -65,7 +65,7 @@ class RegisterEntityTest {
 		service.registerUser(USER_NAME, "", "", "",
 				"", "", "", BIRTHDAY);
 		service.createNewTeam(TEAM_NAME, DESCRIPTION, USER_NAME);
-		service.createNewRegister(REGISTER_NAME, TEAM_NAME);
+		service.createNewRegister(REGISTER_NAME, TEAM_NAME, "#ffffff");
 		service.setUsersRegister(USER_NAME, REGISTER_NAME, TEAM_NAME);
 		UserEntity user = service.getUser(USER_NAME);
 		assertNotEquals(null, user.getRegister());

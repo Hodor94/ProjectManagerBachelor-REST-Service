@@ -534,6 +534,10 @@ public class UserEntity extends GenericEntity {
 		return invitationsOfTeams;
 	}
 
+	public void setInvitationsOfTeams(List<String> invitationsOfTeams) {
+		this.invitationsOfTeams = invitationsOfTeams;
+	}
+
 	public boolean removeInvitation(String teamName) {
 		boolean result = false;
 		if (invitationsOfTeams != null) {

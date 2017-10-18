@@ -86,6 +86,17 @@ public class MainTest {
 						"\"admin\": \"" + "admin" + "\"}");
 				JSONObject editResult = service.editTeam(editTeam);
 				System.out.println(editResult.toString());
+				JSONObject requestTeamRequests
+						= new JSONObject("{\"token\": \"" + token + "\", " +
+						"\"teamName\": \"" + "testTeam" + "\"}");
+				JSONObject resultOfRequestsRequest
+						= service.getRequestsOfTeam(requestTeamRequests);
+				System.out.println(resultOfRequestsRequest.toString());
+				JSONObject getTeamMembers = new JSONObject();
+				getTeamMembers.put("token", token);
+				getTeamMembers.put("teamName", "testTeam");
+				JSONObject responseGetTeamMembers = service.getTeamMembers
+						(getTeamMembers);
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}

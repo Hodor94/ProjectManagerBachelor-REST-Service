@@ -98,7 +98,7 @@ class UserEntityTest {
 		service.createNewTeam(TEAM_NAME, DESCRIPTION, USER_NAME);
 		UserEntity fetchedUser = service.getUser(USER_NAME);
 		assertEquals(null, fetchedUser.getRegister());
-		service.createNewRegister(NAME_OF_REGISTER, TEAM_NAME);
+		service.createNewRegister(NAME_OF_REGISTER, TEAM_NAME, "#ffffff");
 		service.setUsersRegister(USER_NAME, NAME_OF_REGISTER, TEAM_NAME);
 		fetchedUser = service.getUser(USER_NAME);
 		assertEquals(NAME_OF_REGISTER, fetchedUser.getRegister().getName());
@@ -122,7 +122,7 @@ class UserEntityTest {
 				"", "", "", BIRTHDAY);
 		service.createNewTeam(TEAM_NAME, DESCRIPTION, USER_NAME);
 		service.addUserToTeam(TEAM_NAME, "test-user-2");
-		service.createNewRegister(REGISTER_NAME, TEAM_NAME);
+		service.createNewRegister(REGISTER_NAME, TEAM_NAME, "ffffff");
 		service.setUsersRegister("test-user-2", REGISTER_NAME, TEAM_NAME);
 		// test remove a normal user
 		service.removeUserFromApp("test-user-2");
@@ -145,7 +145,7 @@ class UserEntityTest {
 		service.registerUser("test-user-2", "", "",
 				"", "", "", "", BIRTHDAY);
 		service.createNewTeam(TEAM_NAME, DESCRIPTION, "test-user-2");
-		service.createNewRegister(REGISTER_NAME, TEAM_NAME);
+		service.createNewRegister(REGISTER_NAME, TEAM_NAME, "#ffffff");
 		service.setUsersRegister(USER_NAME, REGISTER_NAME, TEAM_NAME);
 		// remove normal user
 		service.removeUserFromTeam(USER_NAME, TEAM_NAME);

@@ -262,6 +262,9 @@ public class TeamEntity extends GenericEntity {
 		return requestsOfUsers;
 	}
 
+	public void setRequestsOfUsers(List<String> requestsOfUsers) {
+		this.requestsOfUsers = requestsOfUsers;
+	}
 
 	public boolean isUpdated() {
 		return updated;

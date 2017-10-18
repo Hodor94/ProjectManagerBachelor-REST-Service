@@ -325,13 +325,15 @@ public class DataService {
 		return result;
 	}
 
-	public boolean createNewRegister(String registerName, String teamName) {
+	public boolean createNewRegister(String registerName, String teamName,
+									 String color) {
 		boolean result = false;
 		RegisterEntity register = registerDAO.getRegisterByName(registerName,
 				teamName);
 		TeamEntity team = teamDAO.getTeamByTeamName(teamName);
 		if (register == null && team != null) {
-			register = new RegisterEntity(registerName, new ArrayList<UserEntity>(), team);
+			register = new RegisterEntity(registerName,
+					new ArrayList<UserEntity>(), team, color);
 			registerDAO.saveOrUpdate(register);
 			result = true;
 		}
@@ -781,6 +783,14 @@ public class DataService {
 			result = false;
 		}
 		return result;
+	}
+
+	public  void saveUser(UserEntity user) {
+		userDAO.saveOrUpdate(user);
+	}
+
+	public void saveTeam(TeamEntity team) {
+		teamDAO.saveOrUpdate(team);
 	}
 }
 

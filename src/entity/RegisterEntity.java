@@ -19,9 +19,14 @@ import java.util.List;
 @Table(name = "register")
 public class RegisterEntity extends GenericEntity {
 
+	private static final String DEFAULt_COLOR = "#ffffff";
+
 	// Attributes without any relations to other entities
 	@Column(name = "name")
 	private String name;
+
+	@Column(name = "color")
+	private String color;
 
 	// Attributes related to other entities
 	@JsonIgnore
@@ -36,14 +41,16 @@ public class RegisterEntity extends GenericEntity {
 	public RegisterEntity() {
 		super();
 		users = new ArrayList<UserEntity>();
+		color = DEFAULt_COLOR;
 	}
 
 	public RegisterEntity(String name, ArrayList<UserEntity> users,
-						  TeamEntity team) {
+						  TeamEntity team, String color) {
 		super();
 		this.name = name;
 		this.users = users;
 		this.team = team;
+		this.color = color;
 	}
 
 	public List<UserEntity> getUsers() {
@@ -82,18 +89,34 @@ public class RegisterEntity extends GenericEntity {
 		stringBuilder.append("{");
 		stringBuilder.append("\"id\": " + "\"" + this.getId() + "\",");
 		stringBuilder.append(appendJSONName(name));
+		stringBuilder.append(appendJSONColor(color));
 		stringBuilder.append("}");
 		result = stringBuilder.toString();
 		return result;
 	}
 
-	private String appendJSONName(String name) {
-		if (name != null && !(name.equals(""))) {
-			return "\"name\": " + "\"" + encodeToUTF8(name) + "\"";
+	private String appendJSONColor(String color) {
+		if (color != null && !(color.equals(""))) {
+			return "\"color\": \"" + color + "\"";
 		} else {
-			return "\"name\": " + null;
+			return "\"color\": " + null + "";
 		}
 	}
 
+	private String appendJSONName(String name) {
+		if (name != null && !(name.equals(""))) {
+			return "\"name\": " + "\"" + encodeToUTF8(name) + "\", ";
+		} else {
+			return "\"name\": " + null + ", ";
+		}
+	}
+
+	public String getColor() {
+		return color;
+	}
+
+	public void setColor(String color) {
+		this.color = color;
+	}
 }
 
