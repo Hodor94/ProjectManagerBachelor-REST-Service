@@ -792,5 +792,9 @@ public class DataService {
 	public void saveTeam(TeamEntity team) {
 		teamDAO.saveOrUpdate(team);
 	}
+
+	public void saveRegister(RegisterEntity register) {
+		registerDAO.saveOrUpdate(register);
+	}
 }
 

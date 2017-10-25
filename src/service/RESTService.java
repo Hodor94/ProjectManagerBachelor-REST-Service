@@ -50,6 +50,187 @@ public class RESTService {
 	}
 
 	@POST
+	@Path("/register")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject getRegister(JSONObject data) {
+		JSONObject result;
+		String token;
+		String registerName;
+		String teamName;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				registerName = data.getString("registerName");
+				teamName = data.getString("teamName");
+				RegisterEntity register = dataService.getRegister(registerName,
+						teamName);
+				if (register != null) {
+					result = new JSONObject();
+					result.put("success", "true");
+					result.put("register", register.toString());
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnTokenError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/edit/register")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject editRegister(JSONObject data) {
+		JSONObject result;
+		String token;
+		String registerName;
+		String color;
+		String teamName;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				registerName = data.getString("registerName");
+				color = data.getString("color");
+				teamName = data.getString("teamName");
+				RegisterEntity register = dataService.getRegister(registerName,
+						teamName);
+				if (register != null) {
+					register.setColor(color);
+					dataService.saveRegister(register);
+					result = new JSONObject();
+					result.put("success", "true");
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnTokenError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/user/projects")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject getUsersProjects(JSONObject data) {
+		JSONObject result;
+		String token;
+		String username;
+		String teamName;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				username = data.getString("username");
+				teamName = data.getString("teamName");
+				UserEntity user = dataService.getUser(username);
+				TeamEntity team = dataService.getTeam(teamName);
+				if (user != null && team != null
+						&& user.getTeam().getName().equals(teamName)) {
+					List<ProjectEntity> usersProjects
+							= user.getProjectsTakingPart();
+					List<String> projectsNames = new ArrayList<>();
+					for (ProjectEntity project : usersProjects) {
+						projectsNames.add(project.getName());
+					}
+					result = new JSONObject();
+					result.put("success", "true");
+					result.put("projects", projectsNames);
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnTokenError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/team/projects")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject getAllProjects(JSONObject data) {
+		JSONObject result;
+		String token;
+		String teamName;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				teamName = data.getString("teamName");
+				TeamEntity team = dataService.getTeam(teamName);
+				if (team != null) {
+					List<ProjectEntity> fetchedProjects = team.getProjects();
+					List<String> projects = new ArrayList<>();
+					for (ProjectEntity project : fetchedProjects) {
+						projects.add(project.getName());
+					}
+					result = new JSONObject();
+					result.put("success", "true");
+					result.put("projects", projects);
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnTokenError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/create/project")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject createProject(JSONObject data) {
+		JSONObject result;
+		String token;
+		String teamName;
+		String projectName;
+		String projectDescription;
+		String projectManager;
+		String deadline;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				teamName = data.getString("teamName");
+				projectName = data.getString("projectName");
+				projectDescription = data.getString("projectDescription");
+				projectManager = data.getString("projectManager");
+				deadline = data.getString("deadline");
+				if (dataService.createNewProject(teamName, projectName,
+						projectDescription, projectManager, deadline)) {
+					UserEntity manager = dataService.getUser(projectManager);
+					token = createUserToken("" +manager.getId(),
+							manager.getUsername(), "" +manager.getRole(),
+							manager.getTeam().getName());
+					result = new JSONObject("{\"success\": \"true\", " +
+							"\"userRole\": \"" + UserRole.PROJECT_OWNER
+							+ "\", \"token\": \"" + token + "\"}");
+				} else {
+					result = new JSONObject("{\"success\": \"false\"}");
+				}
+			} else {
+				result = returnTokenError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
 	@Path("member/edit")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -75,172 +256,167 @@ public class RESTService {
 					register = dataService.getRegister
 							(registerName, teamName);
 				}
-					UserEntity userAdmin = dataService.getUser(admin);
-					if (userToEdit != null && register != null
-							&& userAdmin != null) {
-						if (userAdmin.getRole().equals(UserRole.ADMINISTRATOR)
-								&& userAdmin.getTeam().getName().equals(teamName)) {
-							userToEdit.setRegister(register);
-							dataService.saveUser(userToEdit);
-							result = new JSONObject();
-							result.put("success", "true");
+				UserEntity userAdmin = dataService.getUser(admin);
+				if (userToEdit != null && userAdmin != null) {
+					if (userAdmin.getRole().equals(UserRole.ADMINISTRATOR)
+							&& userAdmin.getTeam().getName().equals(teamName)) {
+						userToEdit.setRegister(register);
+						dataService.saveUser(userToEdit);
+						result = new JSONObject();
+						result.put("success", "true");
+					} else {
+						result = returnTokenError();
+					}
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnTokenError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/team/members")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject getTeamMembers(JSONObject data) {
+		JSONObject result;
+		String token;
+		String teamName;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				teamName = data.getString("teamName");
+				TeamEntity team = dataService.getTeam(teamName);
+				if (team != null) {
+					List<UserEntity> teamsMembers = team.getUsers();
+					ArrayList<JSONObject> members = new ArrayList<>();
+					for (UserEntity user : teamsMembers) {
+						JSONObject userInfo;
+						if (user.getRegister() != null) {
+							userInfo = new JSONObject(
+									"{\"username\": \""
+											+ user.getUsername()
+											+ "\", \"register\": " +
+											"\"" + user.getRegister()
+											.getName() + "\", \"color\": \"" +
+											user.getRegister().getColor()
+											+ "\"}");
+							members.add(userInfo);
 						} else {
-							result = returnTokenError();
+							userInfo = new JSONObject("{\"username\": " +
+									"\"" + user.getUsername() + "\", " +
+									"\"register\": \"null\", \"color\":" +
+									" \"-1\"}");
+							members.add(userInfo);
+						}
+					}
+					result = new JSONObject();
+					result.put("success", "true");
+					result.put("members", members);
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnTokenError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/create/register")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject createRegister(JSONObject data) {
+		JSONObject result;
+		String token;
+		String teamName;
+		String registerName;
+		String username;
+		String color;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				teamName = data.getString("teamName");
+				registerName = data.getString("registerName");
+				username = data.getString("username");
+				color = data.getString("color");
+				TeamEntity team = dataService.getTeam(teamName);
+				RegisterEntity register
+						= dataService.getRegister(registerName, teamName);
+				if (team != null && register == null) {
+					if (team.getAdmin().getUsername().equals(username)) {
+						if (dataService.createNewRegister(registerName,
+								teamName, color)) {
+							result = new JSONObject("{\"success\": \"true\"}");
+						} else {
+							result = returnServerError();
 						}
 					} else {
-						result = new JSONObject();
-						result.put("success", "false");
-						result.put("reason", "USER: " + userToEdit +
-								" REGISTER: " + register +
-								" ADMIN: " + userAdmin);
+						result = returnTokenError();
 					}
-				} else{
-					result = returnTokenError();
+				} else {
+					result = returnExistingError();
 				}
-			} catch(JSONException e){
-				result = returnClientError();
+			} else {
+				result = returnTokenError();
 			}
-			return result;
+		} catch (JSONException e) {
+			result = returnClientError();
 		}
+		return result;
+	}
 
-		@POST
-		@Path("/team/members")
-		@Consumes(MediaType.APPLICATION_JSON)
-		@Produces(MediaType.APPLICATION_JSON)
-		public JSONObject getTeamMembers (JSONObject data){
-			JSONObject result;
-			String token;
-			String teamName;
-			try {
-				token = data.getString("token");
-				if (validateToken(token)) {
-					teamName = data.getString("teamName");
-					TeamEntity team = dataService.getTeam(teamName);
-					if (team != null) {
-						List<UserEntity> teamsMembers = team.getUsers();
-						ArrayList<JSONObject> members = new ArrayList<>();
-						for (UserEntity user : teamsMembers) {
-							JSONObject userInfo;
-							if (user.getRegister() != null) {
-								userInfo = new JSONObject(
-										"{\"username\": \""
-												+ user.getUsername()
-												+ "\", \"register\": " +
-												"\"" + user.getRegister()
-												.getName() + "\", \"color\": \"" +
-												user.getRegister().getColor()
-												+ "\"}");
-								members.add(userInfo);
-							} else {
-								userInfo = new JSONObject("{\"username\": " +
-										"\"" + user.getUsername() + "\", " +
-										"\"register\": \"null\", \"color\":" +
-										" \"-1\"}");
-								members.add(userInfo);
-							}
+	@POST
+	@Path("/team/registers")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject getRegisters(JSONObject data) {
+		JSONObject result;
+		String token;
+		String teamName;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				teamName = data.getString("teamName");
+				TeamEntity team = dataService.getTeam(teamName);
+				if (team != null) {
+					List<JSONObject> registerNames = new ArrayList<>();
+					List<RegisterEntity> registerEntities = team.getRegisters();
+					if (registerEntities.size() != 0) {
+						for (RegisterEntity register : registerEntities) {
+							JSONObject registerData = new JSONObject();
+							registerData.put("registerName",
+									register.getName());
+							registerData.put("color", register.getColor());
+							registerNames.add(registerData);
 						}
 						result = new JSONObject();
 						result.put("success", "true");
-						result.put("members", members);
+						result.put("registers", registerNames);
 					} else {
-						result = returnEmptyResult();
+						result = new JSONObject();
+						result.put("success", "true");
+						result.put("registers", "null");
 					}
 				} else {
-					result = returnTokenError();
+					result = returnEmptyResult();
 				}
-			} catch (JSONException e) {
-				result = returnClientError();
+			} else {
+				result = returnTokenError();
 			}
-			return result;
+		} catch (JSONException e) {
+			result = returnClientError();
 		}
-
-		@POST
-		@Path("/create/register")
-		@Consumes(MediaType.APPLICATION_JSON)
-		@Produces(MediaType.APPLICATION_JSON)
-		public JSONObject createRegister (JSONObject data){
-			JSONObject result;
-			String token;
-			String teamName;
-			String registerName;
-			String username;
-			String color;
-			try {
-				token = data.getString("token");
-				if (validateToken(token)) {
-					teamName = data.getString("teamName");
-					registerName = data.getString("registerName");
-					username = data.getString("username");
-					color = data.getString("color");
-					TeamEntity team = dataService.getTeam(teamName);
-					RegisterEntity register
-							= dataService.getRegister(registerName, teamName);
-					if (team != null && register == null) {
-						if (team.getAdmin().getUsername().equals(username)) {
-							if (dataService.createNewRegister(registerName,
-									teamName, color)) {
-								result = new JSONObject("{\"success\": \"true\"}");
-							} else {
-								result = returnServerError();
-							}
-						} else {
-							result = returnTokenError();
-						}
-					} else {
-						result = returnExistingError();
-					}
-				} else {
-					result = returnTokenError();
-				}
-			} catch (JSONException e) {
-				result = returnClientError();
-			}
-			return result;
-		}
-
-		@POST
-		@Path("/team/registers")
-		@Consumes(MediaType.APPLICATION_JSON)
-		@Produces(MediaType.APPLICATION_JSON)
-		public JSONObject getRegisters (JSONObject data){
-			JSONObject result;
-			String token;
-			String teamName;
-			try {
-				token = data.getString("token");
-				if (validateToken(token)) {
-					teamName = data.getString("teamName");
-					TeamEntity team = dataService.getTeam(teamName);
-					if (team != null) {
-						List<JSONObject> registerNames = new ArrayList<>();
-						List<RegisterEntity> registerEntities = team.getRegisters();
-						if (registerEntities.size() != 0) {
-							for (RegisterEntity register : registerEntities) {
-								JSONObject registerData = new JSONObject();
-								registerData.put("registerName",
-										register.getName());
-								registerData.put("color", register.getColor());
-								registerNames.add(registerData);
-							}
-							result = new JSONObject();
-							result.put("success", "true");
-							result.put("registers", registerNames);
-						} else {
-							result = new JSONObject();
-							result.put("success", "true");
-							result.put("registers", "null");
-						}
-					} else {
-						result = returnEmptyResult();
-					}
-				} else {
-					result = returnTokenError();
-				}
-			} catch (JSONException e) {
-				result = returnClientError();
-			}
-			return result;
-		}
+		return result;
+	}
 
 	public JSONObject getTeamMemebers(JSONObject data) {
 		JSONObject result;
@@ -369,7 +545,9 @@ public class RESTService {
 				} else {
 					try {
 						result = new JSONObject("{\"success\":" +
-								"\"true\", \"type\": \"" + REQUEST + "\"}");
+								"\"false\", \"reason\": \"Der User scheint " +
+								"schon in einem Team Mitglied zu sein oder " +
+								"die Anfrage existiert nicht mehr!\"}");
 					} catch (JSONException e) {
 						result = returnClientError();
 					}
@@ -388,11 +566,18 @@ public class RESTService {
 									TeamEntity team, UserEntity user) {
 		boolean result;
 		if (agreeOrDisagree.equals("agree")) {
-			user.setTeam(team);
-			team.setRequestsOfUsers(new ArrayList<>());
-			dataService.saveUser(user);
-			dataService.saveTeam(team);
-			result = true;
+			if (user.getTeam() == null) {
+				user.setTeam(team);
+				requestOfTeam.remove(user.getUsername());
+				dataService.saveUser(user);
+				dataService.saveTeam(team);
+				result = true;
+			} else {
+				requestOfTeam.remove(user.getUsername());
+				team.setRequestsOfUsers(requestOfTeam);
+				dataService.saveTeam(team);
+				result = false;
+			}
 		} else {
 			requestOfTeam.remove(user.getUsername());
 			team.setRequestsOfUsers(requestOfTeam);
@@ -407,10 +592,16 @@ public class RESTService {
 									   TeamEntity team, UserEntity user) {
 		boolean result;
 		if (agreeOrDisagree.equals("agree")) {
-			user.setTeam(team);
-			user.setInvitationsOfTeams(new ArrayList<String>());
-			dataService.saveUser(user);
-			result = true;
+			if (user.getTeam() == null) {
+				user.setTeam(team);
+				user.setInvitationsOfTeams(new ArrayList<>());
+				dataService.saveUser(user);
+				result = true;
+			} else {
+				user.setInvitationsOfTeams(new ArrayList<>());
+				dataService.saveUser(user);
+				result = false;
+			}
 		} else {
 			invitations.remove(team.getName());
 			user.setInvitationsOfTeams(invitations);
