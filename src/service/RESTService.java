@@ -49,6 +49,10 @@ public class RESTService {
 		}
 	}
 
+	@POST
+	@Path("/leave")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject leaveApp(JSONObject data) {
 		JSONObject result;
 		String token;
