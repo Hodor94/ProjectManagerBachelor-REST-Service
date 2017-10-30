@@ -49,6 +49,70 @@ public class RESTService {
 		}
 	}
 
+	public JSONObject leaveApp(JSONObject data) {
+		JSONObject result;
+		String token;
+		String username;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				username = data.getString("username");
+				UserEntity user = dataService.getUser(username);
+				if (user != null) {
+					dataService.deleteUser(user);
+					result = new JSONObject();
+					result.put("success", "true");
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnTokenError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/delete/register")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject delteRegister(JSONObject data) {
+		JSONObject result;
+		String token;
+		String username;
+		String registerName;
+		String teamName;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				username = data.getString("username");
+				registerName = data.getString("registerName");
+				teamName = data.getString("teamName");
+				TeamEntity team = dataService.getTeam(teamName);
+				RegisterEntity register = dataService.getRegister(registerName,
+						teamName);
+				if (team != null && register != null) {
+					if (team.getAdmin().getUsername().equals(username)) {
+						dataService.deleteRegister(register);
+						result = new JSONObject();
+						result.put("success", "true");
+					} else {
+						result = returnTokenError();
+					}
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnTokenError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
 	@POST
 	@Path("/register")
 	@Consumes(MediaType.APPLICATION_JSON)

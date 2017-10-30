@@ -796,5 +796,13 @@ public class DataService {
 	public void saveRegister(RegisterEntity register) {
 		registerDAO.saveOrUpdate(register);
 	}
+
+	public void deleteRegister(RegisterEntity register) {
+		registerDAO.remove(register);
+	}
+
+	public void deleteUser(UserEntity user) {
+		userDAO.remove(user);
+	}
 }
 
