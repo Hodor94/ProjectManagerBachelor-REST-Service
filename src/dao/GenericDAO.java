@@ -1,6 +1,7 @@
 package dao;
 
 import entity.GenericEntity;
+import entity.UserEntity;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import util.HibernateUtil;
@@ -40,6 +41,7 @@ public class GenericDAO<T extends GenericEntity> {
 		session.beginTransaction();
 		T result = session.get(persistentClass, id);
 		session.getTransaction().commit();
+		session.close();
 		return result;
 	}
 
@@ -57,6 +59,7 @@ public class GenericDAO<T extends GenericEntity> {
 		Criteria crit = session.createCriteria(persistentClass);
 		List<T> result = crit.list();
 		session.getTransaction().commit();
+		session.close();
 		return result;
 	}
 
@@ -89,19 +92,7 @@ public class GenericDAO<T extends GenericEntity> {
 		session.beginTransaction();
 		session.remove(entity);
 		session.getTransaction().commit();
-	}
-
-	/**
-	 * Diese Methode soll einen Eintrag aus der spezifischen Tabelle in der Datenbank
-	 * fÃ¼r eine existierende Instanz aus der Datenbank lÃ¶schen.
-	 *
-	 * @param primaryKey Der PrimÃ¤rschlÃ¼ssel der Instanz, fÃ¼r die der Eintrag aus der Datenbank
-	 *                   gelÃ¶scht werden soll.
-	 */
-	public void remove(long primaryKey) {
-		Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-		session.remove(get(primaryKey));
-		session.getTransaction().commit();
+		session.close();
 	}
 
 }

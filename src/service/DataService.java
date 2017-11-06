@@ -4,6 +4,7 @@ package service;
  * Created by Raphael on 14.06.2017.
  */
 
+import com.sun.org.glassfish.external.statistics.Statistic;
 import dao.*;
 import entity.*;
 
@@ -45,9 +46,9 @@ public class DataService {
 		userDAO = new UserDAO();
 		KeyGenerator keyGenerator;
 		try {
-			 keyGenerator = KeyGenerator.getInstance("AES");
-			 keyGenerator.init(256);
-			 secretKey = keyGenerator.generateKey();
+			keyGenerator = KeyGenerator.getInstance("AES");
+			keyGenerator.init(256);
+			secretKey = keyGenerator.generateKey();
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}
@@ -224,7 +225,9 @@ public class DataService {
 					deadline, manager, team);
 			StatisticEntity newStatistic
 					= new StatisticEntity(manager, project);
+			newStatistic.setNumberOfAllAppointments(1);
 			project.getStatistics().add(newStatistic);
+			project.increaseNumberOfAppointments();
 			projectDAO.saveOrUpdate(project);
 			if (manager.getRole() != UserRole.ADMINISTRATOR) {
 				manager.setRole(UserRole.PROJECT_OWNER);
@@ -233,6 +236,14 @@ public class DataService {
 			manager.getProjectsTakingPart().add(project);
 			manager.getStatistics().add(newStatistic);
 			userDAO.saveOrUpdate(manager);
+			ArrayList<UserEntity> userTakingPart = new ArrayList<>();
+			userTakingPart.add(manager);
+			AppointmentEntity appointment
+					= new AppointmentEntity(projectName + " DEADLINE",
+					"Abschluss des Projekts " + projectName, deadline,
+					project, userTakingPart);
+			appointment.setIsDeadline(true);
+			appointmentDAO.saveOrUpdate(appointment);
 			result = true;
 		}
 		return result;
@@ -785,7 +796,7 @@ public class DataService {
 		return result;
 	}
 
-	public  void saveUser(UserEntity user) {
+	public void saveUser(UserEntity user) {
 		userDAO.saveOrUpdate(user);
 	}
 
@@ -802,7 +813,203 @@ public class DataService {
 	}
 
 	public void deleteUser(UserEntity user) {
-		userDAO.remove(user);
+		UserRole role = user.getRole();
+		switch (role) {
+			case USER:
+				removeDependenciesFromUser(user);
+				userDAO.remove(user);
+				break;
+			case PROJECT_OWNER:
+				deleteProjectOwner(user);
+				break;
+			case ADMINISTRATOR:
+				deleteAdmin(user);
+				break;
+		}
 	}
+
+	private void deleteProjectOwner(UserEntity user) {
+		ProjectEntity projectEntity = user.getAdminOfProject();
+		List<UserEntity> usersTakingPart = projectEntity.getUsers();
+		for (UserEntity tempUser : usersTakingPart) {
+			tempUser.getProjectsTakingPart().remove(projectEntity);
+			userDAO.saveOrUpdate(tempUser);
+		}
+		user.setAdminOfProject(null);
+		user.setTeam(null);
+		user.setAppointmentsTakingPart(null);
+		user.setChats(null);
+		user.setProjectsTakingPart(null);
+		user.setRegister(null);
+		user.setTasks(null);
+		userDAO.saveOrUpdate(user);
+		projectDAO.remove(projectEntity);
+		userDAO.removeUser(user.getId());
+	}
+
+	private void deleteAdmin(UserEntity user) {
+		TeamEntity team = user.getTeam();
+		for (UserEntity teamMember : team.getUsers()) {
+			teamMember.setAdminOfProject(null);
+			teamMember.setTeam(null);
+			teamMember.setAppointmentsTakingPart(new ArrayList<>());
+			teamMember.setChats(new ArrayList<>());
+			teamMember.setProjectsTakingPart(new ArrayList<>());
+			teamMember.setRegister(null);
+			teamMember.setTasks(new ArrayList<>());
+			teamMember.setRole(UserRole.USER);
+			userDAO.saveOrUpdate(teamMember);
+		}
+		List<ProjectEntity> projects = team.getProjects();
+		for (ProjectEntity project : projects) {
+			List<AppointmentEntity> appointments = project.getAppointments();
+			deleteAppointments(appointments);
+			project.setUsers(new ArrayList<>());
+			project.setAppointments(new ArrayList<>());
+			project.setProjectManager(null);
+			projectDAO.saveOrUpdate(project);
+			projectDAO.remove(project);
+		}
+		team.setUsers(null);
+		team.setTasks(null);
+		team.setProjects(null);
+		team.setChats(null);
+		teamDAO.saveOrUpdate(team);
+		teamDAO.remove(team);
+		userDAO.removeUser(user.getId());
+	}
+
+	private void deleteAppointments(List<AppointmentEntity> appointments) {
+		for (AppointmentEntity appointment : appointments) {
+			appointment.setUserTakinPart(new ArrayList<>());
+			appointment.setProject(null);
+			appointmentDAO.saveOrUpdate(appointment);
+			appointmentDAO.remove(appointment);
+		}
+	}
+
+	public void deleteTeam(TeamEntity team) {
+		List<UserEntity> teamMembers = team.getUsers();
+		for (UserEntity user : teamMembers) {
+			removeDependenciesFromUser(user);
+			userDAO.saveOrUpdate(user);
+		}
+		team.setUsers(new ArrayList<>());
+		teamDAO.saveOrUpdate(team);
+		teamDAO.remove(team);
+	}
+
+	private void removeDependenciesFromUser(UserEntity user) {
+		user.setRole(UserRole.USER);
+		user.setTasks(new ArrayList<>());
+		user.setRegister(null);
+		user.setProjectsTakingPart(new ArrayList<>());
+		user.setChats(new ArrayList<>());
+		user.setAppointmentsTakingPart(new ArrayList<>());
+		user.setAdminOfProject(null);
+		user.setDayOfEntry(null);
+		user.setStatistics(new ArrayList<>());
+		user.setTributes(null);
+		user.setTeam(null);
+	}
+
+	public boolean leaveTeam(UserEntity user, TeamEntity team) {
+		boolean result = false;
+		if (user.getRole() != UserRole.ADMINISTRATOR) {
+			if (user.getRole() == UserRole.PROJECT_OWNER) {
+				ProjectEntity project = user.getAdminOfProject();
+				deleteProject(project);
+				removeDependenciesFromUser(user);
+				userDAO.saveOrUpdate(user);
+				result = true;
+			} else {
+				List<UserEntity> teamMembers = team.getUsers();
+				teamMembers.remove(user);
+				teamDAO.saveOrUpdate(team);
+				removeDependenciesFromUser(user);
+				userDAO.saveOrUpdate(user);
+				result = true;
+			}
+		}
+		return result;
+	}
+
+	public void deleteProject(ProjectEntity project) {
+		List<AppointmentEntity> appointments
+				= project.getAppointments();
+		List<StatisticEntity> statistics = project.getStatistics();
+		List<UserEntity> users = project.getUsers();
+		project.setStatistics(new ArrayList<>());
+		project.setAppointments(new ArrayList<>());
+		projectDAO.saveOrUpdate(project);
+		for (UserEntity user : users) {
+			user.getStatistics().removeAll(statistics);
+			user.getAppointmentsTakingPart().removeAll(appointments);
+			user.getProjectsTakingPart().remove(project);
+			if (user.getUsername()
+					.equals(project.getProjectManager().getUsername())) {
+				user.setAdminOfProject(null);
+			}
+			userDAO.saveOrUpdate(user);
+		}
+		for (StatisticEntity statistic : statistics) {
+			deleteStatistic(statistic);
+		}
+		deleteAppointments(appointments);
+		project.setProjectManager(null);
+		projectDAO.remove(project);
+	}
+
+	private void deleteStatistic(StatisticEntity statistic) {
+		statistic.setProject(null);
+		statistic.getUser().getStatistics().remove(statistic);
+		statisticDAO.saveOrUpdate(statistic);
+		statisticDAO.remove(statistic);
+	}
+
+	public void editProject(ProjectEntity project, String description,
+							   String deadline) {
+		List<AppointmentEntity> appointments = project.getAppointments();
+		for (AppointmentEntity appointment : appointments) {
+			if (appointment.getIsDeadline()) {
+				appointment.setDeadline(deadline);
+				appointmentDAO.saveOrUpdate(appointment);
+				break;
+			}
+		}
+		project.setAppointments(appointments);
+		project.setDescription(description);
+		project.setDeadline(deadline);
+		projectDAO.saveOrUpdate(project);
+	}
+
+	public void editProjectMembership(ProjectEntity project,
+									  ArrayList<String> usersToEdit) {
+		List<UserEntity> projectMembers = project.getUsers();
+		List<String> usersToRemove = new ArrayList<>();
+		for (UserEntity user : projectMembers) {
+			for (String username : usersToEdit) {
+				if (user.getUsername().equals(username)) {
+					UserEntity toRemove = getUser(username);
+					projectMembers.remove(toRemove);
+					removeUserFromProject(username, project.getName(),
+							project.getTeam().getName());
+					usersToRemove.add(username);
+				}
+			}
+		}
+		for (String username : usersToRemove) {
+			usersToEdit.remove(username);
+		}
+		for (String username : usersToEdit) {
+			UserEntity user = getUser(username);
+			projectMembers.add(user);
+			user.getProjectsTakingPart().add(project);
+			userDAO.saveOrUpdate(user);
+		}
+		project.setUsers(projectMembers);
+		projectDAO.saveOrUpdate(project);
+	}
+
 }
 

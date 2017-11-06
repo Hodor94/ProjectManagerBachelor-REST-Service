@@ -37,19 +37,6 @@ public class MainTest {
 		JSONObject responseRegister = service.registerUser(register);
 		System.out.println(responseRegister.toString());
 		JSONObject responseLogin = service.loginUser(login);
-		JSONObject userLogin = null;
-		try {
-			userLogin = responseLogin.getJSONObject("user");
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		try {
-			String address = userLogin.getString("address");
-			System.out.println("Address: " + address);
-			System.out.println("Address-bytes: " + address.getBytes());
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
 		try {
 			token = responseLogin.getString("token");
 		} catch (JSONException e) {
@@ -97,6 +84,10 @@ public class MainTest {
 				getTeamMembers.put("teamName", "testTeam");
 				JSONObject responseGetTeamMembers = service.getTeamMembers
 						(getTeamMembers);
+				JSONObject deleteUser = new JSONObject("{\"token\": \"" +
+						token + "\", \"username\": \"admin\"}");
+				JSONObject resultDeleteUser = service.leaveApp(deleteUser);
+				System.out.println(resultDeleteUser.toString());
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}

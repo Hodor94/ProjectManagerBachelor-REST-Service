@@ -28,6 +28,9 @@ public class AppointmentEntity extends GenericEntity {
 	@Column(name = "name")
 	private String name;
 
+	@Column(name = "isDeadline")
+	private boolean isDeadline;
+
 	@Column(name = "description")
 	private String description;
 
@@ -51,6 +54,7 @@ public class AppointmentEntity extends GenericEntity {
 	public AppointmentEntity() {
 		super();
 		userTakingPart = new ArrayList<UserEntity>();
+		isDeadline = false;
 	}
 
 	/**
@@ -71,6 +75,7 @@ public class AppointmentEntity extends GenericEntity {
 		this.deadline = deadline;
 		this.project = project;
 		this.userTakingPart = userTakingPart;
+		isDeadline = false;
 	}
 
 	/**
@@ -165,6 +170,14 @@ public class AppointmentEntity extends GenericEntity {
 		this.userTakingPart = userTakinPart;
 	}
 
+	public void setIsDeadline(boolean isDeadline) {
+		this.isDeadline = isDeadline;
+	}
+
+	public boolean getIsDeadline() {
+		return isDeadline;
+	}
+
 	/**
 	 * Formats all the information contained by an instance of
 	 * AppointmentEntity except the project and the list of users taking part
@@ -181,17 +194,22 @@ public class AppointmentEntity extends GenericEntity {
 		stringBuilder.append("\"id\": " + "\"" + this.getId() + "\",");
 		stringBuilder.append(appendJSONName(name));
 		stringBuilder.append(appendJSONDescription(description));
-		stringBuilder.append(appenJSONDeadline(deadline));
+		stringBuilder.append(appendJSONDeadline(deadline));
+		stringBuilder.append(appendJSONIDeadline(isDeadline));
 		stringBuilder.append("}");
 		result = stringBuilder.toString();
 		return result;
+	}
+
+	private String appendJSONIDeadline(boolean isDeadline) {
+		return "\"isDeadline\": \"" + isDeadline + "\"";
 	}
 
 	private String appendJSONName(String name) {
 		if (name != null && !(name.equals(""))) {
 			return "\"name\": " + "\"" + encodeToUTF8(name) + "\",";
 		} else {
-			return "\"name\": " + null +", ";
+			return "\"name\": " + null + ", ";
 		}
 	}
 
@@ -204,13 +222,12 @@ public class AppointmentEntity extends GenericEntity {
 		}
 	}
 
-	private String appenJSONDeadline(String deadline) {
+	private String appendJSONDeadline(String deadline) {
 		if (deadline != null && !(deadline.equals(""))) {
-			return "\"deadline\": " + "\"" + encodeToUTF8(deadline) + "\"";
+			return "\"deadline\": " + "\"" + encodeToUTF8(deadline) + "\", ";
 		} else {
-			return "\"deadline\": " + null;
+			return "\"deadline\": " + null + ", ";
 		}
-
 	}
 
 }

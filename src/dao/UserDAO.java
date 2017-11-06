@@ -8,6 +8,7 @@ import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
+import org.hibernate.query.Query;
 import util.HibernateUtil;
 
 @SuppressWarnings("deprecation")
@@ -50,5 +51,14 @@ public class UserDAO extends GenericDAO<UserEntity> {
         session.close();
 		return result;
     }
+
+    public void removeUser(long id) {
+    	Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+    	session.beginTransaction();
+    	UserEntity toDelete = session.load(UserEntity.class, id);
+    	session.remove(toDelete);
+    	session.getTransaction().commit();
+    	session.close();
+	}
 
 }
