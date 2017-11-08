@@ -77,7 +77,8 @@ class TeamEntityTest {
 				"", "", "", BIRTHDAY);
 		service.createNewTeam(TEAM_NAME, DESCRIPTION, USER_NAME_ONE);
 		service.addUserToTeam(TEAM_NAME, USER_NAME_TWO);
-		service.createNewTask(TASK_NAME, DESCRIPTION, BIRTHDAY, TEAM_NAME);
+		service.createNewTask(TASK_NAME, DESCRIPTION, BIRTHDAY, TEAM_NAME,
+				USER_NAME_ONE);
 		service.setWorkerToTask(TASK_NAME, USER_NAME_ONE, TEAM_NAME);
 		service.createNewRegister(REGISTER_NAME, TEAM_NAME, "#ffffff");
 		service.setUsersRegister(USER_NAME_TWO, REGISTER_NAME, TEAM_NAME);

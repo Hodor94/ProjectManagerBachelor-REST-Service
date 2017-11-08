@@ -231,8 +231,8 @@ public class DataService {
 			projectDAO.saveOrUpdate(project);
 			if (manager.getRole() != UserRole.ADMINISTRATOR) {
 				manager.setRole(UserRole.PROJECT_OWNER);
-				manager.setAdminOfProject(project);
 			}
+			manager.setAdminOfProject(project);
 			manager.getProjectsTakingPart().add(project);
 			manager.getStatistics().add(newStatistic);
 			userDAO.saveOrUpdate(manager);
@@ -285,14 +285,18 @@ public class DataService {
 	}
 
 	public boolean createNewTask(String name, String description,
-								 String date, String teamName) {
+								 String date, String teamName,
+								 String username) {
 		boolean result = false;
 		TeamEntity team = teamDAO.getTeamByTeamName(teamName);
-		if (team != null) {
+		UserEntity user = getUser(username);
+		if (team != null && user != null) {
 			TaskEntity task = taskDAO.getTaskByTaskName(name, team);
 			if (task == null) {
-				task = new TaskEntity(name, description, date, team);
+				user.getTasks().add(task);
+				task = new TaskEntity(name, description, date, team, user);
 				taskDAO.saveOrUpdate(task);
+				userDAO.saveOrUpdate(user);
 				result = true;
 			}
 		}
@@ -1011,5 +1015,33 @@ public class DataService {
 		projectDAO.saveOrUpdate(project);
 	}
 
+	public TaskEntity getTask(long id) {
+		TaskEntity task = taskDAO.get(id);
+		return task;
+	}
+
+	public void editTask(TaskEntity task, String description,
+							String deadline) {
+		task.setDeadline(deadline);
+		task.setDescription(description);
+		taskDAO.saveOrUpdate(task);
+	}
+
+	public void deleteTask(TaskEntity task) {
+		TeamEntity team = task.getTeam();
+		List<TaskEntity> tasksOfTeam = team.getTasks();
+		tasksOfTeam.remove(task);
+		team.setTasks(tasksOfTeam);
+		UserEntity worker = task.getWorker();
+		List<TaskEntity> tasksOfWorker = worker.getTasks();
+		tasksOfWorker.remove(task);
+		worker.setTasks(tasksOfWorker);
+		task.setTeam(null);
+		task.setWorker(null);
+		userDAO.saveOrUpdate(worker);
+		teamDAO.saveOrUpdate(team);
+		taskDAO.saveOrUpdate(task);
+		taskDAO.remove(task);
+	}
 }
 

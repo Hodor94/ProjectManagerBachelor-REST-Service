@@ -176,7 +176,7 @@ public class TeamEntity extends GenericEntity {
 		return tasks;
 	}
 
-	public void setTasks(ArrayList<TaskEntity> tasks) {
+	public void setTasks(List<TaskEntity> tasks) {
 		this.tasks = tasks;
 	}
 

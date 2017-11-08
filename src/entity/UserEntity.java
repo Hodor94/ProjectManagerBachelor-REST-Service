@@ -399,7 +399,7 @@ public class UserEntity extends GenericEntity {
 	}
 
 	private String appendJSONAdminOfProject(ProjectEntity adminOfProject) {
-		if (adminOfProject != null && role == UserRole.PROJECT_OWNER) {
+		if (adminOfProject != null) {
 			return "\"adminOfProject\": \"" + adminOfProject.getName() + "\", ";
 		} else {
 			return "\"adminOfProject\": " + null + ", ";

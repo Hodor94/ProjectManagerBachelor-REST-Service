@@ -53,11 +53,12 @@ public class TaskEntity extends GenericEntity {
 	}
 
 	public TaskEntity(String name, String description, String deadline,
-					  TeamEntity team) {
+					  TeamEntity team, UserEntity worker) {
 		this.name = name;
 		this.deadline = deadline;
 		this.description = description;
 		this.team = team;
+		this.worker = worker;
 	}
 
 	public String getName() {
@@ -115,6 +116,7 @@ public class TaskEntity extends GenericEntity {
 		stringBuilder.append(appendJSONName(name));
 		stringBuilder.append(appendJSONDescription(description));
 		stringBuilder.append(appendJSONDeadline(deadline));
+		stringBuilder.append(appendJSONWorker());
 		stringBuilder.append("}");
 		result = stringBuilder.toString();
 		return result;
@@ -122,7 +124,7 @@ public class TaskEntity extends GenericEntity {
 
 	private String appendJSONName(String name) {
 		if (name != null && !(name.equals(""))) {
-			return "\"name\": " + "\"" + encodeToUTF8(name) + "\", ";
+			return "\"name\": " + "\"" + name + "\", ";
 		} else {
 			return "\"name\": " + null + ", ";
 		}
@@ -131,7 +133,7 @@ public class TaskEntity extends GenericEntity {
 	private String appendJSONDescription(String description) {
 		if (description != null && !(description.equals(""))) {
 			return "\"description\": " + "\""
-					+ encodeToUTF8(description) + "\", ";
+					+ description + "\", ";
 		} else {
 			return "\"description\": " + null + ", ";
 		}
@@ -139,9 +141,17 @@ public class TaskEntity extends GenericEntity {
 
 	private String appendJSONDeadline(String deadline) {
 		if (deadline != null && !(deadline.equals(""))) {
-			return "\"deadline\": " + "\"" + encodeToUTF8(deadline) + "\"";
+			return "\"deadline\": " + "\"" + deadline + "\", ";
 		} else {
-			return "\"deadline\": " + null;
+			return "\"deadline\": " + null + ", ";
+		}
+	}
+
+	private String appendJSONWorker() {
+		if (this.getWorker() != null) {
+			return "\"worker\":  \"" + getWorker().getUsername() + "\"";
+		} else {
+			return "\"worker\": " + null;
 		}
 	}
 

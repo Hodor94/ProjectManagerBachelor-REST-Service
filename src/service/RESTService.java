@@ -50,7 +50,281 @@ public class RESTService {
 		}
 	}
 
-	// TODO
+	@POST
+	@Path("/project/appointments")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject getProjectsAppointment(JSONObject data) {
+		JSONObject result;
+		String token;
+		String projectName;
+		String teamName;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				projectName = data.getString("projectName");
+				teamName = data.getString("teamName");
+				ProjectEntity project = dataService.getProject(projectName,
+						teamName);
+				if (project != null) {
+					List<AppointmentEntity> appointments
+							= project.getAppointments();
+					List<JSONObject> appointmentsJson = new ArrayList<>();
+					for (AppointmentEntity appointment : appointments) {
+						appointmentsJson
+								.add(new JSONObject(appointment.toString()));
+					}
+					result = new JSONObject();
+					result.put("success", "true");
+					result.put("appointments", appointmentsJson);
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnNoRightsError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/delete/task")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject deleteTask(JSONObject data) {
+		JSONObject result;
+		String token;
+		String taskName;
+		String teamName;
+		String username;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				taskName = data.getString("taskName");
+				teamName = data.getString("teamName");
+				username = data.getString("username");
+				TaskEntity task = dataService.getTask(taskName, teamName);
+				if (task != null) {
+					if (task.getWorker().getUsername().equals(username)) {
+						dataService.deleteTask(task);
+						result = new JSONObject();
+						result.put("success", "true");
+					} else {
+						result = returnNoRightsError();
+					}
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnNoRightsError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/edit/task")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject editTask(JSONObject data) {
+		JSONObject result;
+		String token;
+		String taskName;
+		String description;
+		String deadline;
+		String teamName;
+		String username;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				taskName = data.getString("taskName");
+				description = data.getString("taskDescription");
+				deadline = data.getString("taskDeadline");
+				teamName = data.getString("teamName");
+				username = data.getString("username");
+				TaskEntity task
+						= dataService.getTask(taskName, teamName);
+				TeamEntity team = dataService.getTeam(teamName);
+				if (task != null && team != null) {
+					if (task.getWorker().getUsername().equals(username)) {
+						dataService.editTask(task, description, deadline);
+							result = new JSONObject();
+							result.put("success", "true");
+					} else {
+						result = returnNoRightsError();
+					}
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnNoRightsError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/task")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject getTask(JSONObject data) {
+		JSONObject result;
+		String token;
+		String taskName;
+		String teamName;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				taskName = data.getString("taskName");
+				teamName = data.getString("teamName");
+				TaskEntity task = dataService.getTask(taskName, teamName);
+				if (task != null) {
+					result = new JSONObject();
+					result.put("success", "true");
+					result.put("task", new JSONObject(task.toString()));
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnNoRightsError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/team/tasks")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject getTeamsTasks(JSONObject data) {
+		JSONObject result;
+		String token;
+		String teamName;
+		String username;
+
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				teamName = data.getString("teamName");
+				username = data.getString("username");
+				TeamEntity team = dataService.getTeam(teamName);
+				if (team != null) {
+					if (team.getAdmin().getUsername().equals(username)) {
+						List<TaskEntity> tasks = team.getTasks();
+						ArrayList<String> projectsOfTeam = new ArrayList<>();
+						for (TaskEntity task : tasks) {
+							projectsOfTeam.add(task.getName());
+						}
+						result = new JSONObject();
+						result.put("success", "true");
+						result.put("tasks", projectsOfTeam);
+					} else {
+						result = returnNoRightsError();
+					}
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnNoRightsError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/user/tasks")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject getUsersTasks(JSONObject data) {
+		JSONObject result;
+		String token;
+		String username;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				username = data.getString("username");
+				UserEntity user = dataService.getUser(username);
+				if (user != null) {
+					List<TaskEntity> tasks = user.getTasks();
+					List<String> taskNames = new ArrayList<>();
+					for (TaskEntity task : tasks) {
+						taskNames.add(task.getName());
+					}
+					result = new JSONObject();
+					result.put("success", "true");
+					result.put("tasks", taskNames);
+
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnNoRightsError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/create/task")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject createTask(JSONObject data) {
+		JSONObject result;
+		String token;
+		String taskName;
+		String taskDescription;
+		String worker;
+		String deadline;
+		String teamName;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				taskName = data.getString("taskName");
+				taskDescription = data.getString("description");
+				worker = data.getString("worker");
+				teamName = data.getString("teamName");
+				deadline = data.getString("deadline");
+				TaskEntity task = dataService.getTask(taskName, teamName);
+				UserEntity user = dataService.getUser(worker);
+				if (user != null) {
+					if (task == null) {
+						if (dataService.createNewTask(taskName, taskDescription,
+								deadline, teamName, worker)) {
+							result = new JSONObject();
+							result.put("success", "true");
+						} else {
+							result = new JSONObject();
+							result.put("success", "false");
+							result.put("reason", "Interner Fehler! Die Aufgabe " +
+									"konnte nicht angelegt werden!");
+						}
+					} else {
+						result = returnExistingError();
+					}
+				} else {
+					result = returnNoRightsError();
+				}
+			} else {
+				result = returnEmptyResult();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
 	@POST
 	@Path("/edit/project/membership")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -593,6 +867,7 @@ public class RESTService {
 				UserEntity user = dataService.getUser(projectManager);
 				ProjectEntity project
 						= dataService.getProject(projectName, teamName);
+				TeamEntity team = dataService.getTeam(teamName);
 				if (project == null && user != null) {
 					if (user.getAdminOfProject() == null) {
 						if (dataService.createNewProject(teamName, projectName,
@@ -601,9 +876,15 @@ public class RESTService {
 							token = createUserToken("" + manager.getId(),
 									manager.getUsername(), "" + manager.getRole(),
 									manager.getTeam().getName());
-							result = new JSONObject("{\"success\": \"true\", " +
-									"\"userRole\": \"" + UserRole.PROJECT_OWNER
-									+ "\", \"token\": \"" + token + "\"}");
+							result = new JSONObject();
+							result.put("success", "true");
+							result.put("token", token);
+							if (projectManager.equals(team.getAdmin()
+									.getUsername())) {
+								result.put("adminOfProject", projectName);
+							} else {
+								result.put("adminOfProject", "null");
+							}
 						} else {
 							result = new JSONObject("{\"success\": \"false\"}");
 						}
@@ -1577,7 +1858,11 @@ public class RESTService {
 		try {
 			JSONObject result = new JSONObject("{\"success\": \"false\", " +
 					"\"reason\": \"Die Berechtigung für diese Aktion ist " +
-					"nicht gewährleistet!\"}");
+					"nicht gewährleistet!\n" +
+					"Entweder Ihre Session ist abgelaufen oder Sie haben " +
+					"nicht die nötigen Rechte für die Aktion!\n" +
+					"Bitte loggen Sie sich erneut ein und versuchen Sie es" +
+					".\"}");
 			return result;
 		} catch (JSONException e) {
 			return null;

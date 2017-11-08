@@ -43,7 +43,8 @@ class TaskEntityTest {
 		testUser = new UserEntity(USER_NAME, "", "",
 				"", "", "", "", DATE);
 		testTeam = new TeamEntity(TEAM_NAME, DESCRIPTION, testUser);
-		testTask = new TaskEntity(TASK_NAME, DESCRIPTION, DATE, testTeam);
+		testTask = new TaskEntity(TASK_NAME, DESCRIPTION, DATE, testTeam,
+				testUser);
 	}
 
 	@Test
@@ -52,7 +53,8 @@ class TaskEntityTest {
 		service.registerUser(USER_NAME, "", "", "",
 				"", "", "", DATE);
 		service.createNewTeam(TEAM_NAME, DESCRIPTION, USER_NAME);
-		service.createNewTask(TASK_NAME, DESCRIPTION, DATE, TEAM_NAME);
+		service.createNewTask(TASK_NAME, DESCRIPTION, DATE, TEAM_NAME,
+				USER_NAME);
 		TeamEntity team = service.getTeam(TEAM_NAME);
 		TaskEntity fetchedTask = service.getTask(TASK_NAME, TEAM_NAME);
 		assertEquals(testTask.getName(), fetchedTask.getName());
@@ -71,7 +73,8 @@ class TaskEntityTest {
 		TaskDAO taskDAO = new TaskDAO();
 		userDAO.saveOrUpdate(testUser);
 		teamDAO.saveOrUpdate(testTeam);
-		service.createNewTask(TASK_NAME, DESCRIPTION, DATE, TEAM_NAME);
+		service.createNewTask(TASK_NAME, DESCRIPTION, DATE, TEAM_NAME,
+				USER_NAME);
 		service.setWorkerToTask(TASK_NAME, USER_NAME, TEAM_NAME);
 		TeamEntity team = teamDAO.getTeamByTeamName(TEAM_NAME);
 		TaskEntity fetchedTask = taskDAO.getTaskByTaskName(TASK_NAME, team);
@@ -104,7 +107,8 @@ class TaskEntityTest {
 		service.registerUser(USER_NAME, "", "", "",
 				"", "", "", DATE);
 		service.createNewTeam(TEAM_NAME, DESCRIPTION, USER_NAME);
-		service.createNewTask(TASK_NAME, DESCRIPTION, DATE, TEAM_NAME);
+		service.createNewTask(TASK_NAME, DESCRIPTION, DATE, TEAM_NAME,
+				USER_NAME);
 		TaskEntity task = service.getTask(TASK_NAME, TEAM_NAME);
 		assertNotEquals(null, task);
 		TeamEntity team = service.getTeam(TEAM_NAME);
@@ -118,7 +122,8 @@ class TaskEntityTest {
 		team = service.getTeam(TEAM_NAME);
 		assertTrue(team.getTasks().isEmpty());
 		// create a task again and set a worker
-		service.createNewTask(TASK_NAME, DESCRIPTION, DATE, TEAM_NAME);
+		service.createNewTask(TASK_NAME, DESCRIPTION, DATE, TEAM_NAME,
+				USER_NAME);
 		service.setWorkerToTask(TASK_NAME, USER_NAME, TEAM_NAME);
 		UserEntity user = service.getUser(USER_NAME);
 		task = service.getTask(TASK_NAME, TEAM_NAME);
