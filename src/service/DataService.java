@@ -1043,5 +1043,29 @@ public class DataService {
 		taskDAO.saveOrUpdate(task);
 		taskDAO.remove(task);
 	}
+
+	public void editAppointment(AppointmentEntity appointment,
+								String appointmentName,
+								String appointmentDescription, String deadline) {
+		appointment.setName(appointmentName);
+		appointment.setDescription(appointmentDescription);
+		appointment.setDeadline(deadline);
+		appointmentDAO.saveOrUpdate(appointment);
+	}
+
+	public void deleteAppointment(AppointmentEntity appointment) {
+		List<UserEntity> usersOfAppointment = appointment.getUserTakinPart();
+		ProjectEntity project = appointment.getProject();
+		project.getAppointments().remove(appointment);
+		projectDAO.saveOrUpdate(project);
+		for (UserEntity user : usersOfAppointment) {
+			user.getAppointmentsTakingPart().remove(appointment);
+			userDAO.saveOrUpdate(user);
+		}
+		appointment.setProject(null);
+		appointment.setUserTakinPart(new ArrayList<>());
+		appointmentDAO.saveOrUpdate(appointment);
+		appointmentDAO.remove(appointment);
+	}
 }
 

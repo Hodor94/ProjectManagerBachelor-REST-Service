@@ -10,17 +10,18 @@
 
         <property name="hibernate.enable_lazy_load_no_trans">true</property>
 
-        <!-- For real use
+        <!-- For real use -->
         <property name="connection.url">
-            jdbc:mysql://localhost/projectManager
+            jdbc:mysql://localhost/projectManager?useUnicode=true&amp;characterEncoding=UTF-8&amp;createDatabaseIfNotExist=true
         </property>
         <property name="connection.username">grum</property>
         <property name="connection.password">OoHeedei1eiw8gaa</property>
-        -->
 
-        <!-- For debugging -->
+
+
+        <!-- For debugging and testing
         <property name="connection.url">
-            jdbc:mysql://localhost/evsdb?useUnicode=true;characterEncoding=UTF-8
+            jdbc:mysql://localhost/evsdb?useUnicode=true&amp;characterEncoding=UTF-8&amp;createDatabaseIfNotExist=true
         </property>
 
         <property name="connection.username">
@@ -29,6 +30,8 @@
         <property name="connection.password">
             evs2016!
         </property>
+        -->
+
 
 
         <property name="hibernate.connection.CharSet">utf8</property>
@@ -61,7 +64,7 @@
         <property name="current_session_context_class">thread</property>
 
         <!-- DB schema will be updated if needed -->
-        <property name="hbm2ddl.auto">create-drop</property>
+        <property name="hibernate.hbm2ddl.auto">update</property>
 
         <property name="hibernate.event.merge.entity_copy_observer">allow
         </property>

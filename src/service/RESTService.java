@@ -4,6 +4,7 @@ package service;
  * Created by Raphael on 15.06.2017.
  */
 
+import javax.print.attribute.standard.Media;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
@@ -48,6 +49,166 @@ public class RESTService {
 		} catch (JSONException e) {
 			return null;
 		}
+	}
+
+	@POST
+	@Path("/delete/appointment")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public JSONObject deleteAppointment(JSONObject data) {
+		JSONObject result;
+		String token;
+		String projectName;
+		String teamName;
+		String username;
+		String appointmentId;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				projectName = data.getString("projectName");
+				teamName = data.getString("teamName");
+				username = data.getString("username");
+				appointmentId = data.getString("id");
+				ProjectEntity project = dataService.getProject(projectName,
+						teamName);
+				AppointmentEntity appointment
+						= dataService.getAppointment(projectName,
+						Long.parseLong(appointmentId), teamName);
+				if (appointment != null && project != null) {
+					if (project.getProjectManager().getUsername()
+							.equals(username)) {
+						if (!appointment.getIsDeadline()) {
+							dataService.deleteAppointment(appointment);
+							result = new JSONObject();
+							result.put("success", "true");
+						} else {
+							result = new JSONObject();
+							result.put("success", "false");
+							result.put("reason", "Das Meeting is ein " +
+									"Abschlusstermin eines Projekts!\n" +
+									"Es kann nur gelöscht werden, indem das " +
+									"Projekt gelöscht wird!");
+						}
+					} else {
+						result = returnNoRightsError();
+					}
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnNoRightsError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/edit/appointment")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject editAppointment(JSONObject data) {
+		JSONObject result;
+		String token;
+		String username;
+		String projectName;
+		String teamName;
+		String id;
+		String appointmentName;
+		String appointmentDescription;
+		String deadline;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				username = data.getString("username");
+				projectName = data.getString("projectName");
+				teamName = data.getString("teamName");
+				id = data.getString("id");
+				appointmentName = data.getString("appointmentName");
+				appointmentDescription
+						= data.getString("appointmentDescription");
+				deadline = data.getString("deadline");
+				ProjectEntity project = dataService.getProject(projectName,
+						teamName);
+				AppointmentEntity appointment = dataService.getAppointment
+						(projectName,
+						Long.parseLong(id),
+						teamName);
+				if (project != null && appointment != null) {
+					if (project.getProjectManager().getUsername()
+							.equals(username)) {
+						dataService.editAppointment(appointment,
+								appointmentName, appointmentDescription,
+								deadline);
+						result = new JSONObject();
+						result.put("success", "true");
+					} else {
+						result = returnNoRightsError();
+					}
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnNoRightsError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+
+	@POST
+	@Path("/create/appointment")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject createAppointment(JSONObject data) {
+		JSONObject result;
+		String token;
+		String projectName;
+		String teamName;
+		String appointmentName;
+		String description;
+		String deadline;
+		String username;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				projectName = data.getString("projectName");
+				teamName = data.getString("teamName");
+				appointmentName = data.getString("appointmentName");
+				description = data.getString("description");
+				deadline = data.getString("deadline");
+				username = data.getString("username");
+				ProjectEntity project = dataService.getProject(projectName,
+						teamName);
+				if (project != null) {
+					if (project.getProjectManager().getUsername()
+							.equals(username)) {
+						if (dataService.createNewAppointment(appointmentName,
+								description, deadline, projectName, teamName)) {
+							result = new JSONObject();
+							result.put("success", "true");
+						} else {
+							result = new JSONObject();
+							result.put("success", "false");
+							result.put("reason", "Interner Fehler! Das " +
+									"Meeting konnte nicht angelegt werden!");
+						}
+					} else {
+						result = returnNoRightsError();
+					}
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnNoRightsError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
 	}
 
 	@POST
@@ -2027,4 +2188,3 @@ public class RESTService {
 	}
 
 }
-
