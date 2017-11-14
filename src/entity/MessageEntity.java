@@ -106,7 +106,7 @@ public class MessageEntity extends GenericEntity {
 
 	private String appendJSONDate(String date) {
 		if (date != null && !(date.equals(""))) {
-			return "\"date\": " + "\"" + encodeToUTF8(date) + "\", ";
+			return "\"date\": " + "\"" + date + "\", ";
 		} else {
 			return "\"date\": " + null + ", ";
 		}

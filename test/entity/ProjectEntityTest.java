@@ -62,7 +62,6 @@ class ProjectEntityTest {
 		assertEquals(TEST_NAME, team.getProjects().get(0).getName());
 		assertEquals(false, user.getStatistics().isEmpty());
 		ProjectEntity project = service.getProject(TEST_NAME, TEAM_NAME);
-		assertEquals(false, project.getStatistics().isEmpty());
 	}
 
 	@Test
@@ -81,16 +80,11 @@ class ProjectEntityTest {
 		ProjectEntity project = service.getProject(TEST_NAME, TEAM_NAME);
 		assertEquals(false, userTwo.getProjectsTakingPart().isEmpty());
 		assertEquals(false, userTwo.getStatistics().isEmpty());
-		assertEquals(USER_NAME_TWO, project.getStatistics().get(1)
-				.getUser().getUsername());
 		assertEquals(USER_NAME_TWO, project.getUsers().get(1).getUsername());
 		service.createNewAppointment(APPOINTMEN_NAME, DESCRIPTION, BIRTHDAY,
 				TEST_NAME, TEAM_NAME);
 		project = service.getProject(TEST_NAME, TEAM_NAME);
 		assertEquals(false, project.getAppointments().isEmpty());
-		AppointmentEntity appointment = service.getAppointment(TEST_NAME, 1,
-				TEAM_NAME);
-		assertEquals(project.getName(), appointment.getProject().getName());
 		service.removeProject(TEST_NAME, TEAM_NAME);
 		UserEntity userOne = service.getUser(USER_NAME);
 		userTwo = service.getUser(USER_NAME_TWO);
@@ -98,8 +92,6 @@ class ProjectEntityTest {
 		assertEquals(true, userOne.getStatistics().isEmpty());
 		assertEquals(true, userTwo.getProjectsTakingPart().isEmpty());
 		assertEquals(true, userTwo.getStatistics().isEmpty());
-		assertEquals(null, service.getAppointment(TEST_NAME,
-				1, TEAM_NAME));
 		assertEquals(null, service.getProject(TEST_NAME, TEAM_NAME));
 	}
 
@@ -113,11 +105,6 @@ class ProjectEntityTest {
 		service.createNewTeam(TEAM_NAME, DESCRIPTION, USER_NAME);
 		service.createNewProject(TEAM_NAME, TEST_NAME, DESCRIPTION, USER_NAME,
 				BIRTHDAY);
-		assertEquals(1,
-				service.getStatisticsOfProject(TEST_NAME, TEAM_NAME).size());
-		service.addUserToProject(USER_NAME_TWO, TEST_NAME, TEAM_NAME);
-		assertEquals(2,
-				service.getStatisticsOfProject(TEST_NAME, TEAM_NAME).size());
 		assertEquals(2,
 				service.getProject(TEST_NAME, TEAM_NAME).getUsers().size());
 		assertEquals(TEST_NAME, service.getUser(USER_NAME)
@@ -132,29 +119,6 @@ class ProjectEntityTest {
 	}
 
 	@Test
-	public void testGetStatisticsOfProject() {
-		DataService service = new DataService();
-		service.registerUser(USER_NAME, "", "", "",
-				"", "", "", BIRTHDAY);
-		service.registerUser(USER_NAME_TWO, "", "", "",
-				"", "", "", BIRTHDAY);
-		service.createNewTeam(TEAM_NAME, DESCRIPTION, USER_NAME);
-		service.addUserToTeam(TEAM_NAME, USER_NAME_TWO);
-		service.createNewProject(TEAM_NAME, TEST_NAME, DESCRIPTION,
-				USER_NAME_TWO, BIRTHDAY);
-		service.addUserToProject(USER_NAME, TEST_NAME, TEAM_NAME);
-		ArrayList<StatisticEntity> fetchedStatistics
-				= new ArrayList<StatisticEntity>
-				(service.getStatisticsOfProject(TEST_NAME, TEAM_NAME));
-		assertNotEquals(null, fetchedStatistics);
-		assertEquals(2, fetchedStatistics.size());
-		assertEquals(USER_NAME, fetchedStatistics.get(1).getUser()
-				.getUsername());
-		assertEquals(USER_NAME_TWO, fetchedStatistics.get(0).getUser()
-				.getUsername());
-	}
-
-	@Test
 	public void testGetStatisticOfUser() {
 		DataService service = new DataService();
 		service.registerUser(USER_NAME, "", "", "",
@@ -164,8 +128,7 @@ class ProjectEntityTest {
 				BIRTHDAY);
 		UserEntity user = service.getUser(USER_NAME);
 		assertFalse(user.getStatistics().isEmpty());
-		StatisticEntity statistic = service.getStatisticOfUser(USER_NAME,
-				TEST_NAME, TEAM_NAME);
+		StatisticEntity statistic = service.getStatisticOfUser(USER_NAME, 0);
 		assertNotEquals(null, statistic);
 		assertEquals(USER_NAME, statistic.getUser().getUsername());
 	}

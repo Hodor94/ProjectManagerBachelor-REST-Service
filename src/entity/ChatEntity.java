@@ -147,7 +147,7 @@ public class ChatEntity extends GenericEntity {
 
 	private String appendJSONName(String name) {
 		if (name != null && !(name.equals(""))) {
-			return "\"name\": " + "\"" + encodeToUTF8(name) + "\", ";
+			return "\"name\": " + "\"" + name + "\", ";
 		} else {
 			return "\"name\": " + null + ", ";
 		}
@@ -156,8 +156,7 @@ public class ChatEntity extends GenericEntity {
 	private String appendJSONTeamName(TeamEntity team) {
 		if (team != null && team.getName() != null
 				&& !(team.getName().equals(""))) {
-			return "\"team\": " + "\""
-					+ encodeToUTF8(this.getTeam().getName()) + "\", ";
+			return "\"team\": " + "\"" + this.getTeam().getName() + "\", ";
 		} else {
 			return "\"team\": " + null + ", ";
 		}
@@ -167,7 +166,7 @@ public class ChatEntity extends GenericEntity {
 		if (creator != null && creator.getUsername() != null
 				&& !(creator.getUsername().equals(""))) {
 			return "\"creator\": " + "\""
-					+ encodeToUTF8(creator.getUsername()) + "\"";
+					+ creator.getUsername() + "\"";
 		} else {
 			return "\"creator\": " + "\"" + null + "\"";
 		}

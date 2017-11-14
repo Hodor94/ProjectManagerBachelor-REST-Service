@@ -62,8 +62,7 @@ class AppointmentEntityTest {
 				USER_NAME, BIRTHDAY);
 		service.createNewAppointment(APPOINTMENT_NAME, DESCRIPTION, BIRTHDAY,
 				PROJECT_NAME, TEAM_NAME);
-		AppointmentEntity appointmentEntity = service.getAppointment
-				(PROJECT_NAME, 1, TEAM_NAME);
+		AppointmentEntity appointmentEntity = service.getAppointment(1);
 		ProjectEntity project = service.getProject(PROJECT_NAME, TEAM_NAME);
 		assertEquals(testAppointment.getName(), appointmentEntity.getName());
 		assertEquals(testAppointment.getDeadline(),
@@ -96,8 +95,7 @@ class AppointmentEntityTest {
 		assertEquals(0, user.getAppointmentsTakingPart().size());
 		service.addUserToAppointment(USER_NAME, PROJECT_NAME, TEAM_NAME,
 				1);
-		AppointmentEntity appointment = service.getAppointment(PROJECT_NAME,
-				1, TEAM_NAME);
+		AppointmentEntity appointment = service.getAppointment(1);
 		assertEquals(null, appointment);
 		assertNotEquals(null, project);
 		assertNotEquals(null, team);
@@ -120,18 +118,15 @@ class AppointmentEntityTest {
 		UserEntity user = service.getUser(USER_NAME);
 		assertEquals(0, user.getAppointmentsTakingPart().size());
 		StatisticEntity statisticOfUser
-				= service.getStatisticOfUser(USER_NAME, PROJECT_NAME,
-											 TEAM_NAME);
+				= service.getStatisticOfUser(USER_NAME, 0);
 		assertNotEquals(null, statisticOfUser);
 		assertEquals(1, statisticOfUser.getNumberOfAllAppointments());
 		assertEquals(0, statisticOfUser.getNumberOfParticipiation());
 		assertEquals(0, statisticOfUser.getPercentage());
-		service.takePartAtAppointment(TEAM_NAME, PROJECT_NAME,
-										1, USER_NAME);
+		service.takePartAtAppointment(1, USER_NAME);
 		user = service.getUser(USER_NAME);
 		project = service.getProject(PROJECT_NAME, TEAM_NAME);
-		statisticOfUser = service.getStatisticOfUser(USER_NAME, PROJECT_NAME,
-				TEAM_NAME);
+		statisticOfUser = service.getStatisticOfUser(USER_NAME, 1);
 		assertEquals(1, user.getAppointmentsTakingPart().size());
 		assertEquals(1, user.getAppointmentsTakingPart().get(0).getId());
 		assertEquals(1, project.getNumberOfAppointments());
@@ -140,8 +135,7 @@ class AppointmentEntityTest {
 		assertEquals(1, statisticOfUser.getPercentage());
 		service.createNewAppointment("test-Appointment-2", DESCRIPTION,
 				BIRTHDAY, PROJECT_NAME, TEAM_NAME);
-		statisticOfUser = service.getStatisticOfUser(USER_NAME, PROJECT_NAME,
-				TEAM_NAME);
+		statisticOfUser = service.getStatisticOfUser(USER_NAME, 2);
 		assertEquals(2, statisticOfUser.getNumberOfAllAppointments());
 		assertEquals(1, statisticOfUser.getNumberOfParticipiation());
 		assertEquals(0.5, statisticOfUser.getPercentage());

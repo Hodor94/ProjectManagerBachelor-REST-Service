@@ -67,24 +67,16 @@ public class ProjectEntity extends GenericEntity {
 	@JoinColumn(name = "team")
 	private TeamEntity team;
 
-	@JsonIgnore
-	@LazyCollection(LazyCollectionOption.FALSE)
-	@OneToMany(mappedBy = "project", targetEntity = StatisticEntity.class,
-			cascade = CascadeType.ALL)
-	private List<StatisticEntity> statistics;
-
 	public ProjectEntity() {
 		super();
 		appointments = new ArrayList<AppointmentEntity>();
 		users = new ArrayList<UserEntity>();
-		statistics = new ArrayList<StatisticEntity>();
 	}
 
 	public ProjectEntity(String name, String description, String deadline,
 						 UserEntity projectManager,
 						 ArrayList<AppointmentEntity> appointments,
-						 ArrayList<UserEntity> users, TeamEntity team,
-						 ArrayList<StatisticEntity> statistics) {
+						 ArrayList<UserEntity> users, TeamEntity team) {
 		super();
 		this.name = name;
 		this.description = description;
@@ -93,7 +85,6 @@ public class ProjectEntity extends GenericEntity {
 		this.appointments = appointments;
 		this.users = users;
 		this.team = team;
-		this.statistics = statistics;
 	}
 
 
@@ -107,7 +98,7 @@ public class ProjectEntity extends GenericEntity {
 		this.team = team;
 		this.appointments = new ArrayList<AppointmentEntity>();
 		this.users = new ArrayList<UserEntity>();
-		this.statistics = new ArrayList<StatisticEntity>();
+		users.add(projectManager);
 	}
 
 	public String getName() {
@@ -174,14 +165,6 @@ public class ProjectEntity extends GenericEntity {
 		this.team = team;
 	}
 
-	public List<StatisticEntity> getStatistics() {
-		return statistics;
-	}
-
-	public void setStatistics(ArrayList<StatisticEntity> statistics) {
-		this.statistics = statistics;
-	}
-
 	public void setAppointments(List<AppointmentEntity> appointments) {
 		this.appointments = appointments;
 	}
@@ -190,9 +173,6 @@ public class ProjectEntity extends GenericEntity {
 		this.users = users;
 	}
 
-	public void setStatistics(List<StatisticEntity> statistics) {
-		this.statistics = statistics;
-	}
 
 	public void increaseNumberOfAppointments() {
 		this.numberOfAppointments++;
@@ -227,7 +207,7 @@ public class ProjectEntity extends GenericEntity {
 
 	private String appendJSONName(String name) {
 		if (name != null && !(name.equals(""))) {
-			return "\"name\": " + "\"" + encodeToUTF8(name) + "\", ";
+			return "\"name\": " + "\"" + name + "\", ";
 		} else {
 			return "\"name\": " + null + ", ";
 		}
@@ -236,7 +216,7 @@ public class ProjectEntity extends GenericEntity {
 	private String appendJSONDescription(String description) {
 		if (description != null && !(description.equals(""))) {
 			return "\"description\": " + "\""
-					+ encodeToUTF8(description) + "\", ";
+					+ description + "\", ";
 		} else {
 			return "\"description\": " + null + ", ";
 		}
@@ -244,7 +224,7 @@ public class ProjectEntity extends GenericEntity {
 
 	private String appendJSONDeadline(String deadline) {
 		if (deadline != null) {
-			return "\"deadline\": " + "\"" + encodeToUTF8(deadline) + "\", ";
+			return "\"deadline\": " + "\"" + deadline + "\", ";
 		} else {
 			return "\"deadline:\" " + null + ", ";
 		}
@@ -260,7 +240,7 @@ public class ProjectEntity extends GenericEntity {
 
 	private String appendJSONTeamName(TeamEntity team) {
 		if (team != null && team.getName() != null && !(team.getName().equals(""))) {
-			return "\"team\": " + "\"" + encodeToUTF8(team.getName()) + "\"";
+			return "\"team\": " + "\"" + team.getName()+ "\"";
 		} else {
 			return "\"team\": " + null;
 		}

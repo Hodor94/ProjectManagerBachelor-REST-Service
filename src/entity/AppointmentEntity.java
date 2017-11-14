@@ -48,12 +48,19 @@ public class AppointmentEntity extends GenericEntity {
 	@ManyToMany(mappedBy = "appointmentsTakingPart")
 	private List<UserEntity> userTakingPart;
 
+	@JsonIgnore
+	@LazyCollection(LazyCollectionOption.FALSE)
+	@OneToMany(mappedBy = "appointment", targetEntity = StatisticEntity.class,
+			cascade = CascadeType.ALL)
+	private List<StatisticEntity> statistics;
+
 	/**
 	 * Creates an instance of AppointmentEntity with no information saved in it.
 	 */
 	public AppointmentEntity() {
 		super();
 		userTakingPart = new ArrayList<UserEntity>();
+		statistics = new ArrayList<>();
 		isDeadline = false;
 	}
 
@@ -75,6 +82,7 @@ public class AppointmentEntity extends GenericEntity {
 		this.deadline = deadline;
 		this.project = project;
 		this.userTakingPart = userTakingPart;
+		this.statistics = new ArrayList<>();
 		isDeadline = false;
 	}
 
@@ -178,6 +186,14 @@ public class AppointmentEntity extends GenericEntity {
 		return isDeadline;
 	}
 
+	public void setStatistics(ArrayList<StatisticEntity> statistics) {
+		this.statistics = statistics;
+	}
+
+	public List<StatisticEntity> getStatistics() {
+		return statistics;
+	}
+
 	/**
 	 * Formats all the information contained by an instance of
 	 * AppointmentEntity except the project and the list of users taking part
@@ -207,7 +223,7 @@ public class AppointmentEntity extends GenericEntity {
 
 	private String appendJSONName(String name) {
 		if (name != null && !(name.equals(""))) {
-			return "\"name\": " + "\"" + encodeToUTF8(name) + "\",";
+			return "\"name\": " + "\"" + name + "\",";
 		} else {
 			return "\"name\": " + null + ", ";
 		}
@@ -215,8 +231,7 @@ public class AppointmentEntity extends GenericEntity {
 
 	private String appendJSONDescription(String description) {
 		if (description != null && !(description.equals(""))) {
-			return "\"description\": " + "\"" + encodeToUTF8(description) +
-					"\", ";
+			return "\"description\": " + "\"" + description + "\", ";
 		} else {
 			return "\"description\": " + null + ", ";
 		}
@@ -224,7 +239,7 @@ public class AppointmentEntity extends GenericEntity {
 
 	private String appendJSONDeadline(String deadline) {
 		if (deadline != null && !(deadline.equals(""))) {
-			return "\"deadline\": " + "\"" + encodeToUTF8(deadline) + "\", ";
+			return "\"deadline\": " + "\"" + deadline + "\", ";
 		} else {
 			return "\"deadline\": " + null + ", ";
 		}

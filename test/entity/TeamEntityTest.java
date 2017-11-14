@@ -107,8 +107,7 @@ class TeamEntityTest {
 		assertEquals(null, register);
 		ProjectEntity project = service.getProject(PROJECT_NAME, TEAM_NAME);
 		assertEquals(null, project);
-		AppointmentEntity appointment = service.getAppointment(PROJECT_NAME,
-				0, TEAM_NAME);
+		AppointmentEntity appointment = service.getAppointment(0);
 		assertEquals(null, appointment);
 	}
 

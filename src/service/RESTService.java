@@ -72,8 +72,8 @@ public class RESTService {
 				ProjectEntity project = dataService.getProject(projectName,
 						teamName);
 				AppointmentEntity appointment
-						= dataService.getAppointment(projectName,
-						Long.parseLong(appointmentId), teamName);
+						= dataService.getAppointment
+						(Long.parseLong(appointmentId));
 				if (appointment != null && project != null) {
 					if (project.getProjectManager().getUsername()
 							.equals(username)) {
@@ -131,10 +131,8 @@ public class RESTService {
 				deadline = data.getString("deadline");
 				ProjectEntity project = dataService.getProject(projectName,
 						teamName);
-				AppointmentEntity appointment = dataService.getAppointment
-						(projectName,
-						Long.parseLong(id),
-						teamName);
+				AppointmentEntity appointment
+						= dataService.getAppointment(Long.parseLong(id));
 				if (project != null && appointment != null) {
 					if (project.getProjectManager().getUsername()
 							.equals(username)) {

@@ -38,22 +38,21 @@ public class StatisticEntity extends GenericEntity {
 	@Column(name = "numberOfAllAppointments")
 	private double numberOfAllAppointments;
 
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "appointment")
+	private AppointmentEntity appointment;
+
 	// Attributes related to other entities
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "user")
 	private UserEntity user;
 
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "project")
-	private ProjectEntity project;
-
 	public StatisticEntity() {
 		super();
 	}
 
-	public StatisticEntity(UserEntity user, ProjectEntity project) {
+	public StatisticEntity(UserEntity user) {
 		this.user = user;
-		this.project = project;
 	}
 
 	public StatisticEntity(int numberOfParticipiation, double percentage,
@@ -93,16 +92,8 @@ public class StatisticEntity extends GenericEntity {
 		return user;
 	}
 
-	public ProjectEntity getProject() {
-		return project;
-	}
-
 	public void setUser(UserEntity user) {
 		this.user = user;
-	}
-
-	public void setProject(ProjectEntity project) {
-		this.project = project;
 	}
 
 	public String toString() {
@@ -117,7 +108,6 @@ public class StatisticEntity extends GenericEntity {
 		stringBuilder.append("\"percentage\": " + "\"" + this.percentage
 				+ "\", ");
 		stringBuilder.append(appendJSONUserName(user));
-		stringBuilder.append(appendJSONProject(project));
 		stringBuilder.append("}");
 		result = stringBuilder.toString();
 		return result;
@@ -125,8 +115,7 @@ public class StatisticEntity extends GenericEntity {
 
 	private String appendJSONUserName(UserEntity user) {
 		if (user != null && user.getUsername() != null && !(user.getUsername().equals(""))) {
-			return "\"user\": " + "\""
-					+ encodeToUTF8(user.getUsername()) + "\", ";
+			return "\"user\": " + "\"" + user.getUsername() + "\", ";
 		} else {
 			return "\"user\": " + null + ", ";
 		}
@@ -148,4 +137,11 @@ public class StatisticEntity extends GenericEntity {
 		numberOfParticipiation++;
 	}
 
+	public AppointmentEntity getAppointment() {
+		return appointment;
+	}
+
+	public void setAppointment(AppointmentEntity appointment) {
+		this.appointment = appointment;
+	}
 }
