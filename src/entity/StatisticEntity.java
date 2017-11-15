@@ -144,8 +144,12 @@ public class StatisticEntity extends GenericEntity {
 		numberOfAllAppointments++;
 	}
 
-	public void increaseNumberOfParticipiation() {
+	public void increaseNumberOfParticipation() {
 		numberOfParticipiation++;
 	}
+
+	public void decreaseNumberOfAllAppointments() {numberOfAllAppointments--;}
+
+	public void decreaseNumberOfParticipation() {numberOfParticipiation--;}
 
 }

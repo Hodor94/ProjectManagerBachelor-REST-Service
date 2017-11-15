@@ -203,7 +203,7 @@ public class DataService {
 		if (user != null && appointment != null && statisticOfUser != null) {
 			user.getAppointmentsTakingPart().add(appointment);
 			appointment.getUserTakinPart().add(user);
-			statisticOfUser.increaseNumberOfParticipiation();
+			statisticOfUser.increaseNumberOfParticipation();
 			userDAO.saveOrUpdate(user);
 			appointmentDAO.saveOrUpdate(appointment);
 			statisticDAO.saveOrUpdate(statisticOfUser);
@@ -965,8 +965,14 @@ public class DataService {
 	}
 
 	private void deleteStatistic(StatisticEntity statistic) {
+		ProjectEntity project = statistic.getProject();
+		UserEntity user = statistic.getUser();
 		statistic.setProject(null);
-		statistic.getUser().getStatistics().remove(statistic);
+		statistic.setUser(null);
+		user.getStatistics().remove(statistic);
+		project.getStatistics().remove(statistic);
+		userDAO.saveOrUpdate(user);
+		projectDAO.saveOrUpdate(project);
 		statisticDAO.saveOrUpdate(statistic);
 		statisticDAO.remove(statistic);
 	}
@@ -1005,14 +1011,60 @@ public class DataService {
 		for (String username : usersToRemove) {
 			usersToEdit.remove(username);
 		}
-		for (String username : usersToEdit) {
-			UserEntity user = getUser(username);
-			projectMembers.add(user);
-			user.getProjectsTakingPart().add(project);
-			userDAO.saveOrUpdate(user);
-		}
+		addUsersToProject(usersToEdit, project);
+		removeUsersFromProject(usersToRemove, project);
+		removeStatisticsOfRemovedUsers(usersToRemove, project);
+		project = projectDAO.get(project.getId());
 		project.setUsers(projectMembers);
 		projectDAO.saveOrUpdate(project);
+	}
+
+	private void removeStatisticsOfRemovedUsers(List<String> usersToRemove,
+												ProjectEntity project) {
+		for (String username : usersToRemove) {
+			UserEntity user = getUser(username);
+			List<StatisticEntity> statistics = user.getStatistics();
+			for (StatisticEntity statistic : statistics) {
+				if (statistic.getProject().getId() == project.getId()) {
+					statistic.setUser(null);
+					statistic.setProject(null);
+					project.getStatistics().remove(statistic);
+					statistics.remove(statistic);
+					user.setStatistics(statistics);
+					userDAO.saveOrUpdate(user);
+					projectDAO.saveOrUpdate(project);
+					statisticDAO.saveOrUpdate(statistic);
+					statisticDAO.remove(statistic);
+					break;
+				}
+			}
+		}
+	}
+
+	private void addUsersToProject(List<String> usersToEdit,
+								   ProjectEntity project) {
+		for (String username : usersToEdit) {
+			UserEntity user = getUser(username);
+			StatisticEntity newStatistic = new StatisticEntity();
+			newStatistic.setUser(user);
+			newStatistic.setProject(project);
+			newStatistic.setNumberOfAllAppointments
+					(project.getNumberOfAppointments());
+			statisticDAO.saveOrUpdate(newStatistic);
+			project.getStatistics().add(newStatistic);
+			user.getProjectsTakingPart().add(project);
+			user.getStatistics().add(newStatistic);
+			userDAO.saveOrUpdate(user);
+		}
+	}
+
+	private void removeUsersFromProject(List<String> usersToRemove,
+										ProjectEntity project) {
+		for (String username : usersToRemove) {
+			UserEntity user = getUser(username);
+			user.getProjectsTakingPart().remove(project);
+			userDAO.saveOrUpdate(user);
+		}
 	}
 
 	public TaskEntity getTask(long id) {
@@ -1056,7 +1108,13 @@ public class DataService {
 	public void deleteAppointment(AppointmentEntity appointment) {
 		List<UserEntity> usersOfAppointment = appointment.getUserTakinPart();
 		ProjectEntity project = appointment.getProject();
+		List<StatisticEntity> statistics = project.getStatistics();
+		for (StatisticEntity statistic : statistics) {
+			statistic.decreaseNumberOfAllAppointments();
+			statisticDAO.saveOrUpdate(statistic);
+		}
 		project.getAppointments().remove(appointment);
+		project.decreaseNumberOfAppointments();
 		projectDAO.saveOrUpdate(project);
 		for (UserEntity user : usersOfAppointment) {
 			user.getAppointmentsTakingPart().remove(appointment);

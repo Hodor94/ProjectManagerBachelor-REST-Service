@@ -79,6 +79,7 @@ public class RESTService {
 							.equals(username)) {
 						if (!appointment.getIsDeadline()) {
 							dataService.deleteAppointment(appointment);
+
 							result = new JSONObject();
 							result.put("success", "true");
 						} else {
