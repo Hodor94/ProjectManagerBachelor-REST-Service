@@ -434,6 +434,12 @@ public class DataService {
 	public boolean removeProject(String projectName, String teamName) {
 		boolean result = false;
 		ProjectEntity project = projectDAO.getProject(projectName, teamName);
+		List<StatisticEntity> statistics = project.getStatistics();
+		for (StatisticEntity statistic : statistics) {
+			deleteStatistic(statistic);
+		}
+		List<AppointmentEntity> appointments = project.getAppointments();
+		deleteAppointments(appointments);
 		UserEntity manager = project.getProjectManager();
 		if (manager.getRole() != UserRole.ADMINISTRATOR) {
 			manager.setRole(UserRole.USER);
@@ -956,23 +962,22 @@ public class DataService {
 			}
 			userDAO.saveOrUpdate(user);
 		}
-		for (StatisticEntity statistic : statistics) {
-			deleteStatistic(statistic);
-		}
+		deleteStatistics(statistics);
 		deleteAppointments(appointments);
 		project.setProjectManager(null);
+		projectDAO.saveOrUpdate(project);
 		projectDAO.remove(project);
 	}
 
+	private void deleteStatistics(List<StatisticEntity> statistics) {
+		for (StatisticEntity statistic : statistics) {
+			deleteStatistic(statistic);
+		}
+	}
+
 	private void deleteStatistic(StatisticEntity statistic) {
-		ProjectEntity project = statistic.getProject();
-		UserEntity user = statistic.getUser();
-		statistic.setProject(null);
 		statistic.setUser(null);
-		user.getStatistics().remove(statistic);
-		project.getStatistics().remove(statistic);
-		userDAO.saveOrUpdate(user);
-		projectDAO.saveOrUpdate(project);
+		statistic.setProject(null);
 		statisticDAO.saveOrUpdate(statistic);
 		statisticDAO.remove(statistic);
 	}
