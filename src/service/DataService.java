@@ -4,6 +4,7 @@ package service;
  * Created by Raphael on 14.06.2017.
  */
 
+import com.sun.jersey.json.impl.provider.entity.JSONArrayProvider;
 import com.sun.org.glassfish.external.statistics.Statistic;
 import dao.*;
 import entity.*;
@@ -32,6 +33,16 @@ public class DataService {
 	private UserDAO userDAO;
 	private static SecretKey secretKey;
 	private SimpleDateFormat formatter;
+	private final String NEW_PROJECT = "Ein neues Projekt ";
+	private final String NEW_APPOINTMENT = "Ein neues Meeting ";
+	private final String NEW_TASK = "Eine neue Aufgabe ";
+	private final String NEW_REGISTER = "Eine neue Gruppe ";
+	private final String CREATED = " wurde erstellt!\n";
+	private final String PROJECT = "Das Projekt ";
+	private final String APPOINTMENT = "Das Meeting ";
+	private final String TASK = "Die Aufgabe ";
+	private final String REGISTER = "Die Gruppe ";
+	private final String DELETED = " wurde gelöscht!\n";
 
 	public DataService() {
 		formatter = new SimpleDateFormat("dd.MM.yyyy");
@@ -237,13 +248,16 @@ public class DataService {
 			manager.getStatistics().add(newStatistic);
 			userDAO.saveOrUpdate(manager);
 			ArrayList<UserEntity> userTakingPart = new ArrayList<>();
-			userTakingPart.add(manager);
 			AppointmentEntity appointment
 					= new AppointmentEntity(projectName + " DEADLINE",
 					"Abschluss des Projekts " + projectName, deadline,
 					project, userTakingPart);
 			appointment.setIsDeadline(true);
+			appointment.addUserAnswer(projectManager,
+					StatisticParticipationAnswer.MAYBE);
 			appointmentDAO.saveOrUpdate(appointment);
+			team.addNews(NEW_PROJECT + projectName + CREATED);
+			teamDAO.saveOrUpdate(team);
 			result = true;
 		}
 		return result;
@@ -297,6 +311,8 @@ public class DataService {
 				task = new TaskEntity(name, description, date, team, user);
 				taskDAO.saveOrUpdate(task);
 				userDAO.saveOrUpdate(user);
+				team.addNews(NEW_TASK + name + CREATED);
+				teamDAO.saveOrUpdate(team);
 				result = true;
 			}
 		}
@@ -352,6 +368,8 @@ public class DataService {
 			registerDAO.saveOrUpdate(register);
 			result = true;
 		}
+		team.addNews(NEW_REGISTER + registerName + CREATED);
+		teamDAO.saveOrUpdate(team);
 		return result;
 	}
 
@@ -373,9 +391,14 @@ public class DataService {
 										String teamName) {
 		boolean result = false;
 		ProjectEntity project = projectDAO.getProject(projectName, teamName);
+		List<UserEntity> users = project.getUsers();
 		if (project != null) {
 			AppointmentEntity appointment = new AppointmentEntity(name,
 					description, date, project, new ArrayList<UserEntity>());
+			for (UserEntity user : users) {
+				appointment.addUserAnswer(user.getUsername(),
+						StatisticParticipationAnswer.MAYBE);
+			}
 			appointmentDAO.saveOrUpdate(appointment);
 			project.increaseNumberOfAppointments();
 			ArrayList<StatisticEntity> statistics
@@ -385,6 +408,9 @@ public class DataService {
 			}
 			result = true;
 			projectDAO.saveOrUpdate(project);
+			TeamEntity team = project.getTeam();
+			team.addNews(NEW_APPOINTMENT + name + CREATED);
+			teamDAO.saveOrUpdate(team);
 		}
 		return result;
 	}
@@ -453,7 +479,6 @@ public class DataService {
 	}
 
 	public void removeRegister(String registerName, String teamName) {
-		boolean result = false;
 		RegisterEntity register = registerDAO.getRegisterByName(registerName,
 				teamName);
 		Collection<UserEntity> users = getUsersOfRegister(registerName,
@@ -477,6 +502,7 @@ public class DataService {
 		}
 		register.setTeam(null);
 		register.setUsers(null);
+		team.addNews(REGISTER + registerName + DELETED);
 		registerDAO.saveOrUpdate(register);
 		teamDAO.saveOrUpdate(team);
 		registerDAO.remove(register);
@@ -619,9 +645,9 @@ public class DataService {
 		ProjectEntity project = projectDAO.getProject(projectName, teamName);
 		UserEntity manager = project.getProjectManager();
 		ArrayList<UserEntity> usersTakingPart
-				= new ArrayList<UserEntity>(project.getUsers());
+				= new ArrayList<>(project.getUsers());
 		ArrayList<ProjectEntity> projectsTakingPart
-				= new ArrayList<ProjectEntity>(user.getProjectsTakingPart());
+				= new ArrayList<>(user.getProjectsTakingPart());
 		if (user != null && project != null && usersTakingPart.size() != 0
 				&& projectsTakingPart.size() != 0 && manager != null) {
 			if (manager.getUsername().equals(user.getUsername())
@@ -638,6 +664,12 @@ public class DataService {
 				for (int i = 0; i < projectsTakingPart.size(); i++) {
 					if (projectsTakingPart.get(i).getId()
 							== project.getId()) {
+						List<AppointmentEntity> appointments
+								= project.getAppointments();
+						for (AppointmentEntity appointment : appointments) {
+							appointment.removeUserFromUserAnswer(username);
+							appointmentDAO.saveOrUpdate(appointment);
+						}
 						projectsTakingPart.remove(i);
 					}
 				}
@@ -679,6 +711,7 @@ public class DataService {
 		UserEntity user = userDAO.getUserByUsername(username);
 		TeamEntity team = teamDAO.getTeamByTeamName(teamName);
 		ProjectEntity project = projectDAO.getProject(projectName, teamName);
+		List<AppointmentEntity> appointments = project.getAppointments();
 		TeamEntity usersTeam = user.getTeam();
 		if (user != null && team != null && project != null
 				&& usersTeam.getName().equals(team.getName())) {
@@ -686,8 +719,15 @@ public class DataService {
 			user.getStatistics().add(newStatistic);
 			user.getProjectsTakingPart().add(project);
 			userDAO.saveOrUpdate(user);
+			project.getUsers().add(user);
+			projectDAO.saveOrUpdate(project);
+			for (AppointmentEntity appointment : appointments) {
+				appointment.addUserAnswer(username,
+						StatisticParticipationAnswer.MAYBE);
+			}
 			result = true;
 		}
+
 		return result;
 	}
 
@@ -949,6 +989,7 @@ public class DataService {
 				= project.getAppointments();
 		List<StatisticEntity> statistics = project.getStatistics();
 		List<UserEntity> users = project.getUsers();
+		TeamEntity team = project.getTeam();
 		project.setStatistics(new ArrayList<>());
 		project.setAppointments(new ArrayList<>());
 		projectDAO.saveOrUpdate(project);
@@ -967,6 +1008,8 @@ public class DataService {
 		project.setProjectManager(null);
 		projectDAO.saveOrUpdate(project);
 		projectDAO.remove(project);
+		team.addNews(PROJECT + project.getName() + DELETED);
+		teamDAO.saveOrUpdate(team);
 	}
 
 	private void deleteStatistics(List<StatisticEntity> statistics) {
@@ -983,7 +1026,7 @@ public class DataService {
 	}
 
 	public void editProject(ProjectEntity project, String description,
-							   String deadline) {
+							String deadline) {
 		List<AppointmentEntity> appointments = project.getAppointments();
 		for (AppointmentEntity appointment : appointments) {
 			if (appointment.getIsDeadline()) {
@@ -1021,8 +1064,20 @@ public class DataService {
 		removeStatisticsOfRemovedUsers(usersToRemove, project);
 		project = projectDAO.get(project.getId());
 		project.setUsers(projectMembers);
+		List<AppointmentEntity> appointments = project.getAppointments();
+		for (AppointmentEntity appointment : appointments) {
+			for (String username : usersToEdit) {
+				appointment.addUserAnswer(username,
+						StatisticParticipationAnswer.MAYBE);
+			}
+			for (String username : usersToRemove) {
+				appointment.removeUserFromUserAnswer(username);
+			}
+			appointmentDAO.saveOrUpdate(appointment);
+		}
 		projectDAO.saveOrUpdate(project);
 	}
+
 
 	private void removeStatisticsOfRemovedUsers(List<String> usersToRemove,
 												ProjectEntity project) {
@@ -1078,7 +1133,7 @@ public class DataService {
 	}
 
 	public void editTask(TaskEntity task, String description,
-							String deadline) {
+						 String deadline) {
 		task.setDeadline(deadline);
 		task.setDescription(description);
 		taskDAO.saveOrUpdate(task);
@@ -1099,6 +1154,8 @@ public class DataService {
 		teamDAO.saveOrUpdate(team);
 		taskDAO.saveOrUpdate(task);
 		taskDAO.remove(task);
+		team.addNews(TASK + task.getName() + DELETED);
+		teamDAO.saveOrUpdate(team);
 	}
 
 	public void editAppointment(AppointmentEntity appointment,
@@ -1129,6 +1186,63 @@ public class DataService {
 		appointment.setUserTakinPart(new ArrayList<>());
 		appointmentDAO.saveOrUpdate(appointment);
 		appointmentDAO.remove(appointment);
+		TeamEntity team = project.getTeam();
+		team.addNews(APPOINTMENT + appointment.getName() + DELETED);
+		teamDAO.saveOrUpdate(team);
+	}
+
+	public AppointmentEntity getAppointment(long id) {
+		return appointmentDAO.get(id);
+	}
+
+	public boolean isUserTakingPartAtProject(UserEntity user,
+											 ProjectEntity project) {
+		boolean result = false;
+		List<UserEntity> users = project.getUsers();
+		for (UserEntity tempUser : users) {
+			if (tempUser.getId() == user.getId()) {
+				result = true;
+				break;
+			}
+		}
+		return result;
+	}
+
+	public boolean saveAnswerParticipation(UserEntity user,
+										   AppointmentEntity appointment,
+										   StatisticParticipationAnswer answer) {
+		boolean result = false;
+		List<StatisticEntity> statistics = user.getStatistics();
+		StatisticEntity statistic = null;
+		for (StatisticEntity tempStatistic : statistics) {
+			if (tempStatistic.getProject().getId()
+					== appointment.getProject().getId()) {
+				statistic = tempStatistic;
+				break;
+			}
+		}
+		if (statistic != null) {
+			if (appointment.getUserAnswers().get(user.getUsername())
+					!= answer) {
+				appointment.addUserAnswer(user.getUsername(), answer);
+				if (answer == StatisticParticipationAnswer.YES) {
+					appointment.getUserTakinPart().add(user);
+					user.getAppointmentsTakingPart().add(appointment);
+					statistic.increaseNumberOfParticipation();
+					statisticDAO.saveOrUpdate(statistic);
+					userDAO.saveOrUpdate(user);
+				} else {
+					appointment.getUserTakinPart().remove(user);
+					user.getAppointmentsTakingPart().remove(appointment);
+					statistic.decreaseNumberOfParticipation();
+					statisticDAO.saveOrUpdate(statistic);
+					userDAO.saveOrUpdate(user);
+				}
+			}
+			appointmentDAO.saveOrUpdate(appointment);
+			result = true;
+		}
+		return result;
 	}
 }
 

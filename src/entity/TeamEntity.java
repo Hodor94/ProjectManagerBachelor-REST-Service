@@ -25,6 +25,10 @@ public class TeamEntity extends GenericEntity {
 	@Column(name = "requests")
 	private List<String> requestsOfUsers;
 
+	@ElementCollection
+	@Column(name = "news")
+	private List<String> news;
+
 	@Column(name = "updated")
 	private boolean updated;
 
@@ -268,5 +272,21 @@ public class TeamEntity extends GenericEntity {
 
 	public boolean isUpdated() {
 		return updated;
+	}
+
+	public List<String> getNews() {
+		return news;
+	}
+
+	public void setNews(ArrayList<String> news) {
+		this.news = news;
+	}
+
+	public void addNews(String news) {
+		this.news.add(news);
+	}
+
+	public void clearNews() {
+		this.news = new ArrayList<>();
 	}
 }

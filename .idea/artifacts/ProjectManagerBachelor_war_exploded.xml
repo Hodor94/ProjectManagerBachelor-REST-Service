@@ -61,6 +61,7 @@
           <element id="library" level="project" name="Maven: net.minidev:accessors-smart:1.2" />
           <element id="library" level="project" name="Maven: org.ow2.asm:asm:5.0.4" />
           <element id="library" level="project" name="Maven: commons-io:commons-io:2.5" />
+          <element id="library" level="project" name="Maven: log4j:log4j:1.2.17" />
         </element>
       </element>
       <element id="directory" name="META-INF">

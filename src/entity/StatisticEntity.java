@@ -77,6 +77,10 @@ public class StatisticEntity extends GenericEntity {
 		return numberOfParticipiation / numberOfAllAppointments;
 	}
 
+	public void calculatePercentage() {
+		this.percentage = numberOfParticipiation / numberOfAllAppointments;
+	}
+
 	public void setPercentage(double percentage) {
 		this.percentage = percentage;
 	}
@@ -110,7 +114,7 @@ public class StatisticEntity extends GenericEntity {
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("{");
 		stringBuilder.append("\"id\": " + "\"" + this.getId() + "\", ");
-		stringBuilder.append("\"numberOfParticipiation\": " + "\"" // Numbers are never null, no proof needed
+		stringBuilder.append("\"numberOfParticipiation\": " + "\""
 				+ this.numberOfParticipiation + "\", ");
 		stringBuilder.append("\"numberOfAllAppointments\": " + "\""
 				+ this.numberOfAllAppointments + "\", ");
@@ -126,7 +130,7 @@ public class StatisticEntity extends GenericEntity {
 	private String appendJSONUserName(UserEntity user) {
 		if (user != null && user.getUsername() != null && !(user.getUsername().equals(""))) {
 			return "\"user\": " + "\""
-					+ encodeToUTF8(user.getUsername()) + "\", ";
+					+ user.getUsername() + "\", ";
 		} else {
 			return "\"user\": " + null + ", ";
 		}
@@ -142,14 +146,26 @@ public class StatisticEntity extends GenericEntity {
 
 	public void increaseNumberOfAllAppointments() {
 		numberOfAllAppointments++;
+		calculatePercentage();
 	}
 
 	public void increaseNumberOfParticipation() {
 		numberOfParticipiation++;
+		calculatePercentage();
 	}
 
-	public void decreaseNumberOfAllAppointments() {numberOfAllAppointments--;}
+	public void decreaseNumberOfAllAppointments() {
+		if (numberOfAllAppointments != 0 && numberOfAllAppointments > 0) {
+			numberOfAllAppointments--;
+			calculatePercentage();
+		}
+	}
 
-	public void decreaseNumberOfParticipation() {numberOfParticipiation--;}
+	public void decreaseNumberOfParticipation() {
+		if (numberOfParticipiation != 0 && numberOfParticipiation > 0) {
+			numberOfParticipiation--;
+			calculatePercentage();
+		}
+	}
 
 }

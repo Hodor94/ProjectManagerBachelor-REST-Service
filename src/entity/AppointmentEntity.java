@@ -9,10 +9,7 @@ import org.json.JSONObject;
 
 import javax.persistence.*;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * This class represents an appointment of a project.
@@ -37,6 +34,10 @@ public class AppointmentEntity extends GenericEntity {
 	@Column(name = "deadline")
 	private String deadline; // The date of the appointment.
 
+	@Column(name = "userParticipationAnswer")
+	private HashMap<String, StatisticParticipationAnswer>
+			participationAnswersUser;
+
 	// Attributes related to entities
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -55,16 +56,16 @@ public class AppointmentEntity extends GenericEntity {
 		super();
 		userTakingPart = new ArrayList<UserEntity>();
 		isDeadline = false;
+		participationAnswersUser = new HashMap<>();
 	}
 
 	/**
-	 *
-	 * @param name The name of the new appointment.
-	 * @param description The description of the appointment.
-	 * @param deadline The date of the appointment.
-	 * @param project The project this appointment belongs to.
+	 * @param name           The name of the new appointment.
+	 * @param description    The description of the appointment.
+	 * @param deadline       The date of the appointment.
+	 * @param project        The project this appointment belongs to.
 	 * @param userTakingPart A list of all the users who are coming to the
-	 *                          appointment.
+	 *                       appointment.
 	 */
 	public AppointmentEntity(String name, String description, String deadline,
 							 ProjectEntity project,
@@ -75,6 +76,7 @@ public class AppointmentEntity extends GenericEntity {
 		this.deadline = deadline;
 		this.project = project;
 		this.userTakingPart = userTakingPart;
+		participationAnswersUser = new HashMap<>();
 		isDeadline = false;
 	}
 
@@ -164,7 +166,7 @@ public class AppointmentEntity extends GenericEntity {
 	 * Sets the list of users taking part in this appointment.
 	 *
 	 * @param userTakinPart - The new list of users taking part in this
-	 *                         appointment.
+	 *                      appointment.
 	 */
 	public void setUserTakinPart(ArrayList<UserEntity> userTakinPart) {
 		this.userTakingPart = userTakinPart;
@@ -228,6 +230,19 @@ public class AppointmentEntity extends GenericEntity {
 		} else {
 			return "\"deadline\": " + null + ", ";
 		}
+	}
+
+	public void addUserAnswer(String username,
+							  StatisticParticipationAnswer answer) {
+		participationAnswersUser.put(username, answer);
+	}
+
+	public void removeUserFromUserAnswer(String username) {
+		participationAnswersUser.remove(username);
+	}
+
+	public HashMap<String, StatisticParticipationAnswer> getUserAnswers() {
+		return participationAnswersUser;
 	}
 
 }

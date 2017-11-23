@@ -22,23 +22,52 @@ import org.codehaus.jettison.json.JSONObject;
 import java.io.*;
 import java.security.SecureRandom;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @JsonSerialize
 @Path("/pmservice")
 public class RESTService {
 
+	private final String MAYBE = "MAYBE";
+	private final String YES = "YES";
+	private final String NO = "NO";
 	private final String REQUEST = "request";
 	private final String INVITATION = "invitation";
 	private DataService dataService = new DataService();
 	private final byte[] SHARED_SECRET = generateSharedSecret();
 	private final long EXPIRE_TIME = 900000; // Within a 15 minutes period a
-	// token is valid
+											 // token is valid
 
 	//--------------------------------------------------------------------------
 
-	// Todo: Ask for updates -> InitialService at client side
-	// TODO: test with ping
+	// Todo: Ask for updates -> InternalService at client side
+
+	@POST
+	@Path("/team/news")
+	public JSONObject getTeamsNews(JSONObject data) {
+		JSONObject result;
+		try {
+			String teamName = data.getString("teamName");
+			TeamEntity team = dataService.getTeam(teamName);
+			if (team != null) {
+				result = new JSONObject();
+				List<String> news = team.getNews();
+				result.put("success", "true");
+				result.put("news", news);
+				team.clearNews();
+				dataService.saveTeam(team);
+			} else {
+				result = returnEmptyResult();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
 
 	@GET
 	@Path("/ping")
@@ -49,6 +78,386 @@ public class RESTService {
 		} catch (JSONException e) {
 			return null;
 		}
+	}
+
+	@POST
+	@Path("/newsflash")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public JSONObject getNewsForWeek(JSONObject data) {
+		JSONObject result;
+		String token;
+		String teamName;
+		String username;
+		String mondayOfWeek;
+		String currentDate;
+		String sundayOfWeek;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				teamName = data.getString("teamName");
+				username = data.getString("username");
+				mondayOfWeek = data.getString("mondayOfWeek");
+				currentDate = data.getString("currentDate");
+				sundayOfWeek = data.getString("sundayOfWeek");
+				TeamEntity team = dataService.getTeam(teamName);
+				UserEntity user = dataService.getUser(username);
+				if (user != null && team != null) {
+					JSONObject relevantDatesForTheWeek
+							= getRelevantDates(user, team, currentDate,
+							mondayOfWeek, sundayOfWeek);
+					result = new JSONObject();
+					result.put("success", "true");
+					result.put("dates", relevantDatesForTheWeek);
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnNoRightsError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	private JSONObject getRelevantDates(UserEntity user, TeamEntity team,
+										String currentDate, String mondayOfWeek,
+										String sundayOfWeek) throws JSONException {
+		JSONObject result;
+		SimpleDateFormat formatter
+				= new SimpleDateFormat("dd.MM.yyyy");
+		Calendar today = Calendar.getInstance();
+		Calendar monday = Calendar.getInstance();
+		Calendar sunday = Calendar.getInstance();
+		try {
+			today.setTime(formatter.parse(currentDate));
+			monday.setTime(formatter.parse(mondayOfWeek));
+			sunday.setTime(formatter.parse(sundayOfWeek));
+		} catch (ParseException e) {
+			result = null;
+		}
+		List<ProjectEntity> projects = user.getProjectsTakingPart();
+		JSONArray projectsDeadlines = getDeadlinesOfProjects(projects,
+				formatter, monday, today, sunday);
+		List<TaskEntity> tasks = user.getTasks();
+		JSONArray tasksDeadlines = getDeadlinesOfTasks(tasks, formatter,
+				monday, today, sunday);
+		List<AppointmentEntity> appointments
+				= user.getAppointmentsTakingPart();
+		JSONArray appointmentsDeadlines
+				= getDateOfAppointments(appointments, formatter, monday, today,
+				sunday);
+		List<UserEntity> users = team.getUsers();
+		JSONArray birthdays = getBirthdayOfUsers(users, formatter, monday,
+				today, sunday);
+		result = new JSONObject();
+		if (projectsDeadlines != null) {
+			result.put("projects", projectsDeadlines);
+		} else {
+			result.put("projects", (Collection) null);
+		}
+		if (tasksDeadlines != null) {
+			result.put("tasks", tasksDeadlines);
+		} else {
+			result.put("tasks", (Collection) null);
+		}
+		if (appointmentsDeadlines != null) {
+			result.put("appointments", appointmentsDeadlines);
+		} else {
+			result.put("appointments", (Collection) null);
+		}
+		if (birthdays != null) {
+			result.put("birthdays", birthdays);
+		} else {
+			result.put("birthdays", (Collection) null);
+		}
+		return result;
+	}
+
+	private JSONArray getBirthdayOfUsers(List<UserEntity> users,
+										 SimpleDateFormat formatter,
+										 Calendar monday, Calendar today,
+										 Calendar sunday) {
+		JSONArray result = new JSONArray();
+		for (UserEntity user : users) {
+			Calendar birthday = Calendar.getInstance();
+			try {
+				birthday.setTime(formatter.parse(user.getBirthday()));
+				if (birthday.before(sunday)
+						&& (birthday.after(monday) ||
+						deadlineIsCurrently(birthday, today))) {
+					JSONObject date = new JSONObject();
+					date.put("user", user.getUsername());
+					date.put("birthday", user.getBirthday());
+					result.put(date);
+				}
+			} catch (ParseException e) {
+				result = null;
+			} catch (JSONException e) {
+				result = null;
+			}
+		}
+		return result;
+	}
+
+	private JSONArray getDateOfAppointments(List<AppointmentEntity> appointments,
+											SimpleDateFormat formatter,
+											Calendar monday, Calendar today,
+											Calendar sunday) {
+		JSONArray result = new JSONArray();
+		for (AppointmentEntity appointment : appointments) {
+			Calendar deadline = Calendar.getInstance();
+			try {
+				deadline.setTime(formatter.parse(appointment.getDeadline()));
+				if (deadline.before(sunday)
+						&& (deadline.after(monday) ||
+						deadlineIsCurrently(deadline, today))) {
+					JSONObject date = new JSONObject();
+					date.put("appointment", appointment.getName());
+					date.put("deadline", appointment.getDeadline());
+					result.put(date);
+				}
+			} catch (ParseException e) {
+				result = null;
+			} catch (JSONException e) {
+				result = null;
+			}
+		}
+		return result;
+	}
+
+	private JSONArray getDeadlinesOfTasks(List<TaskEntity> tasks,
+										  SimpleDateFormat formatter,
+										  Calendar startOfWeek, Calendar today,
+										  Calendar endOfTheWeek) {
+		JSONArray result = new JSONArray();
+		for (TaskEntity task : tasks) {
+			Calendar deadline = Calendar.getInstance();
+			try {
+				deadline.setTime(formatter.parse(task.getDeadline()));
+				if (deadline.before(endOfTheWeek)
+						&& (deadline.after(startOfWeek) ||
+						deadlineIsCurrently(deadline, today))) {
+					JSONObject date = new JSONObject();
+					date.put("task", task.getName());
+					date.put("deadline", task.getDeadline());
+					result.put(date);
+				}
+			} catch (ParseException e) {
+				result = null;
+			} catch (JSONException e) {
+				result = null;
+			}
+		}
+		return result;
+	}
+
+	private JSONArray getDeadlinesOfProjects(List<ProjectEntity> projects,
+											 SimpleDateFormat formatter,
+											 Calendar startOfWeek,
+											 Calendar currentDate,
+											 Calendar endOfTheWeek) {
+		JSONArray result = new JSONArray();
+		for (ProjectEntity project : projects) {
+			Calendar deadline = Calendar.getInstance();
+			try {
+				deadline.setTime(formatter.parse(project.getDeadline()));
+				if (deadline.before(endOfTheWeek)
+						&& (deadline.after(startOfWeek) ||
+						deadlineIsCurrently(deadline, currentDate))) {
+					JSONObject date = new JSONObject();
+					date.put("project", project.getName());
+					date.put("deadline", project.getDeadline());
+					result.put(date);
+				}
+			} catch (ParseException e) {
+				result = null;
+			} catch (JSONException e) {
+				result = null;
+			}
+		}
+		return result;
+	}
+
+	private boolean deadlineIsCurrently(Calendar deadline, Calendar currentDate) {
+		boolean result = false;
+		if (deadline.get(Calendar.YEAR) == currentDate.get(Calendar.YEAR)
+				&& deadline.get(Calendar.DAY_OF_YEAR)
+				== currentDate.get(Calendar.DAY_OF_YEAR)) {
+			result = true;
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/project/statistics")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject getStatistics(JSONObject data) {
+		JSONObject result;
+		String token;
+		String projectName;
+		String teamName;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				projectName = data.getString("projectName");
+				teamName = data.getString("teamName");
+				ProjectEntity project = dataService.getProject(projectName,
+						teamName);
+				if (project != null) {
+					List<UserEntity> users = project.getUsers();
+					List<AppointmentEntity> appointments
+							= project.getAppointments();
+					List<JSONObject> usersStatistics
+							= combineUserAndAppointmentStatistic(users,
+							appointments);
+					if (usersStatistics != null) {
+						result = new JSONObject();
+						result.put("success", "true");
+						result.put("statistics", usersStatistics);
+					} else {
+						result = returnInternalError();
+					}
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnNoRightsError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	private List<JSONObject> combineUserAndAppointmentStatistic(
+			List<UserEntity> users,
+			List<AppointmentEntity> appointments) throws JSONException {
+		List<JSONObject> result = new ArrayList<>();
+		int numberOfAllAppoinments = appointments.size();
+		for (UserEntity user : users) {
+			int countMaybe = 0;
+			int countYes = 0;
+			int countNo = 0;
+			for (AppointmentEntity appointment : appointments) {
+				StatisticParticipationAnswer answerOfUser
+						= appointment.getUserAnswers().get(user.getUsername());
+				if (answerOfUser == StatisticParticipationAnswer.YES) {
+					countYes++;
+				} else if (answerOfUser == StatisticParticipationAnswer.MAYBE) {
+					countMaybe++;
+				} else {
+					countNo++;
+				}
+			}
+			JSONObject userStatistic = new JSONObject();
+			userStatistic.put("user", user.getUsername());
+			userStatistic.put("#yes", countYes);
+			userStatistic.put("#maybe", countMaybe);
+			userStatistic.put("#no", countNo);
+			userStatistic.put("#all", numberOfAllAppoinments);
+			result.add(userStatistic);
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/appointment")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject getAppointment(JSONObject data) {
+		JSONObject result;
+		String token;
+		String appointmentId;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				appointmentId = data.getString("id");
+				AppointmentEntity appointment = dataService
+						.getAppointment(Long.parseLong(appointmentId));
+				if (appointment != null) {
+					result = new JSONObject();
+					JSONObject appointmentJSON
+							= new JSONObject(appointment.toString());
+					appointmentJSON.put("userAnswer",
+							appointment.getUserAnswers());
+					result.put("success", "true");
+					result.put("appointment", appointmentJSON);
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnNoRightsError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("appointment/answer/participation")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject saveUsersParticipation(JSONObject data) {
+		JSONObject result;
+		String token;
+		String username;
+		String appointmentId;
+		String answer;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				username = data.getString("username");
+				appointmentId = data.getString("id");
+				answer = data.getString("answer");
+				UserEntity user = dataService.getUser(username);
+				AppointmentEntity appointment = dataService
+						.getAppointment(Long.parseLong(appointmentId));
+				if (user != null && appointment != null) {
+					if (dataService.isUserTakingPartAtProject(user,
+							appointment.getProject())) {
+						StatisticParticipationAnswer usersAnswer =
+								getUsersAnswer(answer);
+						if (dataService.saveAnswerParticipation(user,
+								appointment, usersAnswer)) {
+							result = new JSONObject();
+							result.put("success", "true");
+							result.put("userAnswer", "" + usersAnswer);
+						} else {
+							result = returnInternalError();
+						}
+					} else {
+						result = new JSONObject();
+						result.put("success", "false");
+						result.put("reason", "Der User ist nicht Teil des " +
+								"entsprechenden Projekts und kann deshalb " +
+								"nicht an dem Meeting teilnehmen!");
+					}
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnNoRightsError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	private StatisticParticipationAnswer getUsersAnswer(String answer) {
+		StatisticParticipationAnswer result;
+		if (answer.equals(YES)) {
+			result = StatisticParticipationAnswer.YES;
+		} else if (answer.equals(NO)) {
+			result = StatisticParticipationAnswer.NO;
+		} else {
+			result = StatisticParticipationAnswer.MAYBE;
+		}
+		return result;
 	}
 
 	@POST
@@ -79,7 +488,6 @@ public class RESTService {
 							.equals(username)) {
 						if (!appointment.getIsDeadline()) {
 							dataService.deleteAppointment(appointment);
-
 							result = new JSONObject();
 							result.put("success", "true");
 						} else {
@@ -134,8 +542,8 @@ public class RESTService {
 						teamName);
 				AppointmentEntity appointment = dataService.getAppointment
 						(projectName,
-						Long.parseLong(id),
-						teamName);
+								Long.parseLong(id),
+								teamName);
 				if (project != null && appointment != null) {
 					if (project.getProjectManager().getUsername()
 							.equals(username)) {
@@ -216,7 +624,7 @@ public class RESTService {
 	@Path("/project/appointments")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getProjectsAppointment(JSONObject data) {
+	public JSONObject getProjectsAppointments(JSONObject data) {
 		JSONObject result;
 		String token;
 		String projectName;
@@ -233,8 +641,12 @@ public class RESTService {
 							= project.getAppointments();
 					List<JSONObject> appointmentsJson = new ArrayList<>();
 					for (AppointmentEntity appointment : appointments) {
+						JSONObject appointmentJSON
+								= new JSONObject(appointment.toString());
+						appointmentJSON.put("userAnswer",
+								appointment.getUserAnswers());
 						appointmentsJson
-								.add(new JSONObject(appointment.toString()));
+								.add(appointmentJSON);
 					}
 					result = new JSONObject();
 					result.put("success", "true");
@@ -314,8 +726,8 @@ public class RESTService {
 				if (task != null && team != null) {
 					if (task.getWorker().getUsername().equals(username)) {
 						dataService.editTask(task, description, deadline);
-							result = new JSONObject();
-							result.put("success", "true");
+						result = new JSONObject();
+						result.put("success", "true");
 					} else {
 						result = returnNoRightsError();
 					}
