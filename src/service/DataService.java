@@ -243,6 +243,8 @@ public class DataService {
 			if (manager.getRole() != UserRole.ADMINISTRATOR) {
 				manager.setRole(UserRole.PROJECT_OWNER);
 			}
+			team.addNews(NEW_PROJECT + projectName + CREATED);
+			teamDAO.saveOrUpdate(team);
 			manager.setAdminOfProject(project);
 			manager.getProjectsTakingPart().add(project);
 			manager.getStatistics().add(newStatistic);
@@ -256,8 +258,6 @@ public class DataService {
 			appointment.addUserAnswer(projectManager,
 					StatisticParticipationAnswer.MAYBE);
 			appointmentDAO.saveOrUpdate(appointment);
-			team.addNews(NEW_PROJECT + projectName + CREATED);
-			teamDAO.saveOrUpdate(team);
 			result = true;
 		}
 		return result;
@@ -490,6 +490,8 @@ public class DataService {
 			}
 		}
 		TeamEntity team = getTeam(teamName);
+		team.addNews(REGISTER + registerName + DELETED);
+		teamDAO.saveOrUpdate(team);
 		ArrayList<RegisterEntity> registers
 				= new ArrayList<RegisterEntity>(team.getRegisters());
 		if (team != null && !registers.isEmpty()) {
@@ -502,7 +504,6 @@ public class DataService {
 		}
 		register.setTeam(null);
 		register.setUsers(null);
-		team.addNews(REGISTER + registerName + DELETED);
 		registerDAO.saveOrUpdate(register);
 		teamDAO.saveOrUpdate(team);
 		registerDAO.remove(register);
@@ -1151,11 +1152,10 @@ public class DataService {
 		task.setTeam(null);
 		task.setWorker(null);
 		userDAO.saveOrUpdate(worker);
+		team.addNews(TASK + task.getName() + DELETED);
 		teamDAO.saveOrUpdate(team);
 		taskDAO.saveOrUpdate(task);
 		taskDAO.remove(task);
-		team.addNews(TASK + task.getName() + DELETED);
-		teamDAO.saveOrUpdate(team);
 	}
 
 	public void editAppointment(AppointmentEntity appointment,
@@ -1170,6 +1170,9 @@ public class DataService {
 	public void deleteAppointment(AppointmentEntity appointment) {
 		List<UserEntity> usersOfAppointment = appointment.getUserTakinPart();
 		ProjectEntity project = appointment.getProject();
+		TeamEntity team = project.getTeam();
+		team.addNews(APPOINTMENT + appointment.getName() + DELETED);
+		teamDAO.saveOrUpdate(team);
 		List<StatisticEntity> statistics = project.getStatistics();
 		for (StatisticEntity statistic : statistics) {
 			statistic.decreaseNumberOfAllAppointments();
@@ -1186,9 +1189,6 @@ public class DataService {
 		appointment.setUserTakinPart(new ArrayList<>());
 		appointmentDAO.saveOrUpdate(appointment);
 		appointmentDAO.remove(appointment);
-		TeamEntity team = project.getTeam();
-		team.addNews(APPOINTMENT + appointment.getName() + DELETED);
-		teamDAO.saveOrUpdate(team);
 	}
 
 	public AppointmentEntity getAppointment(long id) {

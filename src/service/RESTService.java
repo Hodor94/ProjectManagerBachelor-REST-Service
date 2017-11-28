@@ -47,6 +47,39 @@ public class RESTService {
 	// Todo: Ask for updates -> InternalService at client side
 
 	@POST
+	@Path("/user/tributes")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject getUsersTribute(JSONObject data) {
+		JSONObject result;
+		String token;
+		String username;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				username = data.getString("username");
+				UserEntity user = dataService.getUser(username);
+				if (user != null) {
+					String tributes = user.getTributes();
+					if (tributes == null) {
+						tributes = "";
+					}
+					result = new JSONObject();
+					result.put("success", "true");
+					result.put("tributes", tributes);
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnNoRightsError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
 	@Path("/team/news")
 	public JSONObject getTeamsNews(JSONObject data) {
 		JSONObject result;
@@ -1494,6 +1527,7 @@ public class RESTService {
 		String registerName;
 		String admin;
 		String teamName;
+		String tributes;
 		try {
 			token = data.getString("token");
 			if (validateToken(token)) {
@@ -1501,6 +1535,7 @@ public class RESTService {
 				registerName = data.getString("registerName");
 				admin = data.getString("admin");
 				teamName = data.getString("teamName");
+				tributes = data.getString("tributes");
 				UserEntity userToEdit = dataService.getUser(toEdit);
 				RegisterEntity register;
 				if (registerName.equals("-----")) {
@@ -1514,6 +1549,7 @@ public class RESTService {
 					if (userAdmin.getRole().equals(UserRole.ADMINISTRATOR)
 							&& userAdmin.getTeam().getName().equals(teamName)) {
 						userToEdit.setRegister(register);
+						userToEdit.setTributes(tributes);
 						dataService.saveUser(userToEdit);
 						result = new JSONObject();
 						result.put("success", "true");
