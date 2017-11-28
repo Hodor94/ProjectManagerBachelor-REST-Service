@@ -40,7 +40,7 @@ public class RESTService {
 	private DataService dataService = new DataService();
 	private final byte[] SHARED_SECRET = generateSharedSecret();
 	private final long EXPIRE_TIME = 900000; // Within a 15 minutes period a
-											 // token is valid
+	// token is valid
 
 	//--------------------------------------------------------------------------
 
@@ -114,6 +114,44 @@ public class RESTService {
 	}
 
 	@POST
+	@Path("/newsflash/tokenless")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public JSONObject getNewsForWeekTokenless(JSONObject data) {
+		JSONObject result;
+		String teamName;
+		String username;
+		String mondayOfWeek;
+		String currentDate;
+		String sundayOfWeek;
+		try {
+			teamName = data.getString("teamName");
+			username = data.getString("username");
+			mondayOfWeek = data.getString("mondayOfWeek");
+			currentDate = data.getString("currentDate");
+			sundayOfWeek = data.getString("sundayOfWeek");
+			TeamEntity team = dataService.getTeam(teamName);
+			UserEntity user = dataService.getUser(username);
+			if (user != null && team != null) {
+				JSONObject relevantDatesForTheWeek
+						= getRelevantDates(user, team, currentDate,
+						mondayOfWeek, sundayOfWeek);
+				result = new JSONObject();
+				result.put("success", "true");
+				result.put("dates", relevantDatesForTheWeek);
+			} else {
+				result = returnEmptyResult();
+			}
+		} catch (
+				JSONException e)
+
+		{
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
 	@Path("/newsflash")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -153,6 +191,7 @@ public class RESTService {
 		}
 		return result;
 	}
+
 
 	private JSONObject getRelevantDates(UserEntity user, TeamEntity team,
 										String currentDate, String mondayOfWeek,
