@@ -40,11 +40,54 @@ public class RESTService {
 	private DataService dataService = new DataService();
 	private final byte[] SHARED_SECRET = generateSharedSecret();
 	private final long EXPIRE_TIME = 900000; // Within a 15 minutes period a
-	// token is valid
+											 // token is valid
 
 	//--------------------------------------------------------------------------
 
-	// Todo: Ask for updates -> InternalService at client side
+	@POST
+	@Path("/change/password")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject changePassword(JSONObject data) {
+		JSONObject result;
+		try {
+			String username = data.getString("username");
+			String oldPassword = data.getString("oldPassword");
+			String newPassword = data.getString("newPassword");
+			UserEntity user = dataService.getUser(username);
+			if (user != null) {
+				if (user.getPassword().equals(oldPassword)) {
+					dataService.changePasswordOfUser(user, newPassword);
+					result = new JSONObject();
+					result.put("success", "true");
+				} else {
+					result = new JSONObject();
+					result.put("success", "false");
+					result.put("reason", "Das alte Passwort stimmt nicht mit " +
+							"Ihrem derzeitigen Passwort überein!");
+				}
+			} else {
+				result = returnEmptyResult();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/password/forgotten")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void forgottenPassword(JSONObject data) {
+		try {
+			String username = data.getString("username");
+			UserEntity user = dataService.getUser(username);
+			PasswordService passwordService = new PasswordService(user);
+			passwordService.sendFromGmail();
+		} catch (JSONException e) {
+			// Do nothing
+		}
+	}
 
 	@POST
 	@Path("/user/tributes")
@@ -100,17 +143,6 @@ public class RESTService {
 			result = returnClientError();
 		}
 		return result;
-	}
-
-	@GET
-	@Path("/ping")
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject ping() {
-		try {
-			return new JSONObject("{\"success\": \"true\"}");
-		} catch (JSONException e) {
-			return null;
-		}
 	}
 
 	@POST

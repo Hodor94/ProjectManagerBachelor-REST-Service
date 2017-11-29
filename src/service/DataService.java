@@ -1244,5 +1244,10 @@ public class DataService {
 		}
 		return result;
 	}
+
+	public void changePasswordOfUser(UserEntity user, String newPassword) {
+		user.setPassword(newPassword);
+		userDAO.saveOrUpdate(user);
+	}
 }
 

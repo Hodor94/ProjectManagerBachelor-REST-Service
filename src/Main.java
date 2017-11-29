@@ -9,10 +9,8 @@ import org.codehaus.jettison.json.JSONObject;
 import service.PasswordService;
 import service.RESTService;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Transport;
+import javax.mail.*;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.*;
@@ -23,8 +21,7 @@ import java.util.Date;
 import java.util.Properties;
 
 public class Main {
-
-	public static void main(String[] args) throws MessagingException {
+	public static void main(String[] args) {
 
 	}
 }
