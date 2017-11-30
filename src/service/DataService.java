@@ -8,6 +8,7 @@ import com.sun.jersey.json.impl.provider.entity.JSONArrayProvider;
 import com.sun.org.glassfish.external.statistics.Statistic;
 import dao.*;
 import entity.*;
+import org.codehaus.jettison.json.JSONArray;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -270,24 +271,6 @@ public class DataService {
 		ProjectEntity project = projectDAO.getProject(projectName, teamName);
 		StatisticEntity statistic = new StatisticEntity(user, project);
 		return statistic;
-	}
-
-	public boolean createNewChat(String name, Collection<String> users,
-								 String teamName, String creatorName) {
-		TeamEntity team = teamDAO.getTeamByTeamName(teamName);
-		UserEntity creator = userDAO.getUserByUsername(creatorName);
-		if (team != null && creator != null) {
-			ChatEntity newChat = new ChatEntity(name, new ArrayList<UserEntity>(),
-					new ArrayList<MessageEntity>(), team, creator);
-			team.getChats().add(newChat);
-			chatDAO.saveOrUpdate(newChat);
-			teamDAO.saveOrUpdate(team);
-			ChatEntity chat = chatDAO.getChatByChatName(name, team, creator);
-			addUsersToChat(chat, users);
-		} else {
-			return false;
-		}
-		return true;
 	}
 
 	private void addUsersToChat(ChatEntity chat, Collection<String> users) {
@@ -1248,6 +1231,20 @@ public class DataService {
 	public void changePasswordOfUser(UserEntity user, String newPassword) {
 		user.setPassword(newPassword);
 		userDAO.saveOrUpdate(user);
+	}
+
+	public void createNewChat(TeamEntity team,
+							  ArrayList<UserEntity> usersOfChat) {
+		ChatEntity newChat = new ChatEntity();
+		newChat.setTeam(team);
+		newChat.setUsers(usersOfChat);
+		chatDAO.saveOrUpdate(newChat);
+		for (UserEntity user : usersOfChat) {
+			user.getChats().add(newChat);
+			userDAO.saveOrUpdate(user);
+		}
+		team.getChats().add(newChat);
+		teamDAO.saveOrUpdate(team);
 	}
 }
 

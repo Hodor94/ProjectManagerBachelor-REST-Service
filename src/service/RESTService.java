@@ -44,6 +44,41 @@ public class RESTService {
 
 	//--------------------------------------------------------------------------
 
+	public JSONObject createChat(JSONObject data) {
+		JSONObject result;
+		String token;
+		String teamName;
+		JSONArray usersOfChat;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				teamName = data.getString("teamName");
+				usersOfChat = data.getJSONArray("users");
+				TeamEntity team = dataService.getTeam(teamName);
+				if (team != null) {
+					ArrayList<UserEntity> users = new ArrayList<>();
+					for (int i = 0; i < usersOfChat.length(); i++) {
+						UserEntity user = dataService.getUser(usersOfChat
+								.getString(i));
+						if (user != null) {
+							users.add(user);
+						}
+					}
+					dataService.createNewChat(team, users);
+					result = new JSONObject();
+					result.put("success", "true");
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnNoRightsError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
 	@POST
 	@Path("/change/password")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -2586,15 +2621,6 @@ public class RESTService {
 			return new JSONObject("{\"success\": \"false\", " +
 					"\"reason\": \"Der eingeladene Nutzer ist bereits in " +
 					"einem Team.\"}");
-		} catch (JSONException e) {
-			return null;
-		}
-	}
-
-	private JSONObject returnUpdatedMessage() {
-		try {
-			return new JSONObject("{\"success\": \"false\", \"reason\":" +
-					" \"Keine Änderungen vorhanden!\"}");
 		} catch (JSONException e) {
 			return null;
 		}

@@ -19,10 +19,6 @@ import java.util.List;
 @Table(name = "chat")
 public class ChatEntity extends GenericEntity {
 
-	// Attributes with no relation to other entities
-	@Column(name = "name")
-	private String name;
-
 	// Attributes related to other entities
 	@JsonIgnore
 	@LazyCollection(LazyCollectionOption.FALSE)
@@ -38,10 +34,6 @@ public class ChatEntity extends GenericEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "team")
 	private TeamEntity team;
-
-	@OneToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "creator")
-	private UserEntity creator; // Creator of the chat.
 
 	/**
 	 * Creates a new instance of ChatEntity with no information in it.
@@ -65,27 +57,9 @@ public class ChatEntity extends GenericEntity {
 					  ArrayList<MessageEntity> messages, TeamEntity team,
 					  UserEntity creator) {
 		super();
-		this.name = name;
 		this.users = users;
 		this.messages = messages;
 		this.team = team;
-		this.creator = creator;
-	}
-
-	/**
-	 *
-	 * @return
-	 */
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 *
-	 * @param name
-	 */
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public List<UserEntity> getUsers() {
@@ -120,14 +94,6 @@ public class ChatEntity extends GenericEntity {
 		this.team = team;
 	}
 
-	public UserEntity getCreator() {
-		return creator;
-	}
-
-	public void setCreator(UserEntity creator) {
-		this.creator = creator;
-	}
-
 	public void addUser(UserEntity user) {
 		this.users.add(user);
 	}
@@ -137,40 +103,20 @@ public class ChatEntity extends GenericEntity {
 		String result;
 		stringBuilder.append("{");
 		stringBuilder.append("\"id\": " + "\"" + this.getId() + "\",");
-		stringBuilder.append(appendJSONName(name));
 		stringBuilder.append(appendJSONTeamName(team));
-		stringBuilder.append(appendJSONCreatorName(creator));
 		stringBuilder.append("}");
 		result = stringBuilder.toString();
 		return result;
 	}
 
-	private String appendJSONName(String name) {
-		if (name != null && !(name.equals(""))) {
-			return "\"name\": " + "\"" + encodeToUTF8(name) + "\", ";
-		} else {
-			return "\"name\": " + null + ", ";
-		}
-	}
-
 	private String appendJSONTeamName(TeamEntity team) {
 		if (team != null && team.getName() != null
 				&& !(team.getName().equals(""))) {
-			return "\"team\": " + "\""
-					+ encodeToUTF8(this.getTeam().getName()) + "\", ";
+			return "\"team\": " + "\"" + this.getTeam().getName() + "\", ";
 		} else {
 			return "\"team\": " + null + ", ";
 		}
 	}
 
-	private String appendJSONCreatorName(UserEntity creator) {
-		if (creator != null && creator.getUsername() != null
-				&& !(creator.getUsername().equals(""))) {
-			return "\"creator\": " + "\""
-					+ encodeToUTF8(creator.getUsername()) + "\"";
-		} else {
-			return "\"creator\": " + "\"" + null + "\"";
-		}
-	}
 }
 
