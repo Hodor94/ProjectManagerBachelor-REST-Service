@@ -19,10 +19,16 @@ import java.util.List;
 @Table(name = "chat")
 public class ChatEntity extends GenericEntity {
 
+	@Column(name = "type")
+	public boolean isSoloChat;
+
+	@Column(name = "name")
+	public String name;
+
 	// Attributes related to other entities
 	@JsonIgnore
 	@LazyCollection(LazyCollectionOption.FALSE)
-	@ManyToMany(cascade = CascadeType.ALL)
+	@ManyToMany
 	private List<UserEntity> users;
 
 	@JsonIgnore
@@ -47,15 +53,12 @@ public class ChatEntity extends GenericEntity {
 	/**
 	 * Creates a new instace of ChatEntity with all information given.
 	 *
-	 * @param name - The new name of the chat.
 	 * @param users - The new list of users chatting.
 	 * @param messages - The messages sent in this chat.
 	 * @param team - The team in which the chat exists.
-	 * @param creator - The user who created the chat.
 	 */
-	public ChatEntity(String name, ArrayList<UserEntity> users,
-					  ArrayList<MessageEntity> messages, TeamEntity team,
-					  UserEntity creator) {
+	public ChatEntity(ArrayList<UserEntity> users,
+					  ArrayList<MessageEntity> messages, TeamEntity team) {
 		super();
 		this.users = users;
 		this.messages = messages;
@@ -103,19 +106,49 @@ public class ChatEntity extends GenericEntity {
 		String result;
 		stringBuilder.append("{");
 		stringBuilder.append("\"id\": " + "\"" + this.getId() + "\",");
+		stringBuilder.append(appendJSONChatName());
+		stringBuilder.append(appendJSONIsSoloChat());
 		stringBuilder.append(appendJSONTeamName(team));
 		stringBuilder.append("}");
 		result = stringBuilder.toString();
 		return result;
 	}
 
+	public String appendJSONChatName() {
+		if (name != null) {
+			return "\"name\": \"" + name + "\", ";
+		} else {
+			return "\"name\": " + null + ", ";
+		}
+	}
+
+	public String appendJSONIsSoloChat() {
+		return "\"type\": \"" + isSoloChat + "\", ";
+	}
+
 	private String appendJSONTeamName(TeamEntity team) {
 		if (team != null && team.getName() != null
 				&& !(team.getName().equals(""))) {
-			return "\"team\": " + "\"" + this.getTeam().getName() + "\", ";
+			return "\"team\": " + "\"" + this.getTeam().getName() + "\"";
 		} else {
-			return "\"team\": " + null + ", ";
+			return "\"team\": " + null;
 		}
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setIsSoloChat(boolean isSoloChat) {
+		this.isSoloChat = isSoloChat;
+	}
+
+	public boolean getIsSoloChat() {
+		return isSoloChat;
 	}
 
 }

@@ -3,9 +3,12 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import entity.TeamEntity;
+import entity.UserEntity;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import service.DataService;
 import service.PasswordService;
 import service.RESTService;
 
@@ -22,7 +25,19 @@ import java.util.Properties;
 
 public class Main {
 	public static void main(String[] args) {
+		ArrayList<String> users = new ArrayList<String>();
+		users.add("admin");
+		users.add("jeri");
+		try {
+			JSONObject result = new JSONObject();
+			result.put("teamName", "Flying Unicorns");
+			JSONArray arrayUsers = new JSONArray(users);
+			result.put("users", arrayUsers);
+			result.put("name", "");
+			result.put("isSoloChat", "true");
+		} catch (JSONException e) {
 
+		}
 	}
 }
 

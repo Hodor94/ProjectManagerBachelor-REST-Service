@@ -302,29 +302,6 @@ public class DataService {
 		return result;
 	}
 
-	public boolean createNewMessage(String message, String date,
-									String userName, String chatName,
-									String teamName, String creatorOfChat) {
-		boolean result = false;
-		TeamEntity team = getTeam(teamName);
-		UserEntity creator = getUser(creatorOfChat);
-		ChatEntity fetchedChat;
-		UserEntity author;
-		if (team != null && creator != null) {
-			fetchedChat
-					= chatDAO.getChatByChatName(chatName, team, creator);
-			author = userDAO.getUserByUsername(userName);
-			if (fetchedChat != null && author != null) {
-				MessageEntity newMessage
-						= new MessageEntity(message, date, author,
-						fetchedChat);
-				messageDAO.saveOrUpdate(newMessage);
-				result = true;
-			}
-		}
-		return result;
-	}
-
 	public boolean setWorkerToTask(String taskName, String userName, String
 			teamName) {
 		boolean result = false;
@@ -421,23 +398,6 @@ public class DataService {
 		projectDAO.saveOrUpdate(project);
 		AppointmentEntity appointment = appointmentDAO.get(appointmentId);
 		appointmentDAO.remove(appointment);
-	}
-
-	public void removeChat(String chatName, String teamName,
-						   String creatorName) {
-		ChatEntity chat = getChat(chatName, teamName, creatorName);
-		if (chat != null) {
-			TeamEntity team = getTeam(teamName);
-			ArrayList<UserEntity> users
-					= new ArrayList<UserEntity>(chat.getUsers());
-			if (team != null && users != null) {
-				for (UserEntity user : users) {
-					user.getChats().remove(chat);
-					userDAO.saveOrUpdate(user);
-				}
-			}
-			chatDAO.remove(chat);
-		}
 	}
 
 	public boolean removeProject(String projectName, String teamName) {
@@ -734,17 +694,6 @@ public class DataService {
 		if (user != null) {
 			user.getAppointmentsTakingPart().add(appointment);
 			userDAO.saveOrUpdate(user);
-		}
-		return result;
-	}
-
-	public ChatEntity getChat(String chatName, String teamName,
-							  String creatorName) {
-		TeamEntity team = getTeam(teamName);
-		UserEntity creator = getUser(creatorName);
-		ChatEntity result = null;
-		if (team != null && creator != null) {
-			result = chatDAO.getChatByChatName(chatName, team, creator);
 		}
 		return result;
 	}
@@ -1234,17 +1183,47 @@ public class DataService {
 	}
 
 	public void createNewChat(TeamEntity team,
-							  ArrayList<UserEntity> usersOfChat) {
+							  ArrayList<UserEntity> usersOfChat,
+							  String chatName) {
 		ChatEntity newChat = new ChatEntity();
 		newChat.setTeam(team);
+		newChat.setName(chatName);
+		if (usersOfChat.size() == 2) {
+			newChat.setIsSoloChat(true);
+		} else {
+			newChat.setIsSoloChat(false);
+		}
 		newChat.setUsers(usersOfChat);
 		chatDAO.saveOrUpdate(newChat);
-		for (UserEntity user : usersOfChat) {
+		team.getChats().add(newChat);
+		teamDAO.saveOrUpdate(team);
+		for (int i = 0; i < usersOfChat.size(); i++) {
+			UserEntity user = usersOfChat.get(i);
 			user.getChats().add(newChat);
 			userDAO.saveOrUpdate(user);
 		}
-		team.getChats().add(newChat);
-		teamDAO.saveOrUpdate(team);
+
+	}
+
+	public ChatEntity getChatByName(TeamEntity team, String chatName) {
+		return chatDAO.getChatByName(team, chatName);
+	}
+
+	public void createNewMessage(String message,UserEntity author,
+								 ChatEntity chat) {
+		SimpleDateFormat formatter
+				= new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
+		Calendar currentTime = Calendar.getInstance();
+		String timestamp = formatter.format(currentTime.getTime());
+		MessageEntity messageEntity = new MessageEntity(message, timestamp,
+				author, chat);
+		messageDAO.saveOrUpdate(messageEntity);
+		chat.getMessages().add(messageEntity);
+		chatDAO.saveOrUpdate(chat);
+	}
+
+	public ChatEntity getChat(long chatId) {
+		return chatDAO.get(chatId);
 	}
 }
 

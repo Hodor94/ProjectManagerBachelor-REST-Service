@@ -16,7 +16,8 @@ public class TeamDAO extends GenericDAO<TeamEntity> {
         TeamEntity result;
         Session session = HibernateUtil.getSessionFactory().getCurrentSession();
         session.beginTransaction();
-        Criteria criteria = session.createCriteria(TeamEntity.class).add(Expression.eq("name", name));
+        Criteria criteria = session.createCriteria(TeamEntity.class)
+				.add(Expression.eq("name", name));
         result = (TeamEntity) criteria.uniqueResult();
         session.getTransaction().commit();
         session.close();
@@ -26,7 +27,8 @@ public class TeamDAO extends GenericDAO<TeamEntity> {
     public void removeByName(String teamName) {
         Session session = HibernateUtil.getSessionFactory().getCurrentSession();
         session.beginTransaction();
-        Criteria criteria = session.createCriteria(TeamEntity.class).add(Expression.eq("name", teamName));
+        Criteria criteria = session.createCriteria(TeamEntity.class)
+				.add(Expression.eq("name", teamName));
         session.delete(criteria.uniqueResult());
         session.getTransaction().commit();
         session.close();

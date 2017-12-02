@@ -40,33 +40,148 @@ public class RESTService {
 	private DataService dataService = new DataService();
 	private final byte[] SHARED_SECRET = generateSharedSecret();
 	private final long EXPIRE_TIME = 900000; // Within a 15 minutes period a
-											 // token is valid
+	// token is valid
 
 	//--------------------------------------------------------------------------
 
+	@POST
+	@Path("/receive/message")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject receiveMessage(JSONObject data) {
+		JSONObject result;
+		String token;
+		long id;
+		String message;
+		String authorName;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				id = Long.parseLong(data.getString("chatId"));
+				message = data.getString("message");
+				authorName = data.getString("author");
+				UserEntity author = dataService.getUser(authorName);
+				ChatEntity chat = dataService.getChat(id);
+				if (chat != null && author != null) {
+					dataService.createNewMessage(message, author, chat);
+					result = new JSONObject();
+					result.put("success", "true");
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnNoRightsError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("user/chats")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public JSONObject getUsersChats(JSONObject data) {
+		JSONObject result;
+		String token;
+		String username;
+		String teamName;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				username = data.getString("username");
+				teamName = data.getString("teamName");
+				TeamEntity team = dataService.getTeam(teamName);
+				UserEntity user = dataService.getUser(username);
+				if (team != null && user != null) {
+					List<ChatEntity> chats = new ArrayList<>();
+					chats = user.getChats();
+					JSONArray usersChats = new JSONArray();
+					for (int i = 0; i < chats.size(); i++) {
+						JSONObject chat
+								= new JSONObject(chats.get(i).toString());
+						List<UserEntity> users = chats.get(i).getUsers();
+						ArrayList<String> usernames = getUsernames(users);
+						chat.put("users", usernames);
+						usersChats.put(chat);
+					}
+					result = new JSONObject();
+					result.put("success", "true");
+					result.put("chats", usersChats);
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnNoRightsError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	private ArrayList<String> getUsernames(List<UserEntity> users) {
+		ArrayList<String> usernames = new ArrayList<>();
+		for (UserEntity user : users) {
+			String name = user.getUsername();
+			usernames.add(name);
+		}
+		return usernames;
+	}
+
+	@POST
+	@Path("/create/chat")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
 	public JSONObject createChat(JSONObject data) {
 		JSONObject result;
 		String token;
 		String teamName;
+		String chatName;
+		String isSoloChat = null;
 		JSONArray usersOfChat;
 		try {
 			token = data.getString("token");
 			if (validateToken(token)) {
 				teamName = data.getString("teamName");
+				chatName = data.getString("name");
+				isSoloChat = data.getString("isSoloChat");
 				usersOfChat = data.getJSONArray("users");
 				TeamEntity team = dataService.getTeam(teamName);
 				if (team != null) {
-					ArrayList<UserEntity> users = new ArrayList<>();
-					for (int i = 0; i < usersOfChat.length(); i++) {
-						UserEntity user = dataService.getUser(usersOfChat
-								.getString(i));
-						if (user != null) {
-							users.add(user);
+					if (isSoloChat.equals("false")) {
+						if (dataService.getChatByName(team, chatName) == null) {
+							ArrayList<UserEntity> users = new ArrayList<>();
+							for (int i = 0; i < usersOfChat.length(); i++) {
+								UserEntity user
+										= dataService
+										.getUser(usersOfChat.getString(i));
+								if (user != null) {
+									users.add(user);
+								}
+							}
+							dataService.createNewChat(team, users, chatName);
+							result = new JSONObject();
+							result.put("success", "true");
+						} else {
+							result = returnExistingError();
 						}
+					} else if (isSoloChat.equals("true")) {
+						ArrayList<UserEntity> users = new ArrayList<>();
+						for (int i = 0; i < usersOfChat.length(); i++) {
+							UserEntity user = dataService.getUser(usersOfChat
+									.getString(i));
+							if (user != null) {
+								users.add(user);
+							}
+						}
+						dataService.createNewChat(team, users, chatName);
+						result = new JSONObject();
+						result.put("success", "true");
+					} else {
+						result = returnClientError();
 					}
-					dataService.createNewChat(team, users);
-					result = new JSONObject();
-					result.put("success", "true");
 				} else {
 					result = returnEmptyResult();
 				}

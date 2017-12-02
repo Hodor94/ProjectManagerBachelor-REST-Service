@@ -65,6 +65,9 @@ public class UserEntity extends GenericEntity {
 	@Column(name = "enteredTeamOn")
 	private Calendar dayOfEntry;
 
+	@Column(name = "lastCheckedMessages")
+	private Calendar lastCheckedMessages;
+
 	@Column(name = "role")
 	private UserRole role;
 
@@ -96,7 +99,7 @@ public class UserEntity extends GenericEntity {
 
 	@JsonIgnore
 	@LazyCollection(LazyCollectionOption.FALSE)
-	@ManyToMany(targetEntity = ChatEntity.class, cascade = CascadeType.ALL)
+	@ManyToMany(targetEntity = ChatEntity.class)
 	@JoinTable(name = "chatsOfUsers")
 	private List<ChatEntity> chats;
 
@@ -552,6 +555,14 @@ public class UserEntity extends GenericEntity {
 
 	public boolean isUpdated() {
 		return updated;
+	}
+
+	public Calendar getLastCheckedMessages() {
+		return lastCheckedMessages;
+	}
+
+	public void setLastCheckedMessages(Calendar lastCheckedMessages) {
+		this.lastCheckedMessages = lastCheckedMessages;
 	}
 }
 
