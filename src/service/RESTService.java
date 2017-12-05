@@ -119,7 +119,7 @@ public class RESTService {
 						} else {
 							result = new JSONObject();
 							result.put("success", "false");
-							return result;
+							result.put("compared", comparedTimes);
 						}
 					}
 				}

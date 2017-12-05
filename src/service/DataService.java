@@ -17,9 +17,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-
-// TODO: Proof at every method if user is allowed to perform operation.
-
 public class DataService {
 	protected static final String DATE_FORMAT = "dd.MM.yyyy hh:mm:ss";
 

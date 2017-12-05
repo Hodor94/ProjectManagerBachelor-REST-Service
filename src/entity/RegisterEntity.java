@@ -105,7 +105,7 @@ public class RegisterEntity extends GenericEntity {
 
 	private String appendJSONName(String name) {
 		if (name != null && !(name.equals(""))) {
-			return "\"name\": " + "\"" + encodeToUTF8(name) + "\", ";
+			return "\"name\": " + "\"" + name + "\", ";
 		} else {
 			return "\"name\": " + null + ", ";
 		}

@@ -209,7 +209,7 @@ public class AppointmentEntity extends GenericEntity {
 
 	private String appendJSONName(String name) {
 		if (name != null && !(name.equals(""))) {
-			return "\"name\": " + "\"" + encodeToUTF8(name) + "\",";
+			return "\"name\": " + "\"" + name + "\",";
 		} else {
 			return "\"name\": " + null + ", ";
 		}
@@ -217,7 +217,7 @@ public class AppointmentEntity extends GenericEntity {
 
 	private String appendJSONDescription(String description) {
 		if (description != null && !(description.equals(""))) {
-			return "\"description\": " + "\"" + encodeToUTF8(description) +
+			return "\"description\": " + "\"" + description +
 					"\", ";
 		} else {
 			return "\"description\": " + null + ", ";
@@ -226,7 +226,7 @@ public class AppointmentEntity extends GenericEntity {
 
 	private String appendJSONDeadline(String deadline) {
 		if (deadline != null && !(deadline.equals(""))) {
-			return "\"deadline\": " + "\"" + encodeToUTF8(deadline) + "\", ";
+			return "\"deadline\": " + "\"" + deadline + "\", ";
 		} else {
 			return "\"deadline\": " + null + ", ";
 		}
