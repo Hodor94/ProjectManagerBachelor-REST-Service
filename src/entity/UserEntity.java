@@ -18,6 +18,7 @@ import javax.persistence.Table;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.List;
 
@@ -39,10 +40,8 @@ public class UserEntity extends GenericEntity {
 	private String username;
 
 	@Column(name = "password")
-	@ColumnTransformer(
-			read = "aes_decrypt('secret', password)",
-			write = "aes_encrypt('secret', ?)"
-	)
+	@ColumnTransformer(write = "AES_ENCRYPT(?, 'secret')",
+	read = "AES_DECRYPT(password, 'secret')")
 	private String password;
 
 	@Column(name = "firstName")

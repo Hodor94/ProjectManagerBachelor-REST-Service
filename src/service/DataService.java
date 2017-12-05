@@ -33,6 +33,7 @@ public class DataService {
 	private TeamDAO teamDAO;
 	private UserDAO userDAO;
 	private static SecretKey secretKey;
+	public static final String secret = generateSecret();
 	private SimpleDateFormat formatter;
 	private final String NEW_PROJECT = "Ein neues Projekt ";
 	private final String NEW_APPOINTMENT = "Ein neues Meeting ";
@@ -64,6 +65,18 @@ public class DataService {
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private static String generateSecret() {
+		char[] chars = "abcdefghijklmnopqrstuvwABCDEFGHIJKLMNOPQRSTUVWXYZ"
+				.toCharArray();
+		StringBuilder stringBuilder = new StringBuilder();
+		Random random = new Random();
+		for (int i = 0; i < 20; i++) {
+			char c  = chars[random.nextInt(chars.length)];
+			stringBuilder.append(c);
+		}
+		return stringBuilder.toString();
 	}
 
 	// Generates a secret key which is used for user authentication
@@ -1229,7 +1242,7 @@ public class DataService {
 		return chatDAO.getChatByName(team, chatName);
 	}
 
-	public void createNewMessage(String message,UserEntity author,
+	public void createNewMessage(String message, UserEntity author,
 								 ChatEntity chat, String timestamp)
 			throws ParseException {
 		SimpleDateFormat formatter
