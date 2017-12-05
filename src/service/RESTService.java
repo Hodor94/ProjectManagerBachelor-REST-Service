@@ -45,25 +45,20 @@ public class RESTService {
 	//--------------------------------------------------------------------------
 
 	@POST
-	@Path("/receive/message")
-	@Consumes(MediaType.APPLICATION_JSON)
+	@Path("/delete/chat")
 	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject receiveMessage(JSONObject data) {
+	@Consumes(MediaType.APPLICATION_JSON)
+	public JSONObject deleteChat(JSONObject data) {
 		JSONObject result;
 		String token;
 		long id;
-		String message;
-		String authorName;
 		try {
 			token = data.getString("token");
 			if (validateToken(token)) {
-				id = Long.parseLong(data.getString("chatId"));
-				message = data.getString("message");
-				authorName = data.getString("author");
-				UserEntity author = dataService.getUser(authorName);
+				id = data.getLong("chatId");
 				ChatEntity chat = dataService.getChat(id);
-				if (chat != null && author != null) {
-					dataService.createNewMessage(message, author, chat);
+				if (chat != null) {
+					dataService.deleteChat(chat);
 					result = new JSONObject();
 					result.put("success", "true");
 				} else {
@@ -74,6 +69,158 @@ public class RESTService {
 			}
 		} catch (JSONException e) {
 			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/messages/new")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject getNewMessagesForUser(JSONObject data) {
+		JSONObject result;
+		try {
+			String username = data.getString("username");
+			String timestamp = data.getString("timestamp");
+			UserEntity user = dataService.getUser(username);
+			ArrayList<String> chatNames = new ArrayList<>();
+			SimpleDateFormat formatter
+					= new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
+			if (user != null) {
+				Calendar currentTime = Calendar.getInstance();
+				currentTime.setTime(formatter.parse(timestamp));
+				List<ChatEntity> chats = user.getChats();
+				for (ChatEntity chat : chats) {
+					if (chat.getMessages().size() != 0) {
+						MessageEntity latestMessage = chat.getMessages().get(0);
+						Calendar timestampLatestMessage
+								= Calendar.getInstance();
+						timestampLatestMessage
+								.setTime(formatter.parse(latestMessage
+										.getDate()));
+						int comparedTimes = user.getLastCheckedMessages()
+								.compareTo(timestampLatestMessage);
+						if (comparedTimes < 0) {
+							String name = "";
+							if (chat.isSoloChat) {
+								for (UserEntity userEntity : chat.getUsers()) {
+									if (!userEntity.getUsername()
+											.equals(username)) {
+										name = userEntity.getUsername();
+										break;
+									}
+								}
+							} else {
+								name = chat.getName();
+							}
+							if (name.length() != 0) {
+								chatNames.add(name);
+							}
+						} else {
+							result = new JSONObject();
+							result.put("success", "false");
+							return result;
+						}
+					}
+				}
+				user.setLastCheckedMessages(currentTime);
+				dataService.saveUser(user);
+				result = new JSONObject();
+				result.put("success", "true");
+				result.put("chats", chatNames);
+			} else {
+				result = returnEmptyResult();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		} catch (ParseException e) {
+			result = new JSONObject();
+			try {
+				result.put("success", "false");
+				result.put("error", e.getMessage());
+			} catch (JSONException e1) {
+				// Do nothing cause try block will always work.
+			}
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/chat/messages")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public JSONObject getChatsMessages(JSONObject data) {
+		JSONObject result;
+		String token;
+		String username;
+		long chatId;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				chatId = Long.parseLong(data.getString("chatId"));
+				username = data.getString("username");
+				UserEntity user = dataService.getUser(username);
+				ChatEntity chat = dataService.getChat(chatId);
+				if (chat != null && user != null) {
+					List<MessageEntity> chatsMessages = chat.getMessages();
+					JSONArray messages = new JSONArray();
+					for (int i = 0; i < chatsMessages.size(); i++) {
+						JSONObject message = new JSONObject(
+								chatsMessages.get(i).toString());
+						messages.put(message);
+					}
+					user.setLastCheckedMessages(Calendar.getInstance());
+					dataService.saveUser(user);
+					result = new JSONObject();
+					result.put("success", "true");
+					result.put("messages", messages);
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnNoRightsError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		}
+		return result;
+	}
+
+	@POST
+	@Path("/receive/message")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject receiveMessage(JSONObject data) {
+		JSONObject result;
+		String token;
+		long id;
+		String message;
+		String authorName;
+		String timestamp;
+		try {
+			token = data.getString("token");
+			if (validateToken(token)) {
+				id = Long.parseLong(data.getString("chatId"));
+				message = data.getString("message");
+				authorName = data.getString("author");
+				timestamp = data.getString("timestamp");
+				UserEntity author = dataService.getUser(authorName);
+				ChatEntity chat = dataService.getChat(id);
+				if (chat != null && author != null) {
+					dataService.createNewMessage(message, author, chat,
+							timestamp);
+					result = new JSONObject();
+					result.put("success", "true");
+				} else {
+					result = returnEmptyResult();
+				}
+			} else {
+				result = returnNoRightsError();
+			}
+		} catch (JSONException e) {
+			result = returnClientError();
+		} catch (ParseException e) {
+			result = returnInternalError();
 		}
 		return result;
 	}

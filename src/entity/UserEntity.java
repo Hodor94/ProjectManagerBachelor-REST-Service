@@ -39,6 +39,10 @@ public class UserEntity extends GenericEntity {
 	private String username;
 
 	@Column(name = "password")
+	@ColumnTransformer(
+			read = "aes_decrypt('secret', password)",
+			write = "aes_encrypt('secret', ?)"
+	)
 	private String password;
 
 	@Column(name = "firstName")
@@ -99,8 +103,7 @@ public class UserEntity extends GenericEntity {
 
 	@JsonIgnore
 	@LazyCollection(LazyCollectionOption.FALSE)
-	@ManyToMany(targetEntity = ChatEntity.class)
-	@JoinTable(name = "chatsOfUsers")
+	@ManyToMany
 	private List<ChatEntity> chats;
 
 	@JsonIgnore

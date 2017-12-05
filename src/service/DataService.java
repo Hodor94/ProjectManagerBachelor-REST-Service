@@ -167,6 +167,15 @@ public class DataService {
 			UserEntity newUser = new UserEntity(username, password,
 					firstName, surname, email, phonNr, address,
 					birthday);
+			SimpleDateFormat formatter
+					= new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+			Calendar initialTime = Calendar.getInstance();
+			try {
+				initialTime.setTime(formatter.parse("01.01.2000 23:59:00"));
+			} catch (ParseException e) {
+				// Do nothing. Try block will always work
+			}
+			newUser.setLastCheckedMessages(initialTime);
 			userDAO.saveOrUpdate(newUser);
 			result = true;
 
@@ -528,6 +537,7 @@ public class DataService {
 	}
 
 	public boolean removeUserFromApp(String username) {
+		// TODO dlete user and it's messages
 		boolean result = false;
 		UserEntity user = userDAO.getUserByUsername(username);
 		TeamEntity team = user.getTeam();
@@ -894,6 +904,7 @@ public class DataService {
 		user.setStatistics(new ArrayList<>());
 		user.setTributes(null);
 		user.setTeam(null);
+		user.setChats(new ArrayList<>());
 	}
 
 	public boolean leaveTeam(UserEntity user, TeamEntity team) {
@@ -903,6 +914,10 @@ public class DataService {
 				ProjectEntity project = user.getAdminOfProject();
 				deleteProject(project);
 				removeDependenciesFromUser(user);
+				List<ChatEntity> chats = user.getChats();
+				for (ChatEntity chat : chats) {
+					deleteChat(chat);
+				}
 				userDAO.saveOrUpdate(user);
 				result = true;
 			} else {
@@ -910,6 +925,11 @@ public class DataService {
 				teamMembers.remove(user);
 				teamDAO.saveOrUpdate(team);
 				removeDependenciesFromUser(user);
+				List<ChatEntity> chats = user.getChats();
+				for (ChatEntity chat : chats) {
+					deleteChat(chat);
+				}
+				userDAO.saveOrUpdate(user);
 				userDAO.saveOrUpdate(user);
 				result = true;
 			}
@@ -1210,20 +1230,47 @@ public class DataService {
 	}
 
 	public void createNewMessage(String message,UserEntity author,
-								 ChatEntity chat) {
+								 ChatEntity chat, String timestamp)
+			throws ParseException {
 		SimpleDateFormat formatter
-				= new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
-		Calendar currentTime = Calendar.getInstance();
-		String timestamp = formatter.format(currentTime.getTime());
+				= new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+		Calendar timeOfMessage = Calendar.getInstance();
+		timeOfMessage.setTime(formatter.parse(timestamp));
 		MessageEntity messageEntity = new MessageEntity(message, timestamp,
 				author, chat);
 		messageDAO.saveOrUpdate(messageEntity);
-		chat.getMessages().add(messageEntity);
+		// Add new messages at front of list
+		chat.getMessages().add(0, messageEntity);
 		chatDAO.saveOrUpdate(chat);
+		author.setLastCheckedMessages(timeOfMessage);
+		userDAO.saveOrUpdate(author);
 	}
 
 	public ChatEntity getChat(long chatId) {
 		return chatDAO.get(chatId);
+	}
+
+	public void deleteChat(ChatEntity chat) {
+		List<MessageEntity> messages = chat.getMessages();
+		List<UserEntity> users = chat.getUsers();
+		TeamEntity team = chat.getTeam();
+		for (UserEntity user : users) {
+			user.getChats().remove(chat);
+			userDAO.saveOrUpdate(user);
+		}
+		for (MessageEntity message : messages) {
+			message.setChat(null);
+			message.setAuthor(null);
+			messageDAO.saveOrUpdate(message);
+			messageDAO.remove(message);
+		}
+		team.getChats().remove(chat);
+		teamDAO.saveOrUpdate(team);
+		chat.setTeam(null);
+		chat.setUsers(new ArrayList<>());
+		chat.setMessages(new ArrayList<>());
+		chatDAO.saveOrUpdate(chat);
+		chatDAO.remove(chat);
 	}
 }
 

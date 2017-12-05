@@ -87,7 +87,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>5.2.2.Final</version>
+            <version>5.2.12.Final</version>
         </dependency>
 
         <dependency>

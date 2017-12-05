@@ -28,7 +28,7 @@ public class ChatEntity extends GenericEntity {
 	// Attributes related to other entities
 	@JsonIgnore
 	@LazyCollection(LazyCollectionOption.FALSE)
-	@ManyToMany
+	@ManyToMany(mappedBy = "chats", targetEntity = UserEntity.class)
 	private List<UserEntity> users;
 
 	@JsonIgnore

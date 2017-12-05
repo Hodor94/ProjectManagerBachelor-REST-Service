@@ -90,15 +90,24 @@ public class MessageEntity extends GenericEntity {
 		stringBuilder.append("\"id\": " + "\"" + this.getId() + "\",");
 		stringBuilder.append(appendJSONAuthor(author));
 		stringBuilder.append(appendJSONDate(date));
+		stringBuilder.append(appendJSONMessage(message));
 		stringBuilder.append(appendJSONChat(chat));
 		stringBuilder.append("}");
 		result = stringBuilder.toString();
 		return result;
 	}
 
+	private String appendJSONMessage(String message) {
+		if (message != null) {
+			return "\"message\": \"" + message + "\", ";
+		} else {
+			return "\"message\": " + null + ", ";
+		}
+	}
+
 	private String appendJSONAuthor(UserEntity author) {
 		if (author != null) {
-			return "\"author\": " + author.toSring() + ", ";
+			return "\"author\": " + author.getUsername() + ", ";
 		} else {
 			return "\"author\": " + null + ", ";
 		}
@@ -106,7 +115,7 @@ public class MessageEntity extends GenericEntity {
 
 	private String appendJSONDate(String date) {
 		if (date != null && !(date.equals(""))) {
-			return "\"date\": " + "\"" + encodeToUTF8(date) + "\", ";
+			return "\"date\": " + "\"" + date + "\", ";
 		} else {
 			return "\"date\": " + null + ", ";
 		}
