@@ -656,7 +656,6 @@ public class DataService {
 		return result;
 	}
 
-	// TODO set value of dayOfEntry
 	public boolean addUserToTeam(String teamName, String username) {
 		boolean result = false;
 		TeamEntity team = teamDAO.getTeamByTeamName(teamName);

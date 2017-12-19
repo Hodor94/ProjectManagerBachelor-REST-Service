@@ -41,7 +41,7 @@ public class UserEntity extends GenericEntity {
 
 	@Column(name = "password")
 	@ColumnTransformer(write = "AES_ENCRYPT(?, 'secret')",
-	read = "AES_DECRYPT(password, 'secret')")
+	read = "AES_DECRYPT(password, 'secret')", forColumn = "password")
 	private String password;
 
 	@Column(name = "firstName")

@@ -1,14 +1,10 @@
 package entity;
 
-import com.google.gson.Gson;
 import org.codehaus.jackson.annotate.JsonIgnore;
-import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
-import org.json.JSONObject;
 
 import javax.persistence.*;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
