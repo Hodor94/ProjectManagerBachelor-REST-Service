@@ -7,10 +7,28 @@ import org.codehaus.jettison.json.JSONObject;
 import service.DataService;
 
 /**
- * Created by Raphael on 19.12.2017.
+ * This class is used to receive data sent by  the client.
+ * It extracts needed data and calls the specific methods to work with
+ * AppointmentEntity data in the database, manipulates it and returns it to the
+ * RESTService object.
+ *
+ * @author Raphael Grum
+ * @version 1.0
+ * @since version 1.0
  */
 public class AppointmentHelper {
 
+	/**
+	 * Gets an appointment data out of the database via the identifier of
+	 * the entry.
+	 *
+	 * @param data The data sent by a client.
+	 * @param dataService An instance of DataService to get and edit data of
+	 *                       the database.
+	 *
+	 * @return A JSONObject with the data of an appointment or null if the
+	 * entry does not exist.
+	 */
 	public static JSONObject getAppointment(JSONObject data,
 											DataService dataService) {
 		JSONObject result;
@@ -42,6 +60,15 @@ public class AppointmentHelper {
 		return result;
 	}
 
+	/**
+	 * Deletes data of an appointment in the database.
+	 *
+	 * @param data The data sent by a client.
+	 * @param dataService An instance of DataService to delete the data.
+	 *
+	 * @return A JSONObject with information about the success or failure of
+	 * this operation.
+	 */
 	public static JSONObject deleteAppointment(JSONObject data,
 											   DataService dataService) {
 		JSONObject result;
@@ -92,6 +119,16 @@ public class AppointmentHelper {
 		return result;
 	}
 
+	/**
+	 * Edits an appointment entry of the database.
+	 *
+	 * @param data The data sent by a client.
+	 * @param dataService An instance of DataService to get and edit the data
+	 *                      from the database.
+	 *
+	 * @return A JSONObject with information about success or failure of this
+	 * operation.
+	 */
 	public static JSONObject editAppointment(JSONObject data,
 											 DataService dataService) {
 		JSONObject result;
@@ -143,6 +180,15 @@ public class AppointmentHelper {
 		return result;
 	}
 
+	/**
+	 * Creates a new appointment entry in the database.
+	 *
+	 * @param data The data sent by a client.
+	 * @param dataService An instance of DataService to work with the database.
+	 *
+	 * @return A JSONObject with information about success or failure of this
+	 * operation.
+	 */
 	public static JSONObject createAppointment(JSONObject data,
 											   DataService dataService) {
 		JSONObject result;

@@ -13,10 +13,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Raphael on 19.12.2017.
+ * This class is used to receive data sent by  the client.
+ * It extracts needed data and calls the specific methods to work with
+ * ProjectEntity data in the database, manipulates it and returns it to the
+ * RESTService object.
+ *
+ * @author Raphael Grum
+ * @version 1.0
+ * @since version 1.0
  */
 public class ProjectHelper {
 
+	/**
+	 * Gets all appointments of a project out of the database.
+	 *
+	 * @param data The data received from the client.
+	 * @param dataService An instance of DataService to get and manipulate data.
+	 *
+	 * @return A JSONObject with all appointments of a project saved in it or
+	 * an error message if there was a failure.
+	 */
 	public static JSONObject getProjectsAppointment(JSONObject data,
 													DataService dataService) {
 		JSONObject result;
@@ -57,6 +73,17 @@ public class ProjectHelper {
 		return result;
 	}
 
+	/**
+	 * Adds and removes users from a project in the database.
+	 *
+	 * @param data The data received from the client.
+	 * @param dataService An instance of DataService to get and edit data
+	 *                       from the database.
+	 *
+	 * @return Returns a JSONObject with information about the result of this
+	 * operation. An error message, if there was a failure and a success
+	 * message if it worked fine.
+	 */
 	public static JSONObject editProjectMemebership(JSONObject data,
 													DataService dataService) {
 		JSONObject result;
@@ -109,6 +136,16 @@ public class ProjectHelper {
 		return result;
 	}
 
+	/**
+	 * Gets all users belonging to a specific project in the system.
+	 *
+	 * @param data The data received from a client.
+	 * @param dataService An instance of DataService to get and edit data
+	 *                       from the database.
+	 *
+	 * @return A JSONObject with all members of a project or an error message
+	 * if there was a failure.
+	 */
 	public static JSONObject getProjectMembers(JSONObject data,
 											   DataService dataService) {
 		JSONObject result;
@@ -147,6 +184,17 @@ public class ProjectHelper {
 		return result;
 	}
 
+	/**
+	 * Deletes a project from the database.
+	 *
+	 * @param data The data received from a client.
+	 * @param dataService An instance of DataService to get and edit data
+	 *                       from the database.
+	 *
+	 * @return A JSONObject with information about the result of this
+	 * operation. A success message if it worked fine or an error message if
+	 * there was a failure.
+	 */
 	public  static JSONObject deleteProject(JSONObject data,
 											DataService dataService) {
 		JSONObject result;
@@ -183,6 +231,17 @@ public class ProjectHelper {
 		return result;
 	}
 
+	/**
+	 * Gets a project entry out of the database, edits the data and saves it
+	 * again in the database.
+	 *
+	 * @param data The data received from a client.
+	 * @param dataService An instance of DataService to get and manipulate
+	 *                       data from the database.
+	 *
+	 * @return A JSONObject with information about the success of this
+	 * operation.
+	 */
 	public static JSONObject editProject(JSONObject data,
 										 DataService dataService) {
 		JSONObject result = new JSONObject();
@@ -223,6 +282,16 @@ public class ProjectHelper {
 		return result;
 	}
 
+	/**
+	 * Gets data of a specific project out of the database.
+	 *
+	 * @param data The data received from a client.
+	 * @param dataService An instance of DataService to get and edit the data
+	 *                      from the database.
+	 *
+	 * @return A JSONObject with the project data saved in it if the
+	 * operation was a success. If it was not, there will be an error message.
+	 */
 	public static JSONObject getProject(JSONObject data,
 								 DataService dataService) {
 		JSONObject result;
@@ -252,6 +321,17 @@ public class ProjectHelper {
 		return result;
 	}
 
+	/**
+	 * Gets all project entries belonging to a specific team out of the
+	 * database.
+	 *
+	 * @param data The data received from a client.
+	 * @param dataService An instance of DataService to get and edit data
+	 *                       from the database.
+	 *
+	 * @return A JSONObject with all projects of a specific team saved in it
+	 * or an error message if there was a failure.
+	 */
 	public static JSONObject getAllProjects(JSONObject data,
 											DataService dataService) {
 		JSONObject result;
@@ -283,6 +363,15 @@ public class ProjectHelper {
 		return result;
 	}
 
+	/**
+	 * Creates a new project data set and savees it in the database.
+	 *
+	 * @param data The data received from a client.
+	 * @param dataService An instance of DataService to get and edit data
+	 *                       from the database.
+	 *
+	 * @return A JSONObject with information about the result of this operation.
+	 */
 	public static JSONObject createProject(JSONObject data,
 										   DataService dataService) {
 		JSONObject result;

@@ -43,8 +43,8 @@ class TaskEntityTest {
 		testUser = new UserEntity(USER_NAME, "", "",
 				"", "", "", "", DATE);
 		testTeam = new TeamEntity(TEAM_NAME, DESCRIPTION, testUser);
-		testTask = new TaskEntity(TASK_NAME, DESCRIPTION, DATE, testTeam,
-				testUser);
+		testTask = new TaskEntity(TASK_NAME, DESCRIPTION, DATE, testUser,
+				testTeam);
 	}
 
 	@Test

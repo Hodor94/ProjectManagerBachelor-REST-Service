@@ -11,6 +11,7 @@ import org.codehaus.jettison.json.JSONObject;
 import service.DataService;
 import service.PasswordService;
 import service.RESTService;
+import service.helper.ErrorCreator;
 
 import javax.mail.*;
 import javax.mail.internet.AddressException;
@@ -24,20 +25,8 @@ import java.util.Date;
 import java.util.Properties;
 
 public class Main {
-	public static void main(String[] args) {
-		ArrayList<String> users = new ArrayList<String>();
-		users.add("admin");
-		users.add("jeri");
-		try {
-			JSONObject result = new JSONObject();
-			result.put("teamName", "Flying Unicorns");
-			JSONArray arrayUsers = new JSONArray(users);
-			result.put("users", arrayUsers);
-			result.put("name", "");
-			result.put("isSoloChat", "true");
-		} catch (JSONException e) {
+	public static void main(String[] args, JSONObject data) {
 
-		}
 	}
 }
 

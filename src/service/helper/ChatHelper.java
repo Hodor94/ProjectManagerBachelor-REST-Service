@@ -14,10 +14,26 @@ import java.util.Calendar;
 import java.util.List;
 
 /**
- * Created by Raphael on 19.12.2017.
+ * This class is used to receive data sent by  the client.
+ * It extracts needed data and calls the specific methods to work with
+ * ChatEntity data in the database, manipulates it and returns it to the
+ * RESTService object.
+ *
+ * @author Raphael Grum
+ * @version 1.0
+ * @since version 1.0
  */
 public class ChatHelper {
 
+	/**
+	 * Deletes a chat entry in the database.
+	 *
+	 * @param data Data needed for the operation sent by a client.
+	 * @param dataService An instance of DataService to work with the database.
+	 *
+	 * @return A JSONObject holding information about failure or success of
+	 * this operation.
+	 */
 	public static JSONObject deleteChat(JSONObject data,
 										DataService dataService) {
 		JSONObject result;
@@ -44,6 +60,15 @@ public class ChatHelper {
 		return result;
 	}
 
+	/**
+	 * Gets all messages of a chat entry in the database.
+	 *
+	 * @param data Data needed fr the operation and sent by a client.
+	 * @param dataService An instance of DataService to work with the database.
+	 *
+	 * @return A JSONObject holding all message data of the specific chat or
+	 * giving information about failure of the operation if there was an error.
+	 */
 	public static JSONObject getChatsMessages(JSONObject data,
 											  DataService dataService) {
 		JSONObject result;
@@ -82,6 +107,15 @@ public class ChatHelper {
 		return result;
 	}
 
+	/**
+	 * Creates a new chat entry in the database.
+	 *
+	 * @param data Data needed for this operation and sent by a client.
+	 * @param dataService An instance of DataService to work with the database.
+	 *
+	 * @return A JSONObject with information about success or failure of this
+	 * operation.
+	 */
 	public static JSONObject createChat(JSONObject data,
 										DataService dataService) {
 		JSONObject result;

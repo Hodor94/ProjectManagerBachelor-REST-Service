@@ -12,10 +12,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Raphael on 15.12.2017.
+ * This class is used to receive data sent by  the client.
+ * It extracts needed data and calls the specific methods to work with
+ * TeamEntity data in the database, manipulates it and returns it to the
+ * RESTService object.
+ *
+ * @author Raphael Grum
+ * @version 1.0
+ * @since version 1.0
  */
 public class TeamHelper {
 
+	/**
+	 * Creates a new team data entry in the database.
+	 *
+	 * @param data The data sent by a client.
+	 * @param dataService An instance of DataService to get and edit data
+	 *                       from the database.
+	 *
+	 * @return A JSONObject with information about success or failure of this
+	 * operation saved in it.
+	 */
 	public static JSONObject createTeam(JSONObject data,
 										DataService dataService) {
 		JSONObject result;
@@ -52,6 +69,16 @@ public class TeamHelper {
 		return result;
 	}
 
+	/**
+	 * Gets the news of a team entry out of the database.
+	 *
+	 * @param data The data sent by a client.
+	 * @param dataService An instance of DataService to get and edit data
+	 *                       from the database.
+	 *
+	 * @return The news of a team or in case of a failure the error and it's
+	 * reason saved in a JSONObject.
+	 */
 	public static JSONObject getTeamsNews(JSONObject data,
 										  DataService dataService) {
 		JSONObject result;
@@ -74,6 +101,16 @@ public class TeamHelper {
 		return result;
 	}
 
+	/**
+	 * Gets all tasks of a specific team out of the database.
+	 *
+	 * @param data The data sent by a client.
+	 * @param dataService An instance of DataService to get and edit data
+	 *                       from the database.
+	 *
+	 * @return A JSONObject with all tasks of a specific team or in case of a
+	 * failure the error and it'S reason saved in it.
+	 */
 	public static JSONObject getTeamsTasks(JSONObject data,
 										   DataService dataService) {
 		JSONObject result;
@@ -111,6 +148,16 @@ public class TeamHelper {
 		return result;
 	}
 
+	/**
+	 * Deletes a team from the database.
+	 *
+	 * @param data The data sent by a client.
+	 * @param dataService An instance of DataService to get and edit data
+	 *                       from the database.
+	 *
+	 * @return A JSONOnject with information about success or failure of this
+	 * operation.
+	 */
 	public static JSONObject deleteTeam(JSONObject data,
 										DataService dataService) {
 		JSONObject result;
@@ -151,6 +198,16 @@ public class TeamHelper {
 		return result;
 	}
 
+	/**
+	 * Adds or removes team members from a team.
+	 *
+	 * @param data The data sent by a client.
+	 * @param dataService An instance of DataService to get and edit data
+	 *                       from the database.
+	 *
+	 * @return A JSONObject with the information about success or failure of
+	 * this operation.
+	 */
 	public static JSONObject editTeamMember(JSONObject data,
 											DataService dataService) {
 		JSONObject result;
@@ -200,6 +257,16 @@ public class TeamHelper {
 		return result;
 	}
 
+	/**
+	 * Gets all users who are members of a specific team.
+	 *
+	 * @param data The data sent by a client.
+	 * @param dataService An instance of DataService to get and edit data
+	 *                       from the database.
+	 *
+	 * @return A JSONObject with all team members or an error with it's
+	 * reason saved in it.
+	 */
 	public static JSONObject getTeamMembers(JSONObject data,
 											DataService dataService) {
 		JSONObject result;
@@ -248,6 +315,16 @@ public class TeamHelper {
 		return result;
 	}
 
+	/**
+	 * Edits a specific data entry of a team.
+	 *
+	 * @param data The data sent by a client.
+	 * @param dataService An instance of DataService to get and edit data
+	 *                       from the database.
+	 *
+	 * @return A JSONObject with information about success or failure of this
+	 * operation saved in it.
+	 */
 	public static JSONObject editTeam(JSONObject data,
 									  DataService dataService) {
 		JSONObject result;
@@ -299,6 +376,18 @@ public class TeamHelper {
 		return result;
 	}
 
+	/**
+	 * Checks if a user is the admin of a team.
+	 *
+	 * @param token The token of the user to be checked.
+	 * @param teamNameSent The name of the team loaded.
+	 * @param dataService An instance of DataService to get and edit data
+	 *                       from the database.
+	 *
+	 * @return A JSONObject with information whether the user is admin of the
+	 * team or not.
+	 *
+	 */
 	private static boolean isAdminOfTeam(String token, String teamNameSent,
 										 DataService dataService) {
 		boolean result = false;
@@ -321,6 +410,15 @@ public class TeamHelper {
 		return result;
 	}
 
+	/**
+	 * Gets the data of a specific team.
+	 *
+	 * @param data The data sent by a client.
+	 * @param dataService An instance of DataService to get and edit data
+	 *                       from the database.
+	 *
+	 * @return A JSONObject with the team data or an error message saved in it.
+	 */
 	public static JSONObject getTeam(JSONObject data,
 									 DataService dataService) {
 		JSONObject result;
@@ -356,6 +454,16 @@ public class TeamHelper {
 		return result;
 	}
 
+	/**
+	 * Gets all team data of the system.
+	 *
+	 * @param data The data sent by a client.
+	 * @param dataService An instance of DataService to get and edit data
+	 *                       from the database.
+	 *
+	 * @return A JSONObject with the teams in it or an error message due to a
+	 * failure.
+	 */
 	public static JSONObject getTeams(JSONObject data,
 										 DataService dataService) {
 		JSONObject result;
@@ -389,6 +497,16 @@ public class TeamHelper {
 		return result;
 	}
 
+	/**
+	 * Adds a user's request for joining a team to the team's requests.
+	 *
+	 * @param data The data sent by a client.
+	 * @param dataService An instance of DataService to get and edit data
+	 *                       from the database.
+	 *
+	 * @return A JSONObject with information about success or failure of this
+	 * operation.
+	 */
 	public static JSONObject addRequestToTeam(JSONObject data,
 											  DataService dataService) {
 		JSONObject result;
@@ -420,6 +538,16 @@ public class TeamHelper {
 		return result;
 	}
 
+	/**
+	 * Gets the requests to join of a specific team.
+	 *
+	 * @param data The data sent by a client.
+	 * @param dataService An instance of DataService to get and edit data
+	 *                       from the database.
+	 *
+	 * @return A JSONObject with all teh requests of a team or due to a
+	 * failure during this operation an error message.
+	 */
 	public static JSONObject getRequestsOfTeam(JSONObject data,
 											   DataService dataService) {
 		JSONObject result;

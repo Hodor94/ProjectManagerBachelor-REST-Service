@@ -7,21 +7,39 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import service.DataService;
-import service.RESTService;
-
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Raphael on 19.12.2017.
+ * This class is used to receive data sent by  the client.
+ * It extracts needed data and calls the specific methods to work with
+ * UserEntity data in the database, manipulates it and returns it to the
+ * RESTService object.
+ *
+ * @author Raphael Grum
+ * @version 1.0
+ * @since version 1.0
  */
 public class UserHelper {
 
-	private static final String MAYBE = "MAYBE";
-	private static final String YES = "YES";
-	private static final String NO = "NO";
+	private static final String MAYBE = "MAYBE"; // User answer for not being
+	// sure about taking part at a certain appointment.
+	private static final String YES = "YES"; // User answer for taking part
+	// in an appointment.
+	private static final String NO = "NO"; // User answer for not taking part
+	// in an appointment.
 
+	/**
+	 * Proofs the login data of the user and allows him or her to get access
+	 * to the systems functions.
+	 *
+	 * @param data The login data sent by a client.
+	 * @param dataService An instance of DataService to work with the database.
+	 *
+	 * @return A JSONObject. If the login data is c´valid, the user gets a
+	 * authentication token. If it is not valid, he or she will be informed.
+	 */
 	public static JSONObject loginUser(JSONObject data,
 									   DataService dataService) {
 		JSONObject result;
@@ -59,6 +77,15 @@ public class UserHelper {
 		return result;
 	}
 
+	/**
+	 * Gets all chats of a user entry.
+	 *
+	 * @param data The data needed for this operation sent by a client.
+	 * @param dataService An instance of DataService to work with the database.
+	 *
+	 * @return A JSONObject with the chats of a user or the information of a
+	 * failure if there was one.
+	 */
 	public static JSONObject getUsersChats(JSONObject data,
 										   DataService dataService) {
 		JSONObject result;
@@ -99,6 +126,10 @@ public class UserHelper {
 		return result;
 	}
 
+	/*
+	Extracts the usernames of a given {@see List} of users and returns them
+	as an ArrayList.
+	 */
 	private static ArrayList<String> getUsernames(List<UserEntity> users) {
 		ArrayList<String> usernames = new ArrayList<>();
 		for (UserEntity user : users) {
@@ -108,6 +139,15 @@ public class UserHelper {
 		return usernames;
 	}
 
+	/**
+	 * Gets the projects a user is involved in.
+	 *
+	 * @param data The data needed for this operation and sent by a client.
+	 * @param dataService An instance of DataService to work with the database.
+	 *
+	 * @return A JSONObject with the data of a user's projects or information
+	 * about a failure if there was one.
+	 */
 	public static JSONObject getUsersProjects(JSONObject data,
 											  DataService dataService) {
 		JSONObject result;
@@ -144,6 +184,15 @@ public class UserHelper {
 		return result;
 	}
 
+	/**
+	 * Gets all tasks of a specific user.
+	 *
+	 * @param data The data needed for this operation.
+	 * @param dataService An instance of DataService to work with the database.
+	 *
+	 * @return A JSONObject with the user's projects or information about a
+	 * failure if there was one.
+	 */
 	public static JSONObject getUsersTasks(JSONObject data,
 										   DataService dataService) {
 		JSONObject result;
@@ -176,6 +225,15 @@ public class UserHelper {
 		return result;
 	}
 
+	/**
+	 * Adds an invitation of a team to the invitations of a specific user.
+	 *
+	 * @param data The data needed for this operation and sent by a client.
+	 * @param dataService An instance of DataService to work with the database.
+	 *
+	 * @return A JSONObject with information about success or failure of this
+	 * operation.
+	 */
 	public static  JSONObject inviteUserToTeam(JSONObject data,
 											   DataService dataService) {
 		JSONObject result;
@@ -216,6 +274,10 @@ public class UserHelper {
 		return result;
 	}
 
+	/*
+	Proofs, if a user is the administrator of a specific team. Returns true,
+	if the user is the administrator and false if not.
+	 */
 	private static boolean isAdminOfTeam(String token, String teamNameSent,
 								  DataService dataService) {
 		boolean result = false;
@@ -238,6 +300,15 @@ public class UserHelper {
 		return result;
 	}
 
+	/**
+	 * Gets all invitations to join a team of a specific user.
+	 *
+	 * @param data The data needed for this operation and sent by a client.
+	 * @param dataService An instance of DataService to work with the database.
+	 *
+	 * @return A JSONObject with all invitations of a user or information
+	 * about a failure if there was one.
+	 */
 	public static JSONObject getInvitationsOfUser(JSONObject data,
 												  DataService dataService) {
 		JSONObject result;
@@ -280,6 +351,15 @@ public class UserHelper {
 		return result;
 	}
 
+	/**
+	 * Gets the tributes of a specific user.
+	 *
+	 * @param data The data needed for this operation and sent by a client.
+	 * @param dataService An instance of DataService to work with the database.
+	 *
+	 * @return A JSONObject with all the honors of a user or information
+	 * about a failure if there was one.
+	 */
 	public static JSONObject getUsersTribute(JSONObject data,
 											 DataService dataService) {
 		JSONObject result;
@@ -310,6 +390,15 @@ public class UserHelper {
 		return result;
 	}
 
+	/**
+	 * Saves the participation answer of a user for a specific appointment.
+	 *
+	 * @param data The data needed for this operation and sent by a client.
+	 * @param dataService An instance of DataService to work with the database.
+	 *
+	 * @return A JSONObject with information about success or failure of this
+	 * operation.
+	 */
 	public static JSONObject saveUsersParticipation(JSONObject data,
 													DataService dataService) {
 		JSONObject result;
@@ -358,6 +447,9 @@ public class UserHelper {
 		return result;
 	}
 
+	/*
+	Returns a participation answer of a user.
+	 */
 	private static StatisticParticipationAnswer getUsersAnswer(String answer) {
 		StatisticParticipationAnswer result;
 		if (answer.equals(YES)) {
@@ -370,6 +462,15 @@ public class UserHelper {
 		return result;
 	}
 
+	/**
+	 * A user leaves the team and all related entities.
+	 *
+	 * @param data The data needed for this operation sent by a client.
+	 * @param dataService An instance of DataService to work with the database.
+	 *
+	 * @return A JSONObject with information about success or failure of this
+	 * operation.
+	 */
 	public static JSONObject leaveTeam(JSONObject data,
 									   DataService dataService) {
 		JSONObject result;
@@ -412,6 +513,15 @@ public class UserHelper {
 		return result;
 	}
 
+	/**
+	 * Edits the entry of a specific user in the database.
+	 *
+	 * @param data The data needed for this operation and sent by a client.
+	 * @param dataService An instance of DataService to work with the database.
+	 *
+	 * @return A JSONObject with information about success or failure of this
+	 * operation.
+	 */
 	public static JSONObject editUser(JSONObject data,
 									  DataService dataService) {
 		JSONObject result;
@@ -454,6 +564,15 @@ public class UserHelper {
 		return result;
 	}
 
+	/**
+	 * Gets all users' data saved in the database.
+	 *
+	 * @param data The data needed for this operation and sent by a client.
+	 * @param dataService An instance of DataService to work with the database.
+	 *
+	 * @return A JSONObject with all user data of the database or information
+	 * about a failure if there was one.
+	 */
 	public static JSONObject getAllUsers(JSONObject data,
 										 DataService dataService) {
 		JSONObject result;
@@ -486,6 +605,15 @@ public class UserHelper {
 		return result;
 	}
 
+	/**
+	 * Gets the data of a specific user from the database.
+	 *
+	 * @param data The data needed for this operation sent by a client.
+	 * @param dataService An instance of DataService to work with the database.
+	 *
+	 * @return A JSONObject with the data of a specific user or information
+	 * about a failure if there was one.
+	 */
 	public static JSONObject getUser(JSONObject data,
 									 DataService dataService) {
 		JSONObject result;
@@ -516,6 +644,16 @@ public class UserHelper {
 		return result;
 	}
 
+	/**
+	 * Creates a new user entry in the database if there is no similar entry
+	 * in the database.
+	 *
+	 * @param data The data needed for this operation and sent by a client.
+	 * @param dataService An instance of DataService to work with the database.
+	 *
+	 * @return a JSONObject with inforamtion whether this operation was a
+	 * success or a failure.
+	 */
 	public static JSONObject registerUser(JSONObject data,
 										  DataService dataService) {
 		JSONObject result = null;

@@ -10,10 +10,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Raphael on 19.12.2017.
+ * This class is used to receive data sent by the client.
+ * It extracts needed data and calls the specific methods to work with
+ * RegisterEntity data in the database, manipulates it and returns it to the
+ * RESTService object.
+ *
+ * @author Raphael Grum
+ * @version 1.0
+ * @since version 1.0
  */
 public class RegisterHelper {
 
+	/**
+	 * Deletes a register in the database.
+	 *
+	 * @param data The data received from a client.
+	 * @param dataService An instance of DataService to get and edit data
+	 *                       from the database.
+	 *
+	 * @return A JSONObject with information about success  or failure of the
+	 * action.
+	 */
 	public static JSONObject deleteRegister(JSONObject data,
 											DataService dataService) {
 		JSONObject result;
@@ -50,6 +67,16 @@ public class RegisterHelper {
 		return result;
 	}
 
+	/**
+	 * Gets the data of a specific register out of the database.
+	 *
+	 * @param data The data sent by a client.
+	 * @param dataService An instance of DataService to get and edit data
+	 *                       from the database.
+	 *
+	 * @return A JSONObject with the register data saved in it due to the
+	 * operation was a success or a error message.
+	 */
 	public static JSONObject getRegister(JSONObject data,
 										 DataService dataService) {
 		JSONObject result;
@@ -80,6 +107,15 @@ public class RegisterHelper {
 		return result;
 	}
 
+	/**
+	 * Gets the data of a specific register out of the database and updates
+	 * it before saving it again.
+	 *
+	 * @param data The data received by a client.
+	 * @param dataService An instance of DataService to get and edit data
+	 *                       from the database.
+	 * @return
+	 */
 	public static JSONObject editRegister(JSONObject data,
 										  DataService dataService) {
 		JSONObject result;
@@ -112,6 +148,16 @@ public class RegisterHelper {
 		return result;
 	}
 
+	/**
+	 * Creates a new register entry in the database.
+	 *
+	 * @param data The data received from a client.
+	 * @param dataService An instance of DataService to get and edit data
+	 *                       from the database.
+	 *
+	 * @return A JSONObject with information about success or failure of this
+	 * operation.
+	 */
 	public static JSONObject createRegister(JSONObject data,
 											DataService dataService) {
 		JSONObject result;
@@ -153,6 +199,16 @@ public class RegisterHelper {
 		return result;
 	}
 
+	/**
+	 * Gets all register data of a specific team out from the database.
+	 *
+	 * @param data The data received from a client.
+	 * @param dataService An instance of DataService to get and edit data
+	 *                       from the database.
+	 *
+	 * @return A JSONObject with all registers of a specific team saved in it
+	 * or information about the failure an it's reason saved in it.
+	 */
 	public static JSONObject getRegisters(JSONObject data,
 										  DataService dataService) {
 		JSONObject result;

@@ -1,0 +1,17 @@
+{
+  "Musiker": {
+    "Vorname" : "Neil",
+    "Nachname" : "Young",
+    "Alter" : 72,
+    "Nation" : {
+      "Name" : "Kanada",
+      "Gründungsdatum" : "01.07.1867",
+      "Einwohnerzahl" : 36290000
+    },
+    "Alben" : ["Neil Young", "Everybody Knows This Is Nowhere",
+      "After The Gold Rush", "Harvest", "..."]
+  }
+}
+
+
+

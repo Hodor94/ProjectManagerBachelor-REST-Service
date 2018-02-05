@@ -8,10 +8,27 @@ import org.codehaus.jettison.json.JSONObject;
 import service.DataService;
 
 /**
- * Created by Raphael on 19.12.2017.
+ * This class is used to receive data sent by  the client.
+ * It extracts needed data and calls the specific methods to work with
+ * TaskEntity data in the database, manipulates it and returns it to the
+ * RESTService object.
+ *
+ * @author Raphael Grum
+ * @version 1.0
+ * @since version 1.0
  */
 public class TaskHelper {
 
+	/**
+	 * Deletes a task from the database.
+	 *
+	 * @param data The data received from a client.
+	 * @param dataService An instance of DataService to get and edit data
+	 *                       from the database.
+	 *
+	 * @return A JSONObject with information about success or failure of this
+	 * operation saved in it.
+	 */
 	public static JSONObject deleteTask(JSONObject data,
 										DataService dataService) {
 		JSONObject result;
@@ -46,6 +63,16 @@ public class TaskHelper {
 		return result;
 	}
 
+	/**
+	 * Edits a task data entry in the database.
+	 *
+	 * @param data The data sent by the client.
+	 * @param dataService An instance of DataService to get and edit data
+	 *                       from the database.
+	 *
+	 * @return A JSONObject with information about success or failure of this
+	 * operation saved in it.
+	 */
 	public static JSONObject editTask(JSONObject data,
 									  DataService dataService) {
 		JSONObject result;
@@ -86,6 +113,16 @@ public class TaskHelper {
 		return result;
 	}
 
+	/**
+	 * Gets a task out of the database.
+	 *
+	 * @param data The data sent by a client.
+	 * @param dataService An instance of DataService to get and edit data
+	 *                       from the database.
+	 *
+	 * @return A JSONObject with the task data or an error message due to a
+	 * failure saved in it.
+	 */
 	public static JSONObject getTask(JSONObject data, DataService dataService) {
 		JSONObject result;
 		String token;
@@ -113,6 +150,16 @@ public class TaskHelper {
 		return result;
 	}
 
+	/**
+	 * Creates a new task data entry in the database.
+	 *
+	 * @param data The data sent by a client.
+	 * @param dataService An instance of DataService to get and edit data
+	 *                       from the database.
+	 *
+	 * @return A JSONObject with information about success or failure of this
+	 * operation saved in it.
+	 */
 	public static JSONObject createTask(JSONObject data,
 										DataService dataService) {
 		JSONObject result;

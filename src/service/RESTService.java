@@ -7,7 +7,6 @@ package service;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import entity.*;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -19,7 +18,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-@JsonSerialize
 @Path("/pmservice")
 public class RESTService {
 
@@ -35,18 +33,18 @@ public class RESTService {
 
 	@POST
 	@Path("/create/team")
-	@Consumes(MediaType.APPLICATION_JSON + ";charset=utf-8")
-	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject createTeam(JSONObject data) {
-		JSONObject result = TeamHelper.createTeam(data, dataService);
-		return result;
+		return TeamHelper.createTeam(data, dataService);
 	}
 
 	@POST
 	@Path("/team/news")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject getTeamsNews(JSONObject data) {
-		JSONObject result = TeamHelper.getTeamsNews(data, dataService);
-		return result;
+		return TeamHelper.getTeamsNews(data, dataService);
 	}
 
 	@POST
@@ -54,8 +52,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject getTeamsTasks(JSONObject data) {
-		JSONObject result = TeamHelper.getTeamsTasks(data, dataService);
-		return result;
+		return TeamHelper.getTeamsTasks(data, dataService);
 	}
 
 	@POST
@@ -63,8 +60,7 @@ public class RESTService {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public JSONObject deleteTeam(JSONObject data) {
-		JSONObject result = TeamHelper.deleteTeam(data, dataService);
-		return result;
+		return TeamHelper.deleteTeam(data, dataService);
 	}
 
 	@POST
@@ -72,8 +68,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject editTeamMember(JSONObject data) {
-		JSONObject result = TeamHelper.editTeamMember(data, dataService);
-		return result;
+		return TeamHelper.editTeamMember(data, dataService);
 	}
 
 	@POST
@@ -81,8 +76,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject getTeamMembers(JSONObject data) {
-		JSONObject result = TeamHelper.getTeamMembers(data, dataService);
-		return result;
+		return TeamHelper.getTeamMembers(data, dataService);
 	}
 
 	@POST
@@ -90,8 +84,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject editTeam(JSONObject data) {
-		JSONObject result = TeamHelper.editTeam(data, dataService);
-		return result;
+		return TeamHelper.editTeam(data, dataService);
 	}
 
 	@POST
@@ -99,8 +92,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject getTeam(JSONObject data) {
-		JSONObject result = TeamHelper.getTeam(data, dataService);
-		return result;
+		return TeamHelper.getTeam(data, dataService);
 	}
 
 	@POST
@@ -108,8 +100,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject getTeams(JSONObject data) {
-		JSONObject result = TeamHelper.getTeams(data, dataService);
-		return result;
+		return TeamHelper.getTeams(data, dataService);
 	}
 
 	@POST
@@ -117,8 +108,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject addRequestToTeam(JSONObject data) {
-		JSONObject result = TeamHelper.addRequestToTeam(data, dataService);
-		return result;
+		return TeamHelper.addRequestToTeam(data, dataService);
 	}
 
 	@POST
@@ -126,8 +116,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject getRequestsOfTeam(JSONObject data) {
-		JSONObject result = TeamHelper.getRequestsOfTeam(data, dataService);
-		return result;
+		return TeamHelper.getRequestsOfTeam(data, dataService);
 	}
 
 	//--------------------------------------------------------------------------
@@ -138,8 +127,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject loginUser(JSONObject data) {
-		JSONObject result = UserHelper.loginUser(data, dataService);
-		return result;
+		return UserHelper.loginUser(data, dataService);
 	}
 
 	@POST
@@ -147,8 +135,7 @@ public class RESTService {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public JSONObject getUsersChats(JSONObject data) {
-		JSONObject result = UserHelper.getUsersChats(data, dataService);
-		return result;
+		return UserHelper.getUsersChats(data, dataService);
 	}
 
 	@POST
@@ -156,8 +143,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject getUsersProjects(JSONObject data) {
-		JSONObject result = UserHelper.getUsersProjects(data, dataService);
-		return result;
+		return UserHelper.getUsersProjects(data, dataService);
 	}
 
 	@POST
@@ -165,8 +151,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject getUsersTasks(JSONObject data) {
-		JSONObject result = UserHelper.getUsersTasks(data, dataService);
-		return result;
+		return UserHelper.getUsersTasks(data, dataService);
 	}
 
 	@POST
@@ -174,8 +159,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject inviteUserToTeam(JSONObject data) {
-		JSONObject result = UserHelper.inviteUserToTeam(data, dataService);
-		return result;
+		return UserHelper.inviteUserToTeam(data, dataService);
 	}
 
 	@POST
@@ -183,8 +167,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject getInvitationsOfUser(JSONObject data) {
-		JSONObject result = UserHelper.getInvitationsOfUser(data, dataService);
-		return result;
+		return UserHelper.getInvitationsOfUser(data, dataService);
 	}
 
 	@POST
@@ -192,8 +175,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject getUsersTribute(JSONObject data) {
-		JSONObject result = UserHelper.getUsersTribute(data, dataService);
-		return result;
+		return UserHelper.getUsersTribute(data, dataService);
 	}
 
 	@POST
@@ -201,9 +183,8 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject saveUsersParticipation(JSONObject data) {
-		JSONObject result = UserHelper.saveUsersParticipation(data,
+		return UserHelper.saveUsersParticipation(data,
 				dataService);
-		return result;
 	}
 
 	@POST
@@ -211,8 +192,7 @@ public class RESTService {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public JSONObject leaveTeam(JSONObject data) {
-		JSONObject result = UserHelper.leaveTeam(data, dataService);
-		return result;
+		return UserHelper.leaveTeam(data, dataService);
 	}
 
 	@POST
@@ -220,8 +200,7 @@ public class RESTService {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public JSONObject editUser(JSONObject data) {
-		JSONObject result = UserHelper.editUser(data, dataService);
-		return result;
+		return UserHelper.editUser(data, dataService);
 	}
 
 	@POST
@@ -229,17 +208,15 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject getAllUsers(JSONObject data) {
-		JSONObject result = UserHelper.getAllUsers(data, dataService);
-		return result;
+		return UserHelper.getAllUsers(data, dataService);
 	}
 
 	@POST
 	@Path("/user")
-	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public JSONObject getUser(JSONObject data) {
-		JSONObject result = UserHelper.getUser(data, dataService);
-		return result;
+		return UserHelper.getUser(data, dataService);
 	}
 
 	@POST
@@ -247,8 +224,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject registerUser(JSONObject data) {
-		JSONObject result = UserHelper.registerUser(data, dataService);
-		return result;
+		return UserHelper.registerUser(data, dataService);
 	}
 
 	//--------------------------------------------------------------------------
@@ -259,9 +235,8 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject getProjectsAppointments(JSONObject data) {
-		JSONObject result = ProjectHelper.getProjectsAppointment(data,
+		return ProjectHelper.getProjectsAppointment(data,
 				dataService);
-		return result;
 	}
 
 	@POST
@@ -269,9 +244,8 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject editProjectMembership(JSONObject data) {
-		JSONObject result = ProjectHelper.editProjectMemebership(data,
+		return ProjectHelper.editProjectMemebership(data,
 				dataService);
-		return result;
 	}
 
 	@POST
@@ -279,9 +253,8 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject getProjectMembers(JSONObject data) {
-		JSONObject result = ProjectHelper.getProjectMembers(data,
+		return ProjectHelper.getProjectMembers(data,
 				dataService);
-		return result;
 	}
 
 	@POST
@@ -289,8 +262,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject deleteProject(JSONObject data) {
-		JSONObject result = ProjectHelper.deleteProject(data, dataService);
-		return result;
+		return ProjectHelper.deleteProject(data, dataService);
 	}
 
 	@POST
@@ -298,8 +270,7 @@ public class RESTService {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public JSONObject editProject(JSONObject data) {
-		JSONObject result = ProjectHelper.editProject(data, dataService);
-		return result;
+		return ProjectHelper.editProject(data, dataService);
 	}
 
 	@POST
@@ -307,8 +278,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject getProject(JSONObject data) {
-		JSONObject result = ProjectHelper.getProject(data, dataService);
-		return result;
+		return ProjectHelper.getProject(data, dataService);
 	}
 
 	@POST
@@ -316,8 +286,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject getAllProjects(JSONObject data) {
-		JSONObject result = ProjectHelper.getAllProjects(data, dataService);
-		return result;
+		return ProjectHelper.getAllProjects(data, dataService);
 	}
 
 	@POST
@@ -325,8 +294,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject createProject(JSONObject data) {
-		JSONObject result = ProjectHelper.createProject(data, dataService);
-		return result;
+		return ProjectHelper.createProject(data, dataService);
 	}
 
 	//--------------------------------------------------------------------------
@@ -337,8 +305,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject getAppointment(JSONObject data) {
-		JSONObject result = AppointmentHelper.getAppointment(data, dataService);
-		return result;
+		return AppointmentHelper.getAppointment(data, dataService);
 	}
 
 	@POST
@@ -346,9 +313,8 @@ public class RESTService {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public JSONObject deleteAppointment(JSONObject data) {
-		JSONObject result = AppointmentHelper.deleteAppointment(data,
+		return AppointmentHelper.deleteAppointment(data,
 				dataService);
-		return result;
 	}
 
 	@POST
@@ -356,9 +322,8 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject editAppointment(JSONObject data) {
-		JSONObject result = AppointmentHelper.editAppointment(data,
+		return AppointmentHelper.editAppointment(data,
 				dataService);
-		return result;
 	}
 
 	@POST
@@ -366,9 +331,8 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject createAppointment(JSONObject data) {
-		JSONObject result = AppointmentHelper.createAppointment(data,
+		return AppointmentHelper.createAppointment(data,
 				dataService);
-		return result;
 	}
 
 	//--------------------------------------------------------------------------
@@ -379,8 +343,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject deleteTask(JSONObject data) {
-		JSONObject result = TaskHelper.deleteTask(data, dataService);
-		return result;
+		return TaskHelper.deleteTask(data, dataService);
 	}
 
 	@POST
@@ -388,8 +351,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject editTask(JSONObject data) {
-		JSONObject result = TaskHelper.editTask(data, dataService);
-		return result;
+		return TaskHelper.editTask(data, dataService);
 	}
 
 	@POST
@@ -397,8 +359,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject getTask(JSONObject data) {
-		JSONObject result = TaskHelper.getTask(data, dataService);
-		return result;
+		return TaskHelper.getTask(data, dataService);
 	}
 
 	@POST
@@ -406,8 +367,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject createTask(JSONObject data) {
-		JSONObject result = TaskHelper.createTask(data, dataService);
-		return result;
+		return TaskHelper.createTask(data, dataService);
 	}
 
 	//--------------------------------------------------------------------------
@@ -418,8 +378,7 @@ public class RESTService {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public JSONObject deleteChat(JSONObject data) {
-		JSONObject result = ChatHelper.deleteChat(data, dataService);
-		return result;
+		return ChatHelper.deleteChat(data, dataService);
 	}
 
 	@POST
@@ -427,8 +386,7 @@ public class RESTService {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public JSONObject getChatsMessages(JSONObject data) {
-		JSONObject result = ChatHelper.getChatsMessages(data, dataService);
-		return result;
+		return ChatHelper.getChatsMessages(data, dataService);
 	}
 
 	@POST
@@ -436,8 +394,7 @@ public class RESTService {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public JSONObject createChat(JSONObject data) {
-		JSONObject result = ChatHelper.createChat(data, dataService);
-		return result;
+		return ChatHelper.createChat(data, dataService);
 	}
 
 	//--------------------------------------------------------------------------
@@ -448,9 +405,8 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject getNewMessagesForUser(JSONObject data) {
-		JSONObject result = MesssageHelper.getNewMessagesForUser(data,
+		return MessageHelper.getNewMessagesForUser(data,
 				dataService);
-		return result;
 	}
 
 	@POST
@@ -458,8 +414,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject receiveMessage(JSONObject data) {
-		JSONObject result = MesssageHelper.receiveMessage(data, dataService);
-		return result;
+		return MessageHelper.receiveMessage(data, dataService);
 	}
 
 	//--------------------------------------------------------------------------
@@ -470,8 +425,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject delteRegister(JSONObject data) {
-		JSONObject result = RegisterHelper.deleteRegister(data, dataService);
-		return result;
+		return RegisterHelper.deleteRegister(data, dataService);
 	}
 
 	@POST
@@ -479,8 +433,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject getRegister(JSONObject data) {
-		JSONObject result = RegisterHelper.getRegister(data, dataService);
-		return result;
+		return RegisterHelper.getRegister(data, dataService);
 	}
 
 	@POST
@@ -488,8 +441,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject editRegister(JSONObject data) {
-		JSONObject result = RegisterHelper.editRegister(data, dataService);
-		return result;
+		return RegisterHelper.editRegister(data, dataService);
 	}
 
 	@POST
@@ -497,8 +449,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject createRegister(JSONObject data) {
-		JSONObject result = RegisterHelper.createRegister(data, dataService);
-		return result;
+		return RegisterHelper.createRegister(data, dataService);
 	}
 
 	@POST
@@ -506,8 +457,7 @@ public class RESTService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject getRegisters(JSONObject data) {
-		JSONObject result = RegisterHelper.getRegisters(data, dataService);
-		return result;
+		return RegisterHelper.getRegisters(data, dataService);
 	}
 
 	//--------------------------------------------------------------------------

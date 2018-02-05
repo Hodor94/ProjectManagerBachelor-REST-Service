@@ -8,10 +8,12 @@ import javax.persistence.*;
 import java.util.*;
 
 /**
- * This class represents an appointment of a project.
+ * This class is used by the framework Hibernate to work with the database and
+ * represents an appointment of a project in this system.
  *
  * @author Raphael Grum
  * @version 1.0
+ * @since 1.0
  */
 @Entity
 @Table(name = "appointment")
@@ -32,7 +34,8 @@ public class AppointmentEntity extends GenericEntity {
 
 	@Column(name = "userParticipationAnswer")
 	private HashMap<String, StatisticParticipationAnswer>
-			participationAnswersUser;
+			participationAnswersUser;	// The answers of the users for
+									    // participation in this appointment.
 
 	// Attributes related to entities
 
@@ -46,7 +49,8 @@ public class AppointmentEntity extends GenericEntity {
 	private List<UserEntity> userTakingPart;
 
 	/**
-	 * Creates an instance of AppointmentEntity with no information saved in it.
+	 * Creates an instance of AppointmentEntity with all attributes set with
+	 * default values.
 	 */
 	public AppointmentEntity() {
 		super();
@@ -56,6 +60,9 @@ public class AppointmentEntity extends GenericEntity {
 	}
 
 	/**
+	 * Creates a AppointmentEntity object with all the attributes set with
+	 * parameter values.
+	 *
 	 * @param name           The name of the new appointment.
 	 * @param description    The description of the appointment.
 	 * @param deadline       The date of the appointment.
@@ -79,7 +86,7 @@ public class AppointmentEntity extends GenericEntity {
 	/**
 	 * Returns the name of an appointment.
 	 *
-	 * @return name - The name of an appointment.
+	 * @return The name of an appointment.
 	 */
 	public String getName() {
 		return name;
@@ -88,7 +95,7 @@ public class AppointmentEntity extends GenericEntity {
 	/**
 	 * Sets the name of an appointment.
 	 *
-	 * @param name - The new name of an appointment.
+	 * @param name The new name of an appointment.
 	 */
 	public void setName(String name) {
 		this.name = name;
@@ -97,7 +104,7 @@ public class AppointmentEntity extends GenericEntity {
 	/**
 	 * Returns the description of an appointment.
 	 *
-	 * @return description - The description of an appointment.
+	 * @return The description of an appointment.
 	 */
 	public String getDescription() {
 		return description;
@@ -106,7 +113,7 @@ public class AppointmentEntity extends GenericEntity {
 	/**
 	 * Sets the description of an appointment.
 	 *
-	 * @param description - The new description of an appointment.
+	 * @param description The new description of an appointment.
 	 */
 	public void setDescription(String description) {
 		this.description = description;
@@ -115,7 +122,7 @@ public class AppointmentEntity extends GenericEntity {
 	/**
 	 * Returns the date on which this appointment is set.
 	 *
-	 * @return deadline - The date of an appointment.
+	 * @return The date of an appointment.
 	 */
 	public String getDeadline() {
 		return deadline;
@@ -124,7 +131,7 @@ public class AppointmentEntity extends GenericEntity {
 	/**
 	 * Sets the date on which this appointment will be set.
 	 *
-	 * @param deadline - The deadline of an appointment.
+	 * @param deadline The deadline of an appointment.
 	 */
 	public void setDeadline(String deadline) {
 		this.deadline = deadline;
@@ -133,7 +140,7 @@ public class AppointmentEntity extends GenericEntity {
 	/**
 	 * Returns the project to which this appointment belongs to.
 	 *
-	 * @return project - The project to which this appointment belongs.
+	 * @return The project to which this appointment belongs.
 	 */
 	public ProjectEntity getProject() {
 		return project;
@@ -142,48 +149,53 @@ public class AppointmentEntity extends GenericEntity {
 	/**
 	 * Sets the project to which this appointment belongs.
 	 *
-	 * @param project - The new project of the appointment.
+	 * @param project The new project of the appointment.
 	 */
 	public void setProject(ProjectEntity project) {
 		this.project = project;
 	}
 
 	/**
-	 * Returns the list of users who are taking part in this appointment.
+	 * Returns a {@see List} of users who are taking part in this appointment.
 	 *
-	 * @return userTakingPart - The list of users taking part in this
-	 * appointment.
+	 * @return The list of users taking part in this appointment.
 	 */
 	public List<UserEntity> getUserTakinPart() {
 		return userTakingPart;
 	}
 
 	/**
-	 * Sets the list of users taking part in this appointment.
+	 * Sets a {@see List} of users taking part in this appointment.
 	 *
-	 * @param userTakinPart - The new list of users taking part in this
+	 * @param userTakinPart The new list of users taking part in this
 	 *                      appointment.
 	 */
 	public void setUserTakinPart(ArrayList<UserEntity> userTakinPart) {
 		this.userTakingPart = userTakinPart;
 	}
 
+	/**
+	 * Sets the deadline of this appointment.
+	 *
+	 * @param isDeadline The point of time the appointment will take place.
+	 */
 	public void setIsDeadline(boolean isDeadline) {
 		this.isDeadline = isDeadline;
 	}
 
+	/**
+	 * Returns the deadline of this appointment.
+	 *
+	 * @return The point of time this appointment is taking place.
+	 */
 	public boolean getIsDeadline() {
 		return isDeadline;
 	}
 
 	/**
-	 * Formats all the information contained by an instance of
-	 * AppointmentEntity except the project and the list of users taking part
-	 * in this appointment to a String version in JSON format.
+	 * Transforms this AppointmentEntity object into a JSON format String.
 	 *
-	 * @return String - The JSON format version of the primitive information
-	 * not including users taking part in this appointment and the project of
-	 * the appointment.
+	 * @return This appointment as a JSON format String.
 	 */
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
@@ -199,10 +211,16 @@ public class AppointmentEntity extends GenericEntity {
 		return result;
 	}
 
+	/*
+	Returns the deadline of this appointment as a JSON attribute.
+	 */
 	private String appendJSONIDeadline(boolean isDeadline) {
 		return "\"isDeadline\": \"" + isDeadline + "\"";
 	}
 
+	/*
+	Returns the name of this appointment as a JSON attribute.
+	 */
 	private String appendJSONName(String name) {
 		if (name != null && !(name.equals(""))) {
 			return "\"name\": " + "\"" + name + "\",";
@@ -211,6 +229,9 @@ public class AppointmentEntity extends GenericEntity {
 		}
 	}
 
+	/*
+	Returns the description of this appointment as a JSON attribute.
+	 */
 	private String appendJSONDescription(String description) {
 		if (description != null && !(description.equals(""))) {
 			return "\"description\": " + "\"" + description +
@@ -220,6 +241,9 @@ public class AppointmentEntity extends GenericEntity {
 		}
 	}
 
+	/*
+	Returns the deadline of this appointment as a JSON attribute.
+	 */
 	private String appendJSONDeadline(String deadline) {
 		if (deadline != null && !(deadline.equals(""))) {
 			return "\"deadline\": " + "\"" + deadline + "\", ";
@@ -228,15 +252,34 @@ public class AppointmentEntity extends GenericEntity {
 		}
 	}
 
+	/**
+	 * Sets the participation answer of a specific user for this appointment.
+	 *
+	 * @param username The username of the user.
+	 * @param answer The answer given by the user.
+	 */
 	public void addUserAnswer(String username,
 							  StatisticParticipationAnswer answer) {
 		participationAnswersUser.put(username, answer);
 	}
 
+	/**
+	 * Removes a user and his/her answer from the attribute
+	 * 'participationAnswerUser'.
+	 *
+	 * @param username The username of the user who should get removed.
+	 */
 	public void removeUserFromUserAnswer(String username) {
 		participationAnswersUser.remove(username);
 	}
 
+	/**
+	 * Returns the users and their asnwers for participation in this
+	 * appointment.
+	 *
+	 * @return The users and their answers for participation in this
+	 * appointment.
+	 */
 	public HashMap<String, StatisticParticipationAnswer> getUserAnswers() {
 		return participationAnswersUser;
 	}

@@ -29,8 +29,7 @@ public class DataService {
 	private TaskDAO taskDAO;
 	private TeamDAO teamDAO;
 	private UserDAO userDAO;
-	private static SecretKey secretKey;
-	public static final String secret = generateSecret();
+
 	private SimpleDateFormat formatter;
 	private final String NEW_PROJECT = "Ein neues Projekt ";
 	private final String NEW_APPOINTMENT = "Ein neues Meeting ";
@@ -54,39 +53,6 @@ public class DataService {
 		taskDAO = new TaskDAO();
 		teamDAO = new TeamDAO();
 		userDAO = new UserDAO();
-		KeyGenerator keyGenerator;
-		try {
-			keyGenerator = KeyGenerator.getInstance("AES");
-			keyGenerator.init(256);
-			secretKey = keyGenerator.generateKey();
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private static String generateSecret() {
-		char[] chars = "abcdefghijklmnopqrstuvwABCDEFGHIJKLMNOPQRSTUVWXYZ"
-				.toCharArray();
-		StringBuilder stringBuilder = new StringBuilder();
-		Random random = new Random();
-		for (int i = 0; i < 20; i++) {
-			char c  = chars[random.nextInt(chars.length)];
-			stringBuilder.append(c);
-		}
-		return stringBuilder.toString();
-	}
-
-	// Generates a secret key which is used for user authentication
-	protected SecretKey generateSecretKey() {
-		try {
-			KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-			keyGenerator.init(256); // The key size
-			SecretKey secretKey = keyGenerator.generateKey();
-			return secretKey;
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-			return null;
-		}
 	}
 
 	public UserEntity getUser(String username) {
@@ -107,17 +73,14 @@ public class DataService {
 
 	public boolean login(String username, String password) {
 		UserEntity userToLogin = userDAO.getUserByUsername(username);
-		if (userToLogin != null && userToLogin.getPassword().equals(password)) {
-			return true;
-		} else {
-			return false;
-		}
+		return userToLogin != null
+				&& userToLogin.getPassword().equals(password);
 	}
 
 	public StatisticEntity getStatisticOfUser(String username,
 											  String projectName,
 											  String teamName) {
-		StatisticEntity result = null;
+		StatisticEntity result;
 		ProjectEntity project = projectDAO.getProject(projectName, teamName);
 		UserEntity user = userDAO.getUserByUsername(username);
 		if (project != null && user != null) {
@@ -135,7 +98,7 @@ public class DataService {
 				}
 			}
 		}
-		return result;
+		return null;
 	}
 
 	public Collection<StatisticEntity> getStatisticsOfProject
@@ -310,7 +273,7 @@ public class DataService {
 			TaskEntity task = taskDAO.getTaskByTaskName(name, team);
 			if (task == null) {
 				user.getTasks().add(task);
-				task = new TaskEntity(name, description, date, team, user);
+				task = new TaskEntity(name, description, date, user, team);
 				taskDAO.saveOrUpdate(task);
 				userDAO.saveOrUpdate(user);
 				team.addNews(NEW_TASK + name + CREATED);
@@ -547,7 +510,6 @@ public class DataService {
 	}
 
 	public boolean removeUserFromApp(String username) {
-		// TODO dlete user and it's messages
 		boolean result = false;
 		UserEntity user = userDAO.getUserByUsername(username);
 		TeamEntity team = user.getTeam();

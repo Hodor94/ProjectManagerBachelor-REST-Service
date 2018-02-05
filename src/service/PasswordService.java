@@ -7,7 +7,6 @@ import javax.mail.*;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import javax.xml.crypto.Data;
 import java.security.SecureRandom;
 import java.util.Properties;
 
@@ -31,20 +30,20 @@ public class PasswordService {
 		properties.put("mail.smtp.host", host);
 		properties.put("mail.smtp.user", USERNAME);
 		properties.put("mail.smtp.password", PASSWORD);
-		properties.put("mail.smtp.port", "587");
 		properties.put("mail.smtp.auth", "true");
+		properties.put("mail.smtp.port", "587");
 
 		Session session = Session.getDefaultInstance(properties);
-		MimeMessage message = new MimeMessage(session);
 
+		MimeMessage message = new MimeMessage(session);
 		try {
 			message.setFrom(new InternetAddress(USERNAME));
 			InternetAddress toAddress = new InternetAddress(recipient);
 			message.addRecipient(Message.RecipientType.TO, toAddress);
 			message.setSubject(SUBJECT);
 			String newPassword = generatePINAndSetPassword();
-			String messageContent = "Ihr altes Passwort hat die Gültigkeit verloren." +
-					"<br> Ihr neues Passwort ist nun: <br> " +
+			String messageContent = "Ihr altes Passwort hat die Gültigkeit " +
+					"verloren.<br> Ihr neues Passwort ist nun: <br> " +
 					"<center><b>" + newPassword + "</b></center>";
 			message.setContent(messageContent, "text/html; charset=	UTF-8");
 			Transport transport = session.getTransport();

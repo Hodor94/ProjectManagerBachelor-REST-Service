@@ -10,12 +10,13 @@ import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
 /**
- * Diese Klasse stellt eine generische Oberklasse für den Zugriff und die Methoden zur Bearbeitung
- * von DatenbankeintrÃ¤gen.
+ * This class enables the generic interaction of the system with the database.
  *
- * @param <T> Der Typ der Entität, welche in der spezifischen Tabelle in der Datenbank
- *            bearbeitet werden soll.
+ * @param <T> The type of the entity with which should be worked with.
+ *
  * @author Raphael Grum
+ * @version 1.0
+ * @since 1.0
  */
 @SuppressWarnings({"deprecation"})
 public class GenericDAO<T extends GenericEntity> {
@@ -29,13 +30,14 @@ public class GenericDAO<T extends GenericEntity> {
 	}
 
 	/**
-	 * Diese Methode holt eine bestimmte Instanz aus der Datenbank.
-	 * Der Typ der Instanz ist generisch und wird vom Platzhalter 'T' bestimmt.
+	 * Reads the instance with the type T and the identifier id out of the
+	 * database and returns it.
 	 *
-	 * @return T
+	 * @param id The identifier of the instance.
+	 * @return If there is a entry with the right identifier it will be
+	 * returned. If not, null will be returned.
 	 */
 	public T get(long id) {
-		// Die offene Datenbankverbindung.
 		Session session = HibernateUtil.getSessionFactory()
 				.getCurrentSession();
 		session.beginTransaction();
@@ -46,16 +48,15 @@ public class GenericDAO<T extends GenericEntity> {
 	}
 
 	/**
-	 * Diese Methode holt sich alle Instanzen vom generischen Typ 'T' aus der spezifischen
-	 * Datenbank und speichert diese in einer Liste.
+	 * Gets all instances of the type T out of the database and saves it
+	 * within a List and returns it.
 	 *
-	 * @return List<T>
+	 * @return A List full of all in the database saved instances of the type T.
 	 */
 	public List<T> getAll() {
 		Session session = HibernateUtil.getSessionFactory()
 				.getCurrentSession();
 		session.beginTransaction();
-		// Entspricht einer komplexen Anfrage - hier: 'select *'.
 		Criteria crit = session.createCriteria(persistentClass);
 		List<T> result = crit.list();
 		session.getTransaction().commit();
@@ -64,10 +65,10 @@ public class GenericDAO<T extends GenericEntity> {
 	}
 
 	/**
-	 * Diese Methode speichert eine Instanz vom Typ 'T' in der spezifischen Tabelle in der Datenbank,
-	 * falls fÃ¼r diese noch kein Eintrag exisitert. Falls dieser schon existiert, wird er aktualisiert.
+	 * Searches for a given entity. If it is already existing in the
+	 * database, it will be updated, else there will be saved a new entry.
 	 *
-	 * @param entity
+	 * @param entity The entity which should be updated or saved.
 	 */
 	public void saveOrUpdate(T entity) {
 		Session session = HibernateUtil.getSessionFactory().getCurrentSession();
@@ -82,10 +83,9 @@ public class GenericDAO<T extends GenericEntity> {
 	}
 
 	/**
-	 * Diese Methode soll einen Eintrag aus der spezifischen Tabelle in der Datenbank
-	 * fÃ¼r eine existierende Instanz aus der Datenbank lÃ¶schen.
+	 * Searches for a specific entry and deletes it if possible.
 	 *
-	 * @param entity Die zu lÃ¶schende Instanz.
+	 * @param entity The entity which will be deleted.
 	 */
 	public void remove(T entity) {
 		Session session = HibernateUtil.getSessionFactory().getCurrentSession();
