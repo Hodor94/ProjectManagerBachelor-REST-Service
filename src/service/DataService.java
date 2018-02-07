@@ -1,25 +1,27 @@
 package service;
 
-/**
- * Created by Raphael on 14.06.2017.
- */
 
-import com.sun.jersey.json.impl.provider.entity.JSONArrayProvider;
-import com.sun.org.glassfish.external.statistics.Statistic;
 import dao.*;
 import entity.*;
-import org.codehaus.jettison.json.JSONArray;
-
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+/**
+ * An instance of this class is used to connect the RESTService object with
+ * the database. It calls the specific methods in the DAOs and gets the data
+ * from the database. It edits the data if needed and returns it to the
+ * RESTService object.
+ *
+ * @author Raphael Grum
+ * @version 1.0
+ * @since version 1.0
+ */
 public class DataService {
+	// The format of a date used in this system.
 	protected static final String DATE_FORMAT = "dd.MM.yyyy hh:mm:ss";
 
+	// The DAO objects needed for interaction with the database.
 	private AppointmentDAO appointmentDAO;
 	private ChatDAO chatDAO;
 	private MessageDAO messageDAO;
@@ -31,6 +33,7 @@ public class DataService {
 	private UserDAO userDAO;
 
 	private SimpleDateFormat formatter;
+	// Text fragemnts used to create the information texts for the clients.
 	private final String NEW_PROJECT = "Ein neues Projekt ";
 	private final String NEW_APPOINTMENT = "Ein neues Meeting ";
 	private final String NEW_TASK = "Eine neue Aufgabe ";
@@ -42,6 +45,9 @@ public class DataService {
 	private final String REGISTER = "Die Gruppe ";
 	private final String DELETED = " wurde gelöscht!\n";
 
+	/**
+	 * Creates a new object of DataService with all needed DAOs initiated.
+	 */
 	public DataService() {
 		formatter = new SimpleDateFormat("dd.MM.yyyy");
 		appointmentDAO = new AppointmentDAO();
@@ -55,11 +61,27 @@ public class DataService {
 		userDAO = new UserDAO();
 	}
 
+	/**
+	 * Returns a user from the database.
+	 *
+	 * @param username The username of the user entry.
+	 *
+	 * @return The specific UserEntity database entry or null if the user
+	 * with the username does not exist.
+	 */
 	public UserEntity getUser(String username) {
 		UserEntity result = userDAO.getUserByUsername(username);
 		return result;
 	}
 
+	/**
+	 * Gets all users belonging to a specific team from the database.
+	 *
+	 * @param teamName The name of the team the users are members of.
+	 *
+	 * @return A {@see Collection} of all UserEntity entries belonging to a
+	 * specific TeamEntity or null if the TeamEntity does not exist.
+	 */
 	public Collection<UserEntity> getUsersOfTeam(String teamName) {
 		Collection<UserEntity> result;
 		TeamEntity team = teamDAO.getTeamByTeamName(teamName);
@@ -71,12 +93,33 @@ public class DataService {
 		return result;
 	}
 
+	/**
+	 * Validates the login data of a user.
+	 *
+	 * @param username The username to login.
+	 * @param password The password of the user.
+	 *
+	 * @return Returns true, if there exists a UserEntity database entry with
+	 * the username and password as sent and false if the data is no correct.
+	 */
 	public boolean login(String username, String password) {
 		UserEntity userToLogin = userDAO.getUserByUsername(username);
 		return userToLogin != null
 				&& userToLogin.getPassword().equals(password);
 	}
 
+	/**
+	 * Returns the participation statistic of a user belonging to a
+	 * specific team and project from the database.
+	 *
+	 * @param username The username of the user the statistic belong to.
+	 * @param projectName The name of the project the participation
+	 *                       statistic belong to.
+	 * @param teamName The name of the team the user is member of.
+	 *
+	 * @return A StatisticEntity instance or null if the sent data is not
+	 * existing in the database.
+	 */
 	public StatisticEntity getStatisticOfUser(String username,
 											  String projectName,
 											  String teamName) {
@@ -101,6 +144,18 @@ public class DataService {
 		return null;
 	}
 
+	/**
+	 * Returns all participation statistics of the users who take part at a
+	 * specific project.
+	 *
+	 * @param projectName The name of the project of which the statistics
+	 *                       should get returned.
+	 * @param teamName The name of the team the project belongs to.
+	 *
+	 * @return A {@see Collection} of all StatisticEntity entries belonging
+	 * to a specific TeamEntity and ProjectEntity or null if the data does
+	 * not exist.
+	 */
 	public Collection<StatisticEntity> getStatisticsOfProject
 			(String projectName, String teamName) {
 		Collection<StatisticEntity> result;
@@ -113,6 +168,15 @@ public class DataService {
 		return result;
 	}
 
+	/**
+	 * Returns a specific task which exists in a team.
+	 *
+	 * @param taskName The name of the task which should be loaded.
+	 * @param teamName The name of the team in which teh task exists.
+	 *
+	 * @return A TaskEntity object or null if the data does not exist in the
+	 * database.
+	 */
 	public TaskEntity getTask(String taskName, String teamName) {
 		TeamEntity team = teamDAO.getTeamByTeamName(teamName);
 		TaskEntity result;
@@ -124,12 +188,37 @@ public class DataService {
 		return result;
 	}
 
+	/**
+	 * Returns a register of a team from the database.
+	 *
+	 * @param registerName The name of the register which should get returned.
+	 * @param teamName The name of the team the register belongs to.
+	 *
+	 * @return A RegisterEntity object or null if the requested data does not
+	 * exist.
+	 */
 	public RegisterEntity getRegister(String registerName, String teamName) {
 		RegisterEntity result;
 		result = registerDAO.getRegisterByName(registerName, teamName);
 		return result;
 	}
 
+	/**
+	 * Creates a new user in the system.
+	 *
+	 * @param username The username of the new user.
+	 * @param password The password of the new user.
+	 * @param firstName The first name of the new user.
+	 * @param surname The surname of the new user.
+	 * @param email The email address of the new user.
+	 * @param phonNr The phone number of the new user.
+	 * @param address The address of the new user.
+	 * @param birthday The birthday of the user.
+	 *
+	 * @return If there is already a UserEntity entry with the same username,
+	 * the action will not be performed and it returns false. Else it returns
+	 * true after creating the new UserEntity entry.
+	 */
 	public boolean registerUser(String username, String password,
 								String firstName, String surname, String email,
 								String phonNr, String address,
@@ -156,18 +245,16 @@ public class DataService {
 		return result;
 	}
 
-	private Calendar parseStringToCalendar(String date) {
-		Calendar calendar = Calendar.getInstance();
-		SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
-		try {
-			calendar.setTime(formatter.parse(date));
-		} catch (ParseException e) {
-			calendar = null;
-			System.out.println("Error! Could not parse date!");
-		}
-		return calendar;
-	}
-
+	/**
+	 * Creates a new team in the system.
+	 *
+	 * @param name The name of the new team.
+	 * @param description The description of the new team.
+	 * @param adminName The username of the administrator of the new team.
+	 *
+	 * @return Returns false, if the action could not be finished and true if
+	 * it was done successfully.
+	 */
 	public boolean createNewTeam(String name, String description, String adminName) {
 		boolean result = false;
 		UserEntity admin = userDAO.getUserByUsername(adminName);
@@ -187,6 +274,18 @@ public class DataService {
 		return result;
 	}
 
+	/**
+	 * Edits the participation statistics of a user who will take part at a
+	 * certain appointment of a project.
+	 *
+	 * @param teamName The name of the team the user is member of.
+	 * @param projectName The name of the project the appointment is
+	 *                       belonging to.
+	 * @param appointmentId The identifier of the appointment the user will
+	 *                         take part.
+	 * @param username The username of the user who will take part at the
+	 *                    appointment.
+	 */
 	public void takePartAtAppointment(String teamName, String projectName,
 									  int appointmentId, String username) {
 		AppointmentEntity appointment = getAppointment(projectName,
@@ -205,7 +304,18 @@ public class DataService {
 
 	}
 
-
+	/**
+	 * Creates a new project in a team.
+	 *
+	 * @param teamName The name of the team the new project should belong to.
+	 * @param projectName The name of the new project.
+	 * @param description The description of thew new project.
+	 * @param projectManager The username of the manager of the new project.
+	 * @param deadline The deadline the new project will end.
+	 *
+	 * @return Returns true if the project has been created successfully and
+	 * false if the action could not be finished.
+	 */
 	public boolean createNewProject(String teamName, String projectName,
 									String description, String projectManager,
 									String deadline) {
@@ -246,23 +356,18 @@ public class DataService {
 		return result;
 	}
 
-	private StatisticEntity createStatistic(String username,
-											String projectName, String
-													teamName) {
-		UserEntity user = userDAO.getUserByUsername(username);
-		ProjectEntity project = projectDAO.getProject(projectName, teamName);
-		StatisticEntity statistic = new StatisticEntity(user, project);
-		return statistic;
-	}
-
-	private void addUsersToChat(ChatEntity chat, Collection<String> users) {
-		for (String username : users) {
-			UserEntity user = getUser(username);
-			user.getChats().add(chat);
-			userDAO.saveOrUpdate(user);
-		}
-	}
-
+	/**
+	 * Creates a new task in a team environment.
+	 *
+	 * @param name The name of the new task.
+	 * @param description The description of the new task.
+	 * @param date The deadline of the new task.
+	 * @param teamName The name of the team the task belongs to.
+	 * @param username The username of the task's worker.
+	 *
+	 * @return Returns true if the action could be performed successfully and
+	 * false if the task could not be created.
+	 */
 	public boolean createNewTask(String name, String description,
 								 String date, String teamName,
 								 String username) {
@@ -284,6 +389,16 @@ public class DataService {
 		return result;
 	}
 
+	/**
+	 * Sets a user as the worker of a specific task.
+	 *
+	 * @param taskName The name of the task.
+	 * @param userName The username of the user.
+	 * @param teamName The name of the team the task and the user belong to.
+	 *
+	 * @return Returns true if the action could be performed successfully and
+	 * false if not.
+	 */
 	public boolean setWorkerToTask(String taskName, String userName, String
 			teamName) {
 		boolean result = false;
@@ -298,6 +413,16 @@ public class DataService {
 		return result;
 	}
 
+	/**
+	 * Creates a new register of a team.
+	 *
+	 * @param registerName The name of the new register.
+	 * @param teamName The name of the team the register should belong to.
+	 * @param color The color of the register as a hexadecimal code.
+	 *
+	 * @return Returns true if the action could be performed successfully and
+	 * false if the action could not be completed.
+	 */
 	public boolean createNewRegister(String registerName, String teamName,
 									 String color) {
 		boolean result = false;
@@ -315,6 +440,16 @@ public class DataService {
 		return result;
 	}
 
+	/**
+	 * Adds a user to a existing register of his or her team.
+	 *
+	 * @param username The username of the user.
+	 * @param registerName The name of the register the user should be part of.
+	 * @param teamName The name of the team the user and register belong to.
+	 *
+	 * @return Returns true if the action could be completed successfully and
+	 * false if the action could not be completed.
+	 */
 	public boolean setUsersRegister(String username, String registerName,
 									String teamName) {
 		boolean result = false;
@@ -328,6 +463,20 @@ public class DataService {
 		return result;
 	}
 
+	/**
+	 * Creates a new appointment of a project.
+	 *
+	 * @param name The name of the new appointment.
+	 * @param description The description of the new appointment.
+	 * @param date The deadline of the new appointment.
+	 * @param projectName The name of the project the new appointment will
+	 *                       belong to.
+	 * @param teamName The name of the team the user, project and appointment
+	 *                   belong to.
+	 *
+	 * @return Returns true if the action could be completed successfully and
+	 * false if not.
+	 */
 	public boolean createNewAppointment(String name, String description,
 										String date, String projectName,
 										String teamName) {
@@ -357,6 +506,16 @@ public class DataService {
 		return result;
 	}
 
+	/**
+	 * Returns an appointment from the database.
+	 *
+	 * @param projectName The name of the project the appointment belongs to.
+	 * @param appointmentId The identifier of the appointment.
+	 * @param teamName The name of the team the project and appointment
+	 *                    belong to.
+	 *
+	 * @return An AppointmentEntity object or null if the data does not exist.
+	 */
 	public AppointmentEntity getAppointment(String projectName,
 											long appointmentId, String
 													teamName) {
@@ -373,6 +532,14 @@ public class DataService {
 		return result;
 	}
 
+	/**
+	 * Deletes an appointment from the database.
+	 *
+	 * @param projectName The name of the project the appointment belongs to.
+	 * @param teamName The name of the team the project and appointment
+	 *                    belong to.
+	 * @param appointmentId The identifier of the appointment to delete.
+	 */
 	public void removeAppointment(String projectName, String teamName,
 								  long appointmentId) {
 		ProjectEntity project = getProject(projectName, teamName);
@@ -382,6 +549,15 @@ public class DataService {
 		appointmentDAO.remove(appointment);
 	}
 
+	/**
+	 * Removes a project from the database.
+	 *
+	 * @param projectName The name of the project to delete.
+	 * @param teamName The name of the team the project belongs to.
+	 *
+	 * @return Returns true if the action could be performed successfully and
+	 * false if not.
+	 */
 	public boolean removeProject(String projectName, String teamName) {
 		boolean result = false;
 		ProjectEntity project = projectDAO.getProject(projectName, teamName);
@@ -403,6 +579,12 @@ public class DataService {
 		return result;
 	}
 
+	/**
+	 * Deletes a register from the database.
+	 *
+	 * @param registerName The name of the register to delete.
+	 * @param teamName The name of teh team the register belongs to.
+	 */
 	public void removeRegister(String registerName, String teamName) {
 		RegisterEntity register = registerDAO.getRegisterByName(registerName,
 				teamName);
@@ -434,6 +616,10 @@ public class DataService {
 		registerDAO.remove(register);
 	}
 
+	/*
+	Returns a {@see Collection} of the users belonging to a specific register
+	 of a team.
+	 */
 	private Collection<UserEntity> getUsersOfRegister(String registerName,
 													  String teamName) {
 		Collection<UserEntity> result = new ArrayList<UserEntity>();
@@ -448,6 +634,15 @@ public class DataService {
 		return result;
 	}
 
+	/**
+	 * Deletes a task from the database.
+	 *
+	 * @param taskName The name of the task to delete.
+	 * @param teamName The name of the team the task belongs to.
+	 *
+	 * @return Returns true if the action could be completed successfully and
+	 * false if not.
+	 */
 	public boolean removeTask(String taskName, String teamName) {
 		boolean result = false;
 		TeamEntity team = teamDAO.getTeamByTeamName(teamName);
@@ -482,6 +677,14 @@ public class DataService {
 		return result;
 	}
 
+	/**
+	 * Deletes a team from the database.
+	 *
+	 * @param teamName The name of the team to delete.
+	 *
+	 * @return Returns true, if the action could be performed successfully
+	 * and false if not.
+	 */
 	public boolean removeTeam(String teamName) {
 		boolean result = false;
 		TeamEntity team = teamDAO.getTeamByTeamName(teamName);
@@ -509,6 +712,14 @@ public class DataService {
 		return result;
 	}
 
+	/**
+	 * Deletes a user from the database.
+	 *
+	 * @param username The username of the user to delete.
+	 *
+	 * @return Returns true if the action could be performed successfully and
+	 * false if not.
+	 */
 	public boolean removeUserFromApp(String username) {
 		boolean result = false;
 		UserEntity user = userDAO.getUserByUsername(username);
@@ -534,6 +745,13 @@ public class DataService {
 		return result;
 	}
 
+	/**
+	 * Removes a user from a team and all other entities inside of the team
+	 * environment.
+	 *
+	 * @param username The username of the user to remove from the team.
+	 * @param teamName The naem of the team the user should be removed from.
+	 */
 	public void removeUserFromTeam(String username, String teamName) {
 		UserEntity user = userDAO.getUserByUsername(username);
 		TeamEntity team = teamDAO.getTeamByTeamName(teamName);
@@ -564,6 +782,17 @@ public class DataService {
 		}
 	}
 
+	/**
+	 * Removes a user from a project and the appointments belonging to the
+	 * project inside of a team environment.
+	 *
+	 * @param username The username of the user who should be removed.
+	 * @param projectName The name of the project the user will be removed from.
+	 * @param teamName The name of the team the user and the project belong to.
+	 *
+	 * @return Returns true if the action could be performed successfully and
+	 * false if not.
+	 */
 	public boolean removeUserFromProject(String username, String projectName,
 										 String teamName) {
 		boolean result = false;
@@ -609,15 +838,15 @@ public class DataService {
 		return result;
 	}
 
-	public List<MessageEntity> getMessagesOfChat(long id) {
-		List<MessageEntity> result = new ArrayList<MessageEntity>();
-		ChatEntity chat = chatDAO.get(id);
-		if (chat != null) {
-			result = chat.getMessages();
-		}
-		return result;
-	}
-
+	/**
+	 * Adds a user to a existing team.
+	 *
+	 * @param teamName The name of the team the user should be added to.
+	 * @param username The username of the user to add.
+	 *
+	 * @return Returns true if the action could be performed successfully and
+	 * false if not.
+	 */
 	public boolean addUserToTeam(String teamName, String username) {
 		boolean result = false;
 		TeamEntity team = teamDAO.getTeamByTeamName(teamName);
@@ -630,6 +859,16 @@ public class DataService {
 		return result;
 	}
 
+	/**
+	 * Adds a user to a existing project inside of a existing team.
+	 *
+	 * @param username The username of the user to add.
+	 * @param projectName The project the user should be added to.
+	 * @param teamName The name of the team the user and the project belong to.
+	 *
+	 * @return Returns true if the action was performed successfully and
+	 * false if it wasn't.
+	 */
 	public boolean addUserToProject(String username, String projectName,
 									String teamName) {
 		boolean result = false;
@@ -656,16 +895,45 @@ public class DataService {
 		return result;
 	}
 
+	/**
+	 * Returns a team from the database.
+	 *
+	 * @param teamName The name of the team which should get loaded.
+	 *
+	 * @return Returns the TeamEntity object or null if it does not exist in
+	 * the database.
+	 */
 	public TeamEntity getTeam(String teamName) {
 		TeamEntity result = teamDAO.getTeamByTeamName(teamName);
 		return result;
 	}
 
+	/**
+	 * Returns a project of a team from the database.
+	 *
+	 * @param projectName The name of the project which should get returned.
+	 * @param teamName The name or the team the project belongs to.
+	 *
+	 * @return Returns a ProjectEntity object or null if it does not exist in
+	 * the database.
+	 */
 	public ProjectEntity getProject(String projectName, String teamName) {
 		ProjectEntity project = projectDAO.getProject(projectName, teamName);
 		return project;
 	}
 
+	/**
+	 * Adds a user to a specific appointment.
+	 *
+	 * @param userName The username of the user to be added.
+	 * @param projectName The name of the project the appointment belongs to.
+	 * @param teamName The name of thte team the project, the user and the
+	 *                    appointemnt belong to.
+	 * @param appointmentId The identifier of the appointment.
+	 *
+	 * @return Returns true if the action was performed successfully and
+	 * false if it yould not be completed.
+	 */
 	public boolean addUserToAppointment(String userName, String projectName,
 										String teamName, long appointmentId) {
 		boolean result = false;
@@ -679,14 +947,34 @@ public class DataService {
 		return result;
 	}
 
+	/**
+	 * Returns all users existing in the database.
+	 *
+	 * @return A {@see Collection} of all UserEntity entries of the database.
+	 */
 	public Collection<UserEntity> getAllUsers() {
 		return userDAO.getAll();
 	}
 
+	/**
+	 * Returns all teams existing in the database.
+	 *
+	 * @return A {@see Collection} of all TeamEntity entries of the database.
+	 */
 	public Collection<TeamEntity> getAllTeams() {
 		return teamDAO.getAll();
 	}
 
+	/**
+	 * Edits a tean's data and saves it in the database.
+	 *
+	 * @param team The TeamEntity entry to be edited.
+	 * @param teamName The new name of the team.
+	 * @param teamDescription The new description of the team.
+	 *
+	 * @return Returns true if the data could be edited successfully and
+	 * false if the team could not be edited.
+	 */
 	public boolean editTeam(TeamEntity team, String teamName,
 							String teamDescription) {
 		boolean result = false;
@@ -700,6 +988,20 @@ public class DataService {
 		return result;
 	}
 
+	/**
+	 * Edits a user's data and saves it in the database.
+	 *
+	 * @param toEdit The UserEntity data to be edited.
+	 * @param firstName The new first name of the user.
+	 * @param surname The new surname of the user.
+	 * @param address The new address of the user.
+	 * @param phoneNr The new phone number of the user.
+	 * @param email The new email address of the user.
+	 * @param birthday The new birthday of the user.
+	 *
+	 * @return Returns true if the data  could be edited successfully and
+	 * false if it could not be edited.
+	 */
 	public boolean editUser(UserEntity toEdit, String firstName, String surname,
 							String address, String phoneNr, String email,
 							String birthday) {
@@ -718,6 +1020,15 @@ public class DataService {
 		return result;
 	}
 
+	/**
+	 * Adds a team's invitation to a user.
+	 *
+	 * @param user The user data to which the invitation should be added.
+	 * @param team The team data which invited the user to join.
+	 *
+	 * @return Returns true if the action was completed successfully and
+	 * false if not.
+	 */
 	public boolean addInvitationToUser(UserEntity user, TeamEntity team) {
 		if (user != null && team != null) {
 			String teamName = team.getName();
@@ -729,16 +1040,15 @@ public class DataService {
 		}
 	}
 
-	public boolean removeInvitationFromUser(UserEntity user, TeamEntity team) {
-		boolean result;
-		if (user != null && team != null) {
-			result = user.removeInvitation(team.getName());
-		} else {
-			result = false;
-		}
-		return result;
-	}
-
+	/**
+	 * Adds a user's request to a specific team in the system.
+	 *
+	 * @param team The team the user wants to join.
+	 * @param user The user who sent the request to the team.
+	 *
+	 * @return Returns true if the action was performed successfully and
+	 * false if not.
+	 */
 	public boolean addRequestToTeam(TeamEntity team, UserEntity user) {
 		if (team != null && user != null) {
 			String username = user.getUsername();
@@ -750,32 +1060,52 @@ public class DataService {
 		}
 	}
 
-	public boolean removeRequestOfTeam(TeamEntity team, UserEntity user) {
-		boolean result;
-		if (team != null && user != null) {
-			result = team.removeRequestOfUser(user.getUsername());
-		} else {
-			result = false;
-		}
-		return result;
-	}
-
+	/**
+	 * Saves a user in the database.
+	 *
+	 * @param user The user who will be saved.
+	 */
 	public void saveUser(UserEntity user) {
 		userDAO.saveOrUpdate(user);
 	}
 
+	/**
+	 * Saves a team in the database.
+	 *
+	 * @param team The team which will be saved in the database.
+	 */
 	public void saveTeam(TeamEntity team) {
 		teamDAO.saveOrUpdate(team);
 	}
 
+	/**
+	 * Saves a register in the database.
+	 *
+	 * @param register The register which will be saved.
+	 */
 	public void saveRegister(RegisterEntity register) {
 		registerDAO.saveOrUpdate(register);
 	}
 
+	/**
+	 * Deletes a register from the database.
+	 *
+	 * @param register The register which will be deleted.
+	 */
 	public void deleteRegister(RegisterEntity register) {
 		registerDAO.remove(register);
 	}
 
+	/**
+	 * Deletes a user from the database.
+	 * If the user is an admin of a team,
+	 * all users of the team will be with óut a team and the whole data
+	 * belonging to the team will be deleted (except the other users).
+	 * If the user is an admin of a project the project, appointments and
+	 * statistics belonging to it will be deleted.
+	 *
+	 * @param user The user who will be deleted.
+	 */
 	public void deleteUser(UserEntity user) {
 		UserRole role = user.getRole();
 		switch (role) {
@@ -792,6 +1122,11 @@ public class DataService {
 		}
 	}
 
+	/*
+	Deletes a user who is a project manager. The whole project data (project,
+	appointments and statistics) are deleted to. All users who took part in
+	the project are removed from it before but keep existing in the team.
+	 */
 	private void deleteProjectOwner(UserEntity user) {
 		ProjectEntity projectEntity = user.getAdminOfProject();
 		List<UserEntity> usersTakingPart = projectEntity.getUsers();
@@ -811,6 +1146,11 @@ public class DataService {
 		userDAO.removeUser(user.getId());
 	}
 
+	/*
+	Deletes a team administrator. All the other users will be removed from
+	the team but keep on existing in the system. The whole team data and the
+	related data will be deleted.
+	 */
 	private void deleteAdmin(UserEntity user) {
 		TeamEntity team = user.getTeam();
 		for (UserEntity teamMember : team.getUsers()) {
@@ -843,6 +1183,9 @@ public class DataService {
 		userDAO.removeUser(user.getId());
 	}
 
+	/*
+	Deletes a {@see List} of appointments from the database.
+	 */
 	private void deleteAppointments(List<AppointmentEntity> appointments) {
 		for (AppointmentEntity appointment : appointments) {
 			appointment.setUserTakinPart(new ArrayList<>());
@@ -852,6 +1195,12 @@ public class DataService {
 		}
 	}
 
+	/**
+	 * Deletes a team and all it's related data. Before the action all users
+	 * will be removed from teh team but keep on existing in the system.
+	 *
+	 * @param team The team to be deleted.
+	 */
 	public void deleteTeam(TeamEntity team) {
 		List<UserEntity> teamMembers = team.getUsers();
 		for (UserEntity user : teamMembers) {
@@ -863,6 +1212,12 @@ public class DataService {
 		teamDAO.remove(team);
 	}
 
+	/**
+	 * Removes all relationships to other data in the database from a user.
+	 *
+	 * @param user The user who will loose all relationships to other
+	 *                database entries.
+	 */
 	private void removeDependenciesFromUser(UserEntity user) {
 		user.setRole(UserRole.USER);
 		user.setTasks(new ArrayList<>());
@@ -878,6 +1233,19 @@ public class DataService {
 		user.setChats(new ArrayList<>());
 	}
 
+	/**
+	 * Removes a user from a team.
+	 * If the user is an admin the whole team the action will not be performed.
+	 * If teh user is a manager of a project, all users belonging to the
+	 * project will be removed from it and the project and the whole data
+	 * belonging to it will be deleted.
+	 *
+	 * @param user The user to be removed.
+	 * @param team Teh team the user will be removed from.
+	 *
+	 * @return Returns true, if the action was successfully done and false if
+	 * not.
+	 */
 	public boolean leaveTeam(UserEntity user, TeamEntity team) {
 		boolean result = false;
 		if (user.getRole() != UserRole.ADMINISTRATOR) {
@@ -908,6 +1276,12 @@ public class DataService {
 		return result;
 	}
 
+	/**
+	 * Removes all users from a project and deletes the whole data which
+	 * belongs to the project including the project itself.
+	 *
+	 * @param project The project to be deleted.
+	 */
 	public void deleteProject(ProjectEntity project) {
 		List<AppointmentEntity> appointments
 				= project.getAppointments();
@@ -936,12 +1310,18 @@ public class DataService {
 		teamDAO.saveOrUpdate(team);
 	}
 
+	/*
+	Deletes a List of statistics form the database.
+	 */
 	private void deleteStatistics(List<StatisticEntity> statistics) {
 		for (StatisticEntity statistic : statistics) {
 			deleteStatistic(statistic);
 		}
 	}
 
+	/*
+	Deletes a a single statistic from the database.
+	 */
 	private void deleteStatistic(StatisticEntity statistic) {
 		statistic.setUser(null);
 		statistic.setProject(null);
@@ -949,6 +1329,13 @@ public class DataService {
 		statisticDAO.remove(statistic);
 	}
 
+	/**
+	 * Updates the data of a project.
+	 *
+	 * @param project The project data to be edited.
+	 * @param description The new description of the project.
+	 * @param deadline The new deadline of the project.
+	 */
 	public void editProject(ProjectEntity project, String description,
 							String deadline) {
 		List<AppointmentEntity> appointments = project.getAppointments();
@@ -965,6 +1352,17 @@ public class DataService {
 		projectDAO.saveOrUpdate(project);
 	}
 
+	/**
+	 * Adds or removes users from a project. Takes a {@see List} of usernames
+	 * iterates through it. If the user with the current username already is
+	 * member of the project, he or she will be removed from it. If there is
+	 * no user with the username the user is added to the project as a new
+	 * member.
+	 *
+	 * @param project The project to update it's members.
+	 * @param usersToEdit The usernames of the users who's membership to the
+	 *                       project have to be edited.
+	 */
 	public void editProjectMembership(ProjectEntity project,
 									  ArrayList<String> usersToEdit) {
 		List<UserEntity> projectMembers = project.getUsers();
@@ -1002,7 +1400,10 @@ public class DataService {
 		projectDAO.saveOrUpdate(project);
 	}
 
-
+	/*
+	Removes the participation statistics of the users who were removed from a
+	project.
+	 */
 	private void removeStatisticsOfRemovedUsers(List<String> usersToRemove,
 												ProjectEntity project) {
 		for (String username : usersToRemove) {
@@ -1024,7 +1425,10 @@ public class DataService {
 			}
 		}
 	}
-
+	/*
+	Adds a List of users to a project and creates their participation
+	statistics for this project.
+	 */
 	private void addUsersToProject(List<String> usersToEdit,
 								   ProjectEntity project) {
 		for (String username : usersToEdit) {
@@ -1042,6 +1446,9 @@ public class DataService {
 		}
 	}
 
+	/*
+	Removes a List of users from a project.
+	 */
 	private void removeUsersFromProject(List<String> usersToRemove,
 										ProjectEntity project) {
 		for (String username : usersToRemove) {
@@ -1051,11 +1458,13 @@ public class DataService {
 		}
 	}
 
-	public TaskEntity getTask(long id) {
-		TaskEntity task = taskDAO.get(id);
-		return task;
-	}
-
+	/**
+	 * Edits the data of a specific task.
+	 *
+	 * @param task The task data to be updated.
+	 * @param description The new description of the task.
+	 * @param deadline The new deadline of the task.
+	 */
 	public void editTask(TaskEntity task, String description,
 						 String deadline) {
 		task.setDeadline(deadline);
@@ -1063,6 +1472,11 @@ public class DataService {
 		taskDAO.saveOrUpdate(task);
 	}
 
+	/**
+	 * Deletes a task from teh database.
+	 *
+	 * @param task Teh task to be deleted.
+	 */
 	public void deleteTask(TaskEntity task) {
 		TeamEntity team = task.getTeam();
 		List<TaskEntity> tasksOfTeam = team.getTasks();
@@ -1081,6 +1495,15 @@ public class DataService {
 		taskDAO.remove(task);
 	}
 
+	/**
+	 * Updates the data of an appointment.
+	 *
+	 * @param appointment The appointment to be updated.
+	 * @param appointmentName The new name of the appointment.
+	 * @param appointmentDescription The new description of the appointment.
+	 * @param deadline The new deadline of the appointment.
+	 * @param deadline The new deadline of the appointment.
+	 */
 	public void editAppointment(AppointmentEntity appointment,
 								String appointmentName,
 								String appointmentDescription, String deadline) {
@@ -1090,6 +1513,11 @@ public class DataService {
 		appointmentDAO.saveOrUpdate(appointment);
 	}
 
+	/**
+	 * Deletes an appointment from the database.
+	 *
+	 * @param appointment The appointment to be deleted.
+	 */
 	public void deleteAppointment(AppointmentEntity appointment) {
 		List<UserEntity> usersOfAppointment = appointment.getUserTakinPart();
 		ProjectEntity project = appointment.getProject();
@@ -1114,6 +1542,14 @@ public class DataService {
 		appointmentDAO.remove(appointment);
 	}
 
+	/**
+	 * Returns an appointment entry from the database.
+	 *
+	 * @param id The identifier of the database.
+	 *
+	 * @return An AppointmentEntity object or null if it does not exist in
+	 * the database.
+	 */
 	public AppointmentEntity getAppointment(long id) {
 		return appointmentDAO.get(id);
 	}
@@ -1131,6 +1567,17 @@ public class DataService {
 		return result;
 	}
 
+	/**
+	 * Saves the participation answer of a specific user for a specific
+	 * appointment.
+	 *
+	 * @param user The user who answered his or her participation.
+	 * @param appointment The appointment the participation belongs to.
+	 * @param answer The answer the user gave.
+	 *
+	 * @return Returns true if the action was performed successfully and
+	 * false if it was not.
+	 */
 	public boolean saveAnswerParticipation(UserEntity user,
 										   AppointmentEntity appointment,
 										   StatisticParticipationAnswer answer) {
@@ -1168,11 +1615,24 @@ public class DataService {
 		return result;
 	}
 
+	/**
+	 * Changes the password of a user.
+	 *
+	 * @param user The user who changes his/her password.
+	 * @param newPassword The new password of the user.
+	 */
 	public void changePasswordOfUser(UserEntity user, String newPassword) {
 		user.setPassword(newPassword);
 		userDAO.saveOrUpdate(user);
 	}
 
+	/**
+	 * Creates a new chat.
+	 *
+	 * @param team The team the chat belongs to.
+	 * @param usersOfChat The {@see ArrayList} of users using the new chat.
+	 * @param chatName The name of the new chat.
+	 */
 	public void createNewChat(TeamEntity team,
 							  ArrayList<UserEntity> usersOfChat,
 							  String chatName) {
@@ -1196,10 +1656,29 @@ public class DataService {
 
 	}
 
+	/**
+	 * Returns a chat from the database.
+	 *
+	 * @param team The team teh chat belongs to.
+	 * @param chatName The name of the chat which should get returned.
+	 *
+	 * @return Returns a ChatEntity instance or null if it does not exist.
+	 */
 	public ChatEntity getChatByName(TeamEntity team, String chatName) {
 		return chatDAO.getChatByName(team, chatName);
 	}
 
+	/**
+	 * Creates a new message for a specific chat.
+	 *
+	 * @param message The text of the message.
+	 * @param author The author of the message.
+	 * @param chat The chat the message belongs to.
+	 * @param timestamp The point of time the message was written.
+	 *
+	 * @throws ParseException Throws this exception if the parameter
+	 * timestamp has the wrong format.
+	 */
 	public void createNewMessage(String message, UserEntity author,
 								 ChatEntity chat, String timestamp)
 			throws ParseException {
@@ -1217,6 +1696,13 @@ public class DataService {
 		userDAO.saveOrUpdate(author);
 	}
 
+	/**
+	 * Returns a specific chat.
+	 *
+	 * @param chatId The id of the chat.
+	 *
+	 * @return An instance of ChatEntity or null if it does not exist.
+	 */
 	public ChatEntity getChat(long chatId) {
 		return chatDAO.get(chatId);
 	}
