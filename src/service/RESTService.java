@@ -1,9 +1,5 @@
 package service;
 
-/**
- * Created by Raphael on 15.06.2017.
- */
-
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import entity.*;
@@ -18,19 +14,38 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+/**
+ * This is the communication interface between the clients and the server.
+ * It uses the construct of a REST service which means it listens to HTTP
+ * requests with the specific identifier of it's resources and call the logic
+ * before it answers with the specific JSON data.
+ */
 @Path("/pmservice")
 public class RESTService {
 
+	// Needed for proofing if a client sent a request to a team to join or a
+	// team administrator invites a new user to join a team.
 	private final String REQUEST = "request";
 	private final String INVITATION = "invitation";
 	private DataService dataService = new DataService();
+	// A random secret created when this instance gets created and used for
+	// creating the user tokens to authenticate at server side.
 	public static final byte[] SHARED_SECRET = generateSharedSecret();
+	// Expiration time of the tokens.
 	public static final long EXPIRE_TIME = 900000; // Within a 15 minutes
 								                   // period a token is valid.
 
 	//--------------------------------------------------------------------------
 	// Team methods
 
+	/**
+	 * Listens for a client's request to create a new team.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with information about the success or failure of
+	 * the operation.
+	 */
 	@POST
 	@Path("/create/team")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -39,6 +54,13 @@ public class RESTService {
 		return TeamHelper.createTeam(data, dataService);
 	}
 
+	/**
+	 * Listens for a client's request to get the news of a team.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with the news of a team.
+	 */
 	@POST
 	@Path("/team/news")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -47,6 +69,13 @@ public class RESTService {
 		return TeamHelper.getTeamsNews(data, dataService);
 	}
 
+	/**
+	 * Listens for a client's request to get all tasks of a team.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with all the task data of a team.
+	 */
 	@POST
 	@Path("/team/tasks")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -55,6 +84,14 @@ public class RESTService {
 		return TeamHelper.getTeamsTasks(data, dataService);
 	}
 
+	/**
+	 * Listens for a client's request to delete a specific team.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSON object with information about the success or failure of
+	 * the operation.
+	 */
 	@POST
 	@Path("/delete/team")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -63,6 +100,14 @@ public class RESTService {
 		return TeamHelper.deleteTeam(data, dataService);
 	}
 
+	/**
+	 * Listens for a client's request to edit the membership of a specific team.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with the information about the success or failure
+	 * of this operation.
+	 */
 	@POST
 	@Path("member/edit")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -71,6 +116,13 @@ public class RESTService {
 		return TeamHelper.editTeamMember(data, dataService);
 	}
 
+	/**
+	 * Listens for a client's request to get all members of a team.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with all members of a specific team.
+	 */
 	@POST
 	@Path("/team/members")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -79,6 +131,14 @@ public class RESTService {
 		return TeamHelper.getTeamMembers(data, dataService);
 	}
 
+	/**
+	 * Listens to a client's request to edit a specific team.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with information about the success or failure of
+	 * this operation.
+	 */
 	@POST
 	@Path("/edit/team")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -87,6 +147,13 @@ public class RESTService {
 		return TeamHelper.editTeam(data, dataService);
 	}
 
+	/**
+	 * Listens to a client's request to get the data of a specific team.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with the team's data.
+	 */
 	@POST
 	@Path("/team")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -95,6 +162,13 @@ public class RESTService {
 		return TeamHelper.getTeam(data, dataService);
 	}
 
+	/**
+	 * Listens to a client's request to get all team names in the system.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with all the names of the teams in the system.
+	 */
 	@POST
 	@Path("/teams")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -103,6 +177,15 @@ public class RESTService {
 		return TeamHelper.getTeams(data, dataService);
 	}
 
+	/**
+	 * Listens to a client's request of a user to join a specific team and
+	 * adds this request to the team.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with the information about the success or failure
+	 * of this operation.
+	 */
 	@POST
 	@Path("/request")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -111,6 +194,14 @@ public class RESTService {
 		return TeamHelper.addRequestToTeam(data, dataService);
 	}
 
+	/**
+	 * Listens to a client's request to get all the users' requests to join a
+	 * team of this specific team.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with all the requests of users of a specific team.
+	 */
 	@POST
 	@Path("/requests")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -122,6 +213,15 @@ public class RESTService {
 	//--------------------------------------------------------------------------
 	// User methods
 
+	/**
+	 * Listens to a client's login request.
+	 *
+	 * @param data The JSON data a client sent.
+	 *
+	 * @return A JSONObject. If the login was successful, it contains a JWT
+	 * for the authentication at the server side and if the login wasn't
+	 * successful it just informs the client about that.
+	 */
 	@POST
 	@Path("/login")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -130,6 +230,13 @@ public class RESTService {
 		return UserHelper.loginUser(data, dataService);
 	}
 
+	/**
+	 * Listens to a client's request to get all the chats of a specific user.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with all the chats of a user.
+	 */
 	@POST
 	@Path("user/chats")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -138,6 +245,14 @@ public class RESTService {
 		return UserHelper.getUsersChats(data, dataService);
 	}
 
+	/**
+	 * Listens to a client's request to get all the projects a specific user
+	 * is involved in.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with all the projects of a specific user.
+	 */
 	@POST
 	@Path("/user/projects")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -146,6 +261,13 @@ public class RESTService {
 		return UserHelper.getUsersProjects(data, dataService);
 	}
 
+	/**
+	 * Listens to a client's request to get all the tasks of a specific user.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with all the tasks a specific user is working on.
+	 */
 	@POST
 	@Path("/user/tasks")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -154,6 +276,15 @@ public class RESTService {
 		return UserHelper.getUsersTasks(data, dataService);
 	}
 
+	/**
+	 * Listens to a team administrators request to invite a specific user to
+	 * join his or her team.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with information about the success or failure of
+	 * this operation.
+	 */
 	@POST
 	@Path("/invite")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -162,6 +293,15 @@ public class RESTService {
 		return UserHelper.inviteUserToTeam(data, dataService);
 	}
 
+	/**
+	 * Listens to the request of a client to get all teams' invitations a user
+	 * got to this point of time.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with all invitations a specific user has received
+	 * yet.
+	 */
 	@POST
 	@Path("/invitations")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -170,6 +310,14 @@ public class RESTService {
 		return UserHelper.getInvitationsOfUser(data, dataService);
 	}
 
+	/**
+	 * Listens t a client's request to get all the tributes a specific user has
+	 * received yet.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with all the tributes of a specific user.
+	 */
 	@POST
 	@Path("/user/tributes")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -178,6 +326,15 @@ public class RESTService {
 		return UserHelper.getUsersTribute(data, dataService);
 	}
 
+	/**
+	 * Listens to a client's request to set the answer if a user participates
+	 * in a specific appointment.
+	 *
+	 * @param data THe JSON data sent by a client.
+	 *
+	 * @return A JSONObject with the information about the success or failure
+	 * of this operation.
+	 */
 	@POST
 	@Path("appointment/answer/participation")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -187,6 +344,14 @@ public class RESTService {
 				dataService);
 	}
 
+	/**
+	 * Listens to a client's request to remove a user from a team.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with the information about the success or failure
+	 * of this operation.
+	 */
 	@POST
 	@Path("/leave/team")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -195,6 +360,14 @@ public class RESTService {
 		return UserHelper.leaveTeam(data, dataService);
 	}
 
+	/**
+	 * Listens to the request of a client to edit a specific user's data.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with information about the succes or failure of
+	 * this operation.
+	 */
 	@POST
 	@Path("/edit/user")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -203,6 +376,14 @@ public class RESTService {
 		return UserHelper.editUser(data, dataService);
 	}
 
+	/**
+	 * Listens to a client's request to get all usernames existing in the
+	 * system.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with all usernames of this system.
+	 */
 	@POST
 	@Path("/users")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -211,6 +392,14 @@ public class RESTService {
 		return UserHelper.getAllUsers(data, dataService);
 	}
 
+	/**
+	 * Listens to a request of a client to get the data of a specific user.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with all the data of a specific user
+	 * (except password).
+	 */
 	@POST
 	@Path("/user")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -219,6 +408,14 @@ public class RESTService {
 		return UserHelper.getUser(data, dataService);
 	}
 
+	/**
+	 * Listens to a client's request to register a new user in the system.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with information about success or failure of this
+	 * operation.
+	 */
 	@POST
 	@Path("/register/user")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -230,6 +427,14 @@ public class RESTService {
 	//--------------------------------------------------------------------------
 	// Project methods
 
+	/**
+	 * Listens to a client's request to get all appointments of a specific
+	 * project.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with all appointments' data of a specific project.
+	 */
 	@POST
 	@Path("/project/appointments")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -239,6 +444,15 @@ public class RESTService {
 				dataService);
 	}
 
+	/**
+	 * Listens to a client's request to edit a bunch of users' membership of
+	 * a specific project.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with information about the success or failure of
+	 * this operation.
+	 */
 	@POST
 	@Path("/edit/project/membership")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -248,6 +462,15 @@ public class RESTService {
 				dataService);
 	}
 
+	/**
+	 * Listens to a client's request to get all usernames of a specific
+	 * project's members.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with all usernames of the members of a specific
+	 * project.
+	 */
 	@POST
 	@Path("/project/members")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -257,6 +480,14 @@ public class RESTService {
 				dataService);
 	}
 
+	/**
+	 * Listens to a client's request to delete a specific project.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with information about the success or failure of
+	 * this operation.
+	 */
 	@POST
 	@Path("/delete/project")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -265,6 +496,14 @@ public class RESTService {
 		return ProjectHelper.deleteProject(data, dataService);
 	}
 
+	/**
+	 * Listens to a client's request
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with the information of success or failure of
+	 * this operation.
+	 */
 	@POST
 	@Path("/edit/project")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -273,6 +512,13 @@ public class RESTService {
 		return ProjectHelper.editProject(data, dataService);
 	}
 
+	/**
+	 * Listens to a client's request to get the data of a specific project.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with a specific project's data.
+	 */
 	@POST
 	@Path("/project")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -281,6 +527,14 @@ public class RESTService {
 		return ProjectHelper.getProject(data, dataService);
 	}
 
+	/**
+	 * Listens to a client's request to get all project names of a specific
+	 * team.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with all project names of a specific team.
+	 */
 	@POST
 	@Path("/team/projects")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -289,6 +543,14 @@ public class RESTService {
 		return ProjectHelper.getAllProjects(data, dataService);
 	}
 
+	/**
+	 * Listens to a client's request to create a new project in a specific team.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with information about success or failure of this
+	 * operation.
+	 */
 	@POST
 	@Path("/create/project")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -300,6 +562,13 @@ public class RESTService {
 	//--------------------------------------------------------------------------
 	// Appointment methods
 
+	/**
+	 * Listens to a client's request to get the data of a specific appointment.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with the data of a specific appointment.
+	 */
 	@POST
 	@Path("/appointment")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -308,6 +577,14 @@ public class RESTService {
 		return AppointmentHelper.getAppointment(data, dataService);
 	}
 
+	/**
+	 * Listens to a client's request to delete a specific appointment.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with information about success or failure of this
+	 * operation.
+	 */
 	@POST
 	@Path("/delete/appointment")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -317,6 +594,14 @@ public class RESTService {
 				dataService);
 	}
 
+	/**
+	 * Listens to a client's request to edit the data of a specific appointment.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with information about the success or failure of
+	 * this operation.
+	 */
 	@POST
 	@Path("/edit/appointment")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -326,6 +611,14 @@ public class RESTService {
 				dataService);
 	}
 
+	/**
+	 * Listens to a client's request to create a new appointment in the system.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with information about success or failure of this
+	 * operation.
+	 */
 	@POST
 	@Path("/create/appointment")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -338,6 +631,14 @@ public class RESTService {
 	//--------------------------------------------------------------------------
 	// Task methods
 
+	/**
+	 * Listens to a client's request to delete a specific task.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with information about the success or failure of
+	 * this operation.
+	 */
 	@POST
 	@Path("/delete/task")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -346,6 +647,14 @@ public class RESTService {
 		return TaskHelper.deleteTask(data, dataService);
 	}
 
+	/**
+	 * Listens to a client's request to edit the data of a specific task.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with information about the success or failure of
+	 * this operation.
+	 */
 	@POST
 	@Path("/edit/task")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -354,6 +663,13 @@ public class RESTService {
 		return TaskHelper.editTask(data, dataService);
 	}
 
+	/**
+	 * Listens to a client's request to get the data of a specific taks.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with the data of a specific task.
+	 */
 	@POST
 	@Path("/task")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -362,6 +678,14 @@ public class RESTService {
 		return TaskHelper.getTask(data, dataService);
 	}
 
+	/**
+	 * Listens to a client's request to create a new task.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with the information of success or failure of
+	 * this operation.
+	 */
 	@POST
 	@Path("/create/task")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -373,6 +697,14 @@ public class RESTService {
 	//--------------------------------------------------------------------------
 	// Chat methods
 
+	/**
+	 * Listens to a client's request to delete a specific chat.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with information about success or failure of this
+	 * operation.
+	 */
 	@POST
 	@Path("/delete/chat")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -381,6 +713,13 @@ public class RESTService {
 		return ChatHelper.deleteChat(data, dataService);
 	}
 
+	/**
+	 * Listens to a client's request to get all messages of a specific chat.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with the data of a chat's messages.
+	 */
 	@POST
 	@Path("/chat/messages")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -389,6 +728,14 @@ public class RESTService {
 		return ChatHelper.getChatsMessages(data, dataService);
 	}
 
+	/**
+	 * Listens to a client's request to create a new chat.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with information about success or failure of this
+	 * operation.
+	 */
 	@POST
 	@Path("/create/chat")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -400,6 +747,14 @@ public class RESTService {
 	//--------------------------------------------------------------------------
 	// Message methods
 
+	/**
+	 * Listens to a client's request to get the new messages of a user's chats.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with all the new messages' data a specific user
+	 * received.
+	 */
 	@POST
 	@Path("/messages/new")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -409,6 +764,14 @@ public class RESTService {
 				dataService);
 	}
 
+	/**
+	 * Listens to a client's request to save a new message in a specific chat.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with information about the success or failure of
+	 * this operation.
+	 */
 	@POST
 	@Path("/receive/message")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -420,6 +783,14 @@ public class RESTService {
 	//--------------------------------------------------------------------------
     // Register methods
 
+	/**
+	 * Listens to a client's request to delete a specific register.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with information about the success or failure of
+	 * this operation.
+	 */
 	@POST
 	@Path("/delete/register")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -428,6 +799,13 @@ public class RESTService {
 		return RegisterHelper.deleteRegister(data, dataService);
 	}
 
+	/**
+	 * Listens to a client's request to get the data of a specific register.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with the data of a specific register.
+	 */
 	@POST
 	@Path("/register")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -436,6 +814,14 @@ public class RESTService {
 		return RegisterHelper.getRegister(data, dataService);
 	}
 
+	/**
+	 * Listens to a client's request to edit the data of a specific register.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with the information about success or failure of
+	 * this operation.
+	 */
 	@POST
 	@Path("/edit/register")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -444,6 +830,14 @@ public class RESTService {
 		return RegisterHelper.editRegister(data, dataService);
 	}
 
+	/**
+	 * Listens to a client's request to create a new register.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with information about success or failure of this
+	 * operation.
+	 */
 	@POST
 	@Path("/create/register")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -452,6 +846,14 @@ public class RESTService {
 		return RegisterHelper.createRegister(data, dataService);
 	}
 
+	/**
+	 * Listens to a client's request to get the data of all registers of a
+	 * specific team.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with the data of all registers of a specific team.
+	 */
 	@POST
 	@Path("/team/registers")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -463,6 +865,15 @@ public class RESTService {
 	//--------------------------------------------------------------------------
 	// General needed methods for services etc.
 
+	/**
+	 * Listens to a client's request with which a user changes his or her
+	 * password.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with information about the success or failure of
+	 * this operation.
+	 */
 	@POST
 	@Path("/change/password")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -494,6 +905,14 @@ public class RESTService {
 		return result;
 	}
 
+	/**
+	 * Listens to a client's request with which the system will generate a
+	 * random secure PIN for a specific user due to the fact that the current
+	 * password has been forgotten. The PIN is set as the new password and
+	 * sent to the user's email address.
+	 *
+	 * @param data The JSON data sent by a client.
+	 */
 	@POST
 	@Path("/password/forgotten")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -508,6 +927,16 @@ public class RESTService {
 		}
 	}
 
+	/**
+	 * Listens to a request to get all the actions belonging to a
+	 * specific team for the current day. No user token is needed cause this
+	 * resource is only called by a background thread on the client side.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with all the specific team's data relevant for the
+	 * current week.
+	 */
 	@POST
 	@Path("/newsflash/tokenless")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -546,6 +975,16 @@ public class RESTService {
 		return result;
 	}
 
+	/**
+	 * Listens to a client's request to get all news of a team for the
+	 * current week but using a token to authenticate and validate the
+	 * request due to the active call of the client.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with all the specific team's data relevant for
+	 * the current week.
+	 */
 	@POST
 	@Path("/newsflash")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -587,7 +1026,10 @@ public class RESTService {
 		return result;
 	}
 
-
+	/*
+	Extracts all the dates of the current week on which there will happen
+	actions of a specific team and returns them as a JSONObject.
+	 */
 	private JSONObject getRelevantDates(UserEntity user, TeamEntity team,
 										String currentDate, String mondayOfWeek,
 										String sundayOfWeek) throws JSONException {
@@ -642,6 +1084,10 @@ public class RESTService {
 		return result;
 	}
 
+	/*
+	Extracts all the birthdays of a team's members which will be in the
+	current week and returns them as a JSONObject.
+	 */
 	private JSONArray getBirthdayOfUsers(List<UserEntity> users,
 										 SimpleDateFormat formatter,
 										 Calendar monday, Calendar today,
@@ -668,6 +1114,10 @@ public class RESTService {
 		return result;
 	}
 
+	/*
+	Extracts all appointments which deadlines are set for the current week
+	and returns them as a JSONObject.
+	 */
 	private JSONArray getDateOfAppointments(List<AppointmentEntity> appointments,
 											SimpleDateFormat formatter,
 											Calendar monday, Calendar today,
@@ -694,6 +1144,10 @@ public class RESTService {
 		return result;
 	}
 
+	/*
+	Extracts the tasks -- of which the deadlines are set for the current week --
+	of a specific team and returns them as a JSONObject.
+	 */
 	private JSONArray getDeadlinesOfTasks(List<TaskEntity> tasks,
 										  SimpleDateFormat formatter,
 										  Calendar startOfWeek, Calendar today,
@@ -720,6 +1174,10 @@ public class RESTService {
 		return result;
 	}
 
+	/*
+	Extracts all the projects of a team with their deadlines set during the
+	current week and returns them as a JSONObject.
+	 */
 	private JSONArray getDeadlinesOfProjects(List<ProjectEntity> projects,
 											 SimpleDateFormat formatter,
 											 Calendar startOfWeek,
@@ -747,6 +1205,10 @@ public class RESTService {
 		return result;
 	}
 
+	/*
+	Checks if a point of time is happening during the current week. Returns
+	true if this is the case and false if not.
+	 */
 	private boolean deadlineIsCurrently(Calendar deadline, Calendar currentDate) {
 		boolean result = false;
 		if (deadline.get(Calendar.YEAR) == currentDate.get(Calendar.YEAR)
@@ -757,6 +1219,15 @@ public class RESTService {
 		return result;
 	}
 
+	/**
+	 * Listens to a client's request to get all participation statistics
+	 * belonging to a specific project.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with all participation statistics of the
+	 * project's members saved in it.
+	 */
 	@POST
 	@Path("/project/statistics")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -799,6 +1270,11 @@ public class RESTService {
 		return result;
 	}
 
+	/*
+	Combines the user and his/her participation answers for every appointment in a
+	JSONObject to prepare the numbers for the statistics on the client side.
+	It returns a List of JSONObjects
+	*/
 	private List<JSONObject> combineUserAndAppointmentStatistic(
 			List<UserEntity> users,
 			List<AppointmentEntity> appointments) throws JSONException {
@@ -830,6 +1306,14 @@ public class RESTService {
 		return result;
 	}
 
+	/**
+	 * Listens to the request of a client to remove a user from the system.
+	 *
+	 * @param data The JSON data sent by a client.
+	 *
+	 * @return A JSONObject with information about the success or failure of
+	 * this operation.
+	 */
 	@POST
 	@Path("/leave")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -859,6 +1343,17 @@ public class RESTService {
 		return result;
 	}
 
+	/**
+	 * Listens to a client's request to answer a specific invitation or
+	 * request for joining a team. If the answer is to let the user join, the
+	 * user will be added to the team and if the answer is a rejection the
+	 * request/invitation will be deleted.
+	 *
+	 * @param data The data sent by a client.
+	 *
+	 * @return A JSONObject with the information about the success or failure
+	 * of this operation.
+	 */
 	@POST
 	@Path("/answer")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -896,6 +1391,10 @@ public class RESTService {
 		return result;
 	}
 
+	/*
+	Decides whether the system has to deal with a request or an invitation to
+	 join a team.
+	 */
 	private JSONObject prepareAnswer(UserEntity user, TeamEntity team,
 									 String agreeOrDisagree,
 									 String invitationOrRequest) {
@@ -908,6 +1407,10 @@ public class RESTService {
 		return result;
 	}
 
+	/*
+	Answers an invitation of a team. If the user wants to join it he/she will
+	 be added to it. If not the invitation is deleted.
+	 */
 	private JSONObject answerInvitation(UserEntity user, TeamEntity team,
 										String agreeOrDisagree) {
 		JSONObject result;
@@ -942,6 +1445,11 @@ public class RESTService {
 		return result;
 	}
 
+	/*
+	Answers a request of a user. It can only be done by the administrator of
+	the specific team. If he/she accepts the request the user will be added
+	to the team and if not the request is deleted here.
+	 */
 	private JSONObject answerRequest(UserEntity user, TeamEntity team,
 									 String agreeOrDisagree) {
 		JSONObject result;
@@ -1030,6 +1538,10 @@ public class RESTService {
 		return result;
 	}
 
+	/*
+	Generates a random secret and returns it as a byte array. the secret is
+	saved in a file and will be just created if the file is empty.
+	 */
 	private static byte[] generateSharedSecret() {
 		// Generate random 256-bit shared secret
 		FileInputStream fis;
